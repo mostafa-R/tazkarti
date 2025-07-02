@@ -4,8 +4,8 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import connectDB from "./config/database.js";
-import authRoutes from "./routes/authRoutes.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -15,11 +15,15 @@ app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
 
-connectDB();
-
 app.use("/", authRoutes);
 
 app.use(errorMiddleware);
 
-
-export default app;
+export const Bootstrap = () => {
+  connectDB();
+  app
+    .listen(process.env.PORT, () => {
+      console.log(`Server is running on port ${process.env.PORT}`);
+    })
+    .on("error", (err) => console.log("Server error", err));
+};
