@@ -63,6 +63,7 @@ export const register = async (req, res, next) => {
   }
 };
 
+///register from default form for organizer
 export const registerOrganizer = async (req, res, next) => {
   try {
     const {
@@ -133,7 +134,7 @@ export const registerOrganizer = async (req, res, next) => {
     const user = new User(userData);
     await user.save();
 
-    // إرسال بريد التحقق
+   //send verification email
     const emailResult = await sendEmail(
       user.email,
       "Verify Your Email",
