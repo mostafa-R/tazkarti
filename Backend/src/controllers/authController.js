@@ -1,25 +1,190 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { sendEmail } from "../services/emailService.js";
 
+//local register from default form for user
+
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, confirmPassword, phone } = req.body;
 
-    const user = new User({ name, email, password });
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: "Passwords do not match." });
+    }
+    const existEmail = await User.findOne({ email });
+
+    if (existEmail) {
+      return res.status(400).json({ error: "Email already exists." });
+    }
+
+    const existPhone = await User.findOne({ phone });
+    if (existPhone) {
+      return res.status(400).json({ error: "Phone number already exists." });
+    }
+
+    const allawedFields = [
+      "name",
+      "email",
+      "password",
+      "avatar",
+      "bio",
+      "phone",
+      "provider",
+      "address",
+    ];
+
+    const userData = {};
+    allawedFields.forEach((field) => {
+      if (field in req.body) {
+        userData[field] = req.body[field];
+      }
+    });
+
+    if ("address" in req.body && typeof req.body.address === "object") {
+      userData.address = {
+        country: req.body.address.country || "",
+        city: req.body.address.city || "",
+        street: req.body.address.street || "",
+        zip: req.body.address.zip || "",
+      };
+    }
+
+    const user = new User(userData);
     await user.save();
-
-    // إرسال الإيميل
-    const link = `${process.env.APP_URL}/verify/${user._id}`;
-    await sendEmail(email, "تفعيل حسابك على Tazkarti", link);
 
     res.status(201).json({
       message: "User registered. Please verify your email.",
     });
   } catch (error) {
-    console.error("Register Error:", error.message);
-    res.status(500).json({ error: "Something went wrong." });
+    console.log("Register Error:", error.message);
+    next(error);
+  }
+};
+
+export const registerOrganizer = async (req, res, next) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      confirmPassword,
+      phone,
+      organizationName,
+      organizationDescription,
+      address,
+    } = req.body;
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ error: "Passwords do not match." });
+    }
+    const existEmail = await User.findOne({ email });
+
+    if (existEmail) {
+      return res.status(400).json({ error: "Email already exists." });
+    }
+
+    const existPhone = await User.findOne({ phone });
+    if (existPhone) {
+      return res.status(400).json({ error: "Phone number already exists." });
+    }
+
+    const allawedFields = [
+      "name",
+      "email",
+      "password",
+      "avatar",
+      "bio",
+      "phone",
+      "provider",
+      "address",
+      "organizationName",
+      "organizationDescription",
+    ];
+
+    const userData = {};
+    allawedFields.forEach((field) => {
+      if (field in req.body) {
+        userData[field] = req.body[field];
+      }
+    });
+
+    if (address && typeof address === "object") {
+      const { country, city, street, zip } = address;
+      if (!country || !city || !street || !zip) {
+        return res.status(400).json({
+          error:
+            "All address fields (country, city, street, zip) are required.",
+        });
+      }
+      userData.address = { country, city, street, zip };
+    }
+
+    const verificationCode = crypto
+      .randomInt(100000, 999999)
+      .toString()
+      .padStart(6, "0");
+
+    userData.emailVerificationCode = await bcrypt.hash(verificationCode, 10);
+    userData.expireVerificationAt = new Date(Date.now() + 10 * 60 * 1000);
+    userData.role = "organizer";
+
+    const user = new User(userData);
+    await user.save();
+
+    // إرسال بريد التحقق
+    const emailResult = await sendEmail(
+      user.email,
+      "Verify Your Email",
+      `Your verification code is: ${verificationCode}`,
+      `<p>Your verification code is: <strong>${verificationCode}</strong></p>`
+    );
+
+    if (!emailResult.success) {
+      await User.findByIdAndDelete(user._id);
+      return res.status(500).json({
+        error: "Failed to send verification email. Please try again.",
+      });
+    }
+
+    res.status(201).json({
+      message: "Organize Added Successfully. Please verify your email.",
+    });
+  } catch (error) {
+    console.log("Register Error:", error.message);
+    next(error);
+  }
+};
+
+//verify-email
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    if (user.verified) {
+      return res.status(400).json({ error: "User is already verified." });
+    }
+
+    const isMatch = await bcrypt.compare(code, user.emailVerificationCode);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Invalid verification code." });
+    }
+
+    user.verified = true;
+    user.emailVerificationCode = null;
+    user.expireVerificationAt = null;
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully." });
+  } catch (err) {
+    next(err);
   }
 };
 
