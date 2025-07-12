@@ -1,10 +1,13 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import session from "express-session";
 import helmet from "helmet";
 import morgan from "morgan";
 import multer from "multer";
+import passport from "passport";
 import connectDB from "./config/database.js";
+import "./config/passport.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 
@@ -15,6 +18,19 @@ app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
 const upload = multer({ dest: "uploads/" });
+
+// init session
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// passport init
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/auth", authRoutes);
 

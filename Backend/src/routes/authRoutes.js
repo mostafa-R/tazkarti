@@ -1,5 +1,7 @@
 import express from "express";
+import passport from "passport";
 import {
+  logout,
   register,
   registerOrganizer,
   verifyEmail,
@@ -24,6 +26,23 @@ router.post(
 );
 
 router.post("/verifyOTP", verifyEmail);
+
+///google login
+//http://localhost:5000/auth/google
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  (req, res) => {
+    res.redirect("/");
+  }
+);
+
+router.get("/logout", logout);
 
 // router.post("/login", login);
 

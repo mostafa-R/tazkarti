@@ -32,7 +32,7 @@ export const register = async (req, res, next) => {
       "bio",
       "phone",
       "provider",
-      "address",
+      // "address",
     ];
 
     const userData = {};
@@ -42,17 +42,38 @@ export const register = async (req, res, next) => {
       }
     });
 
-    if ("address" in req.body && typeof req.body.address === "object") {
-      userData.address = {
-        country: req.body.address.country || "",
-        city: req.body.address.city || "",
-        street: req.body.address.street || "",
-        zip: req.body.address.zip || "",
-      };
-    }
+    // if (address && typeof address === "object") {
+    //   const { country, city, street, zip } = address;
+
+    //   userData.address = { country, city, street, zip };
+    // }
+
+    const verificationCode = crypto
+      .randomInt(100000, 999999)
+      .toString()
+      .padStart(6, "0");
+
+    userData.emailVerificationCode = await bcrypt.hash(verificationCode, 10);
+    userData.expireVerificationAt = new Date(Date.now() + 10 * 60 * 1000);
+    userData.role = "user";
 
     const user = new User(userData);
     await user.save();
+
+    //send verification email
+    const emailResult = await sendEmail(
+      user.email,
+      "Verify Your Email",
+      `Your verification code is: ${verificationCode}`,
+      `<p>Your verification code is: <strong>${verificationCode}</strong></p>`
+    );
+
+    if (!emailResult.success) {
+      await User.findByIdAndDelete(user._id);
+      return res.status(500).json({
+        error: "Failed to send verification email. Please try again.",
+      });
+    }
 
     res.status(201).json({
       message: "User registered. Please verify your email.",
@@ -134,7 +155,7 @@ export const registerOrganizer = async (req, res, next) => {
     const user = new User(userData);
     await user.save();
 
-   //send verification email
+    //send verification email
     const emailResult = await sendEmail(
       user.email,
       "Verify Your Email",
@@ -188,6 +209,20 @@ export const verifyEmail = async (req, res, next) => {
     next(err);
   }
 };
+
+//google login
+
+export const logout = (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      console.error("Error logging out:", err);
+      return res.redirect("/");
+    }
+    res.redirect("/");
+  });
+};
+
+//************************ */
 
 export const login = async (req, res, next) => {
   try {

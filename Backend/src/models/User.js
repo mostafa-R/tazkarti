@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
       lowercase: true,
       min: [3, "Name must be at least 3 characters long"],
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
       select: false,
       validate: {
         validator: (value) => {
@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: true,
+      // required: true,
       unique: true,
       trim: true,
       validate: {
@@ -93,7 +93,7 @@ const userSchema = new mongoose.Schema(
     expireVerificationAt: {
       type: Date,
       default: null,
-      index: { expires: "10m" }, 
+      index: { expires: "10m" },
     },
     verified: {
       type: Boolean,
@@ -116,11 +116,8 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
       default: null,
-    },
-
-    facebookId: {
-      type: String,
-      default: null,
+      unique: true,
+      sparse: true,
     },
 
     role: {
