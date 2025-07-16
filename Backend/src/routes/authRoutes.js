@@ -5,6 +5,7 @@ import {
   register,
   registerOrganizer,
   verifyEmail,
+  login,
 } from "../controllers/authController.js";
 import { validate } from "../middleware/authMiddleware.js";
 import {
@@ -41,9 +42,9 @@ router.get(
     res.redirect("/");
   }
 );
+router.post("/login", login);
 
-router.get("/logout", logout);
+router.post("/logout", logout );
 
-// router.post("/login", login);
 
 export default router;

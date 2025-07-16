@@ -1,3 +1,4 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -10,9 +11,12 @@ import connectDB from "./config/database.js";
 import "./config/passport.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import { authMiddleware } from "./middleware/authMiddleware.js";
 
 dotenv.config();
 const app = express();
+app.use(cookieParser());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
@@ -33,6 +37,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/auth", authRoutes);
+app.use(authMiddleware);
+app.use("/user", userRoutes);
 
 app.use(errorMiddleware);
 

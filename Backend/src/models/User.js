@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { parse } from "dotenv";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
@@ -63,8 +64,8 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      // required: true,
       unique: true,
+      sparse: true,
       trim: true,
       validate: {
         validator: (value) => {
@@ -117,7 +118,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
       unique: true,
-      sparse: true,
+      sparse : true,
     },
 
     role: {
@@ -140,7 +141,7 @@ const userSchema = new mongoose.Schema(
 );
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, process.env.SALT);
   }
   next();
 });
