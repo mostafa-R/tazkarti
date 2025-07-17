@@ -1,4 +1,6 @@
+import fs from "fs";
 import User from "../models/User.js";
+import cloudinary from "../utils/cloudinary.js";
 
 export const getUser = async (req, res) => {
   try {
@@ -18,16 +20,39 @@ export const getUser = async (req, res) => {
   }
 };
 
+export const getUserById = async (req, res) => { 
+  try {
+    const {id} = req.params
+    const user = await User.findById(id).select("-password");
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error, message: error.message });
+  }
+}
 
 export const getAllUser = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find({ role: "user" }).select("-password");
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error, message: error.message });
   }
 };
 
+export const getAllOrganizers = async (req, res) => {
+  try {
+    const organizers = await User.find({ role: "organizer" }).select(
+      "-password"
+    );
+    res.status(200).json(organizers);
+  } catch (error) {
+    res.status(500).json({ error, message: error.message });
+  }
+};
 
 export const update = async (req, res) => {
   try {
@@ -36,11 +61,9 @@ export const update = async (req, res) => {
       return res.status(401).json({ message: "You must be logged in" });
     }
 
-    // الحقول المسموح بتحديثها
-    const allowedFields = ["name", "phone", "bio", "address", "avatar"];
+    const allowedFields = ["name", "phone", "bio", "address", "profileImage"];
     const updates = {};
 
-    // فلترة وتنسيق البيانات
     for (const field of allowedFields) {
       if (field in req.body) {
         const value = req.body[field];
@@ -48,7 +71,6 @@ export const update = async (req, res) => {
       }
     }
 
-    // ✅ معالجة كلمة المرور (بشكل آمن)
     if (req.body.newPassword) {
       const user = await User.findById(id);
       if (!user) {
@@ -68,7 +90,6 @@ export const update = async (req, res) => {
       updates.password = hashedPassword;
     }
 
-    // التحديث
     const updatedUser = await User.findByIdAndUpdate(
       id,
       { $set: updates },
@@ -85,6 +106,134 @@ export const update = async (req, res) => {
     });
   } catch (error) {
     console.error("Update error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const extractPublicId = (url) => {
+  const parts = url.split("/");
+  const filename = parts[parts.length - 1];
+  const publicIdWithExtension = filename.split(".")[0];
+  return `tazkarti/users/${publicIdWithExtension}`;
+};
+
+export const profileImage = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (user.profileImage) {
+      const publicId = extractPublicId(user.profileImage);
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    // upload image to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "tazkarti/users",
+    });
+    //delete temporary file image
+    try {
+      fs.unlinkSync(req.file.path);
+    } catch (unlinkErr) {
+      console.warn("Failed to delete local file:", unlinkErr.message);
+    }
+
+    const newUser = await User.findByIdAndUpdate(
+      user._id,
+      { profileImage: result.secure_url },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({ user: newUser });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Upload failed" });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.user;
+    if (!id) {
+      return res.status(401).json({ message: "You must be logged in" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      { deletedAt: date.now() },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const deleteUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      { deletedAt: new Date() },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error, message: error.message });
+  }
+};
+
+export const restoreUserbyId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+    const user = await User.findByIdAndUpdate(
+      id,
+      { deletedAt: null },
+      { new: true }
+    );
+    res.status(200).json({ message: "User restored successfully", user });
+  } catch (error) {
+    res.status(500).json({ error, message: error.message });
+  }
+};
+
+
+export const restoreUser = async (req, res) => {
+  try {
+    const { id } = req.user;
+    if (!id) {
+      return res.status(401).json({ message: "You must be logged in" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      { deletedAt: null },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User restored successfully", user });
+  } catch (error) {
+    console.error("Restore error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

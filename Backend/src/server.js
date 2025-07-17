@@ -13,6 +13,7 @@ import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
+import "./utils/archiveOldUsers.js";
 
 dotenv.config();
 const app = express();

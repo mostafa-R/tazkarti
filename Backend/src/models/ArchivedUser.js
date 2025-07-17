@@ -1,12 +1,9 @@
-import bcrypt from "bcrypt";
-import { parse } from "dotenv";
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+const archivedUserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      // required: true,
       trim: true,
       lowercase: true,
       min: [3, "Name must be at least 3 characters long"],
@@ -32,7 +29,6 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      // required: true,
       select: false,
       validate: {
         validator: (value) => {
@@ -118,7 +114,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
       unique: true,
-      sparse : true,
+      sparse: true,
     },
 
     role: {
@@ -136,14 +132,13 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    archivedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
-userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password,10);
-  }
-  next();
-});
-const User = mongoose.model("User", userSchema);
-export default User;
+
+const ArchivedUser = mongoose.model("ArchivedUser", archivedUserSchema);
+export default ArchivedUser;

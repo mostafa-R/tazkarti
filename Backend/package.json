@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
@@ -24,6 +25,7 @@
     "mongoose": "^8.16.1",
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.4",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0"

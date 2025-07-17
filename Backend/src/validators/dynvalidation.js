@@ -37,7 +37,7 @@ const baseUserSchema = {
       "string.pattern.base": "Phone number must be 11 digits and start with 01",
     }),
 
-  avatar: Joi.string().uri(),
+  profileImage: Joi.string().uri(),
   bio: Joi.string().max(300),
 
   organizationName: Joi.string().min(3).max(100),
@@ -89,7 +89,7 @@ export const getUserValidationSchema = ({ isUpdate = false } = {}) => {
     password: schema.password.required(),
     confirmPassword: schema.confirmPassword.required(),
     phone: schema.phone.required(),
-    avatar: schema.avatar.optional(),
+    profileImage: schema.profileImage.optional(),
     bio: schema.bio.optional(),
     provider: schema.provider.optional(),
     address: schema.address.optional(),
@@ -124,7 +124,7 @@ export const getOrganizerValidationSchema = ({ isUpdate = false } = {}) => {
     password: schema.password.required(),
     confirmPassword: schema.confirmPassword.required(),
     phone: schema.phone.required(),
-    avatar: schema.avatar.optional(),
+    profileImage: schema.profileImage.optional(),
     bio: schema.bio.optional(),
     provider: schema.provider.optional(),
     address: schema.address.required(),
