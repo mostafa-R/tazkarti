@@ -1,0 +1,108 @@
+<div class="login-page">
+  <div class="login-background">
+    <div class="background-overlay"></div>
+    <div class="floating-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+      <div class="shape shape-4"></div>
+    </div>
+  </div>
+
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Login Header -->
+      <div class="login-header">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <h1 class="logo-title">Tazkarti</h1>
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form (ngSubmit)="submit()" [formGroup]="LoginForm" class="login-form">
+        <!-- Email Field -->
+        <div class="form-group">
+          <label for="email" class="form-label">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <div class="input-wrapper">
+            <input 
+              formControlName="email" 
+              type="email" 
+              id="email"
+              class="form-input" 
+              placeholder="Enter your email"
+              [class.error]="LoginForm.get('email')?.invalid && LoginForm.get('email')?.touched"
+              required>
+            <div class="input-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+          </div>
+          @if (LoginForm.get('email')?.invalid && LoginForm.get('email')?.touched) {
+            <div class="error-message">
+              <i class="fas fa-exclamation-circle"></i>
+              Please enter a valid email address
+            </div>
+          }
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group">
+          <label for="password" class="form-label">
+            <i class="fas fa-lock"></i>
+            Password
+          </label>
+          <div class="input-wrapper">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              id="password"
+              class="form-input"
+              placeholder="Enter your password"
+              [class.error]="LoginForm.get('password')?.invalid && LoginForm.get('password')?.touched"
+              required>
+            <div class="input-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          @if (LoginForm.get('password')?.invalid && LoginForm.get('password')?.touched) {
+            <div class="error-message">
+              <i class="fas fa-exclamation-circle"></i>
+              Password is required
+            </div>
+          }
+        </div>
+
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          class="login-button"
+          [disabled]="LoginForm.invalid || isLoading">
+          @if (isLoading) {
+            <div class="button-content">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Signing in...</span>
+            </div>
+          } @else {
+            <div class="button-content">
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Sign In</span>
+            </div>
+          }
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

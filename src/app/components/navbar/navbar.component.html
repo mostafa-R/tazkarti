@@ -1,0 +1,41 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 px-md-4 shadow-sm">
+  <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+    <!-- 🔵 Logo & Brand -->
+    <div class="d-flex align-items-center gap-2">
+      <img src="../../../assets/pexels-mminschlxxx-31827772.jpg"
+           alt="Logo"
+           width="36"
+           height="36"
+           class="rounded-circle border border-light"
+           style="object-fit: cover;">
+      <span class="navbar-brand mb-0 h5">Tazkarti</span>
+    </div>
+
+    <!-- ⚙️ Actions: Notifications - Dark Mode - Lang - Avatar -->
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+
+      <button routerLink="/waiting" class="btn btn-sm btn-outline-light position-relative">
+        🔔
+      </button>
+
+      <!-- 🌓 Dark Mode -->
+      <button class="btn btn-sm btn-outline-light" (click)="toggleDarkMode()">
+        🌓
+      </button>
+
+      <!-- 🌐 Language Switch -->
+      <button class="btn btn-sm btn-outline-light" (click)="switchLanguage()">
+        🌐 {{ currentLang }}
+      </button>
+
+      <!-- 🧑 Admin Avatar -->
+      <img src="../../../assets/295810785_603664684610641_2277856159059492752_n.jpg"
+           alt="Avatar"
+           width="36"
+           height="36"
+           class="rounded-circle border border-light"
+           style="object-fit: cover;">
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,123 @@
+<!-- Header Section -->
+<div class="events-header mb-4">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <h1 class="display-6 fw-bold text-gradient mb-2">
+          <i class="fas fa-calendar-alt me-3"></i>
+          Events Management
+        </h1>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <div class="stats-card">
+          <div class="stats-icon">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <div class="stats-content">
+            <h3 class="stats-number">{{events.length}}</h3>
+            <p class="stats-label">Total Events</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters Section -->
+<div class="filters-section mb-4">
+  <div class="container-fluid">
+    <div class="row g-3">
+      <div class="col-md-8">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input 
+            type="text" 
+            class="form-control search-input" 
+            placeholder="Search events by name or location..."
+            [(ngModel)]="searchTerm"
+            (input)="filterEvents()">
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary filter-btn" (click)="sortByDateDesc()">
+            <i class="fas fa-clock me-2"></i>
+            Newest First
+          </button>
+          <button class="btn btn-outline-success filter-btn" (click)="sortByPriceDesc()">
+            <i class="fas fa-dollar-sign me-2"></i>
+            Price
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Events Grid -->
+<div class="events-grid">
+  <div class="row g-4">
+    @for (event of filteredEvents; track event.id) {
+      <div class="col-lg-4 col-md-6">
+        <div class="event-card">
+          <div class="event-card-header">
+            <div class="event-status" [class]="getEventStatus(event.date)">
+              {{ getEventStatusText(event.date) }}
+            </div>
+            <div class="event-actions">
+              <button class="btn btn-sm btn-outline-primary action-btn" [routerLink]="['/update' , event.id]">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger action-btn" (click)="deleteEvent(event)">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="event-card-body">
+            <h5 class="event-title">{{ event.name }}</h5>
+            
+            <div class="event-details">
+              <div class="detail-item">
+                <i class="fas fa-calendar-day detail-icon"></i>
+                <span class="detail-text">{{ event.date | date: 'MMM dd, yyyy' }}</span>
+              </div>
+              
+              <div class="detail-item">
+                <i class="fas fa-map-marker-alt detail-icon"></i>
+                <a 
+                  [href]="'https://www.google.com/maps/search/?api=1&query=' + event.location"
+                  target="_blank"
+                  class="detail-link">
+                  {{ event.location }}
+                </a>
+              </div>
+              
+              <div class="detail-item">
+                <i class="fas fa-ticket-alt detail-icon"></i>
+                <span class="detail-text">{{ event.tickets }} tickets available</span>
+              </div>
+            </div>
+            
+            <div class="event-price">
+              <span class="price-amount">{{ event.price }}</span>
+              <span class="price-currency">EGP</span>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    }
+  </div>
+  
+  <!-- Empty State -->
+  @if (filteredEvents.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-calendar-times"></i>
+      </div>
+      <h4>No Events Found</h4>
+      <p class="text-muted">Try adjusting your search criteria or add a new event.</p>
+    </div>
+  }
+</div>

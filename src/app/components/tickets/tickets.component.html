@@ -1,0 +1,175 @@
+<div class="tickets-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <i class="fas fa-ticket-alt"></i>
+          Ticket Management
+        </h1>
+        <p class="page-subtitle">View ticket statistics for all events</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="refreshData()" [disabled]="loading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+          {{ loading ? 'Loading...' : 'Refresh Data' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Stats Cards -->
+  <div class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card total-events">
+        <div class="stat-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ totalEvents }}</h3>
+          <p class="stat-label">Total Events</p>
+        </div>
+      </div>
+
+      <div class="stat-card total-tickets">
+        <div class="stat-icon">
+          <i class="fas fa-tickets"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ totalTickets }}</h3>
+          <p class="stat-label">Total Tickets</p>
+        </div>
+      </div>
+
+      <div class="stat-card reserved-tickets">
+        <div class="stat-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ totalReserved }}</h3>
+          <p class="stat-label">Reserved Tickets</p>
+        </div>
+      </div>
+
+      <div class="stat-card available-tickets">
+        <div class="stat-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{ totalAvailable }}</h3>
+          <p class="stat-label">Available Tickets</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <div class="search-content">
+      <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          placeholder="Search events..."
+          class="search-input"
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Events Section -->
+  <div class="events-section">
+    <!-- Loading State -->
+    @if (loading) {
+    <div class="loading-state">
+      <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <h3>Loading Data...</h3>
+      <p>Please wait a moment</p>
+    </div>
+    }
+
+    <!-- Content when loaded -->
+    @if (!loading) {
+      <div class="events-grid">
+        <div
+          *ngFor="let event of filteredEvents"
+          class="event-card"
+          [class]="getStatusClass(event)"
+        >
+          <div class="event-header">
+            <div class="event-title">
+              <h3>{{ event.eventName }}</h3>
+              <span class="event-location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ event.eventLocation }}
+              </span>
+            </div>
+            <div class="event-status">
+              <span class="status-badge" [class]="getStatusClass(event)">
+                {{ getStatusText(event) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="event-date">
+            <i class="fas fa-calendar"></i>
+            {{ event.eventDate }}
+          </div>
+
+          <div class="tickets-overview">
+            <div class="tickets-total">
+              <div class="ticket-stat">
+                <span class="stat-label">Total Tickets</span>
+                <span class="stat-value">{{ event.totalTickets }}</span>
+              </div>
+            </div>
+
+            <div class="tickets-breakdown">
+              <div class="ticket-category reserved">
+                <div class="category-header">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Reserved</span>
+                </div>
+                <div class="category-stats">
+                  <span class="ticket-count">{{ event.reservedTickets }}</span>
+                  <span class="ticket-percentage">{{ event.reservedPercentage }}%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill reserved-fill" [style.width.%]="event.reservedPercentage"></div>
+                </div>
+              </div>
+
+              <div class="ticket-category available">
+                <div class="category-header">
+                  <i class="fas fa-clock"></i>
+                  <span>Available</span>
+                </div>
+                <div class="category-stats">
+                  <span class="ticket-count">{{ event.availableTickets }}</span>
+                  <span class="ticket-percentage">{{ event.availablePercentage }}%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill available-fill" [style.width.%]="event.availablePercentage"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredEvents.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-ticket-alt"></i>
+      </div>
+      <h3>No Events Found</h3>
+      <p>No events match the search criteria</p>
+    </div>
+  </div>
+</div>

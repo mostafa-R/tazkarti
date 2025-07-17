@@ -1,0 +1,37 @@
+@if(formUpdate)
+{
+  <div class="card mt-4 p-4 shadow-sm">
+    <h5 class="mb-3 text-primary">✏️ Edit Event</h5>
+
+    <form [formGroup]="formUpdate" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input formControlName="name" class="form-control" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Location</label>
+        <input formControlName="location" class="form-control" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Date</label>
+        <input type="date" formControlName="date" class="form-control" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Price</label>
+        <input type="number" formControlName="price" class="form-control" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Tickets</label>
+        <input type="number" formControlName="tickets" class="form-control" />
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button type="submit" class="btn btn-outline-success p-2" [disabled]="formUpdate.invalid">💾 Save</button>
+      </div>
+    </form>
+  </div>
+}

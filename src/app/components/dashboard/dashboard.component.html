@@ -1,0 +1,277 @@
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+  <div class="container-fluid">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="display-5 fw-bold text-gradient mb-2">
+          <i class="fas fa-tachometer-alt me-3"></i>
+          Dashboard Overview
+        </h1>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="date-display">
+          <i class="fas fa-calendar-day me-2"></i>
+          {{ currentDate | date:'EEEE, MMMM d, y' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-section">
+  <div class="container-fluid">
+    <div class="row g-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card users-card">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ usersCount() }}</h3>
+            <p class="stat-label">Total Users</p>
+            <div class="stat-trend">
+              <i class="fas fa-arrow-up text-success"></i>
+              <span class="trend-text">+12% this month</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card events-card">
+          <div class="stat-icon">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ eventsCount() }}</h3>
+            <p class="stat-label">Active Events</p>
+            <div class="stat-trend">
+              <i class="fas fa-arrow-up text-success"></i>
+              <span class="trend-text">+8% this week</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card tickets-card">
+          <div class="stat-icon">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ ticketsCount() }}</h3>
+            <p class="stat-label">Tickets Sold</p>
+            <div class="stat-trend">
+              <i class="fas fa-arrow-up text-success"></i>
+              <span class="trend-text">+15% today</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="charts-section">
+  <div class="container-fluid">
+    <div class="row g-4">
+      <!-- Users Chart -->
+      <div class="col-lg-8">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-chart-line me-2"></i>
+              Users Growth
+            </h3>
+
+          </div>
+          <div class="chart-body">
+            @if (usersLineChartData().length > 0) {
+              <div class="chart-container">
+                <ngx-charts-line-chart
+                  [results]="usersLineChartData()"
+                  [gradient]="true"
+                  [xAxis]="true"
+                  [yAxis]="true"
+                  [legend]="false"
+                  [showXAxisLabel]="true"
+                  [showYAxisLabel]="true"
+                  xAxisLabel="Month"
+                  yAxisLabel="Users Count"
+                  [autoScale]="true"
+                  [curve]="curve"
+                  >
+                </ngx-charts-line-chart>
+              </div>
+            } @else {
+              <div class="loading-state">
+                <div class="loading-spinner">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <p>Loading chart data...</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="col-lg-4">
+        <div class="quick-stats-card">
+          <div class="quick-stats-header">
+            <h3 class="quick-stats-title">
+              <i class="fas fa-chart-pie me-2"></i>
+              Quick Stats
+            </h3>
+          </div>
+          <div class="quick-stats-body">
+            <div class="quick-stat-item">
+              <div class="quick-stat-icon">
+                <i class="fas fa-user-plus"></i>
+              </div>
+              <div class="quick-stat-content">
+                <h4>{{ newUsersThisMonth() }}</h4>
+                <p>New Users This Month</p>
+              </div>
+            </div>
+
+            <div class="quick-stat-item">
+              <div class="quick-stat-icon">
+                <i class="fas fa-calendar-plus"></i>
+              </div>
+              <div class="quick-stat-content">
+                <h4>{{ upcomingEvents() }}</h4>
+                <p>Upcoming Events</p>
+              </div>
+            </div>
+
+            <div class="quick-stat-item">
+              <div class="quick-stat-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <div class="quick-stat-content">
+                <h4>{{ averageRating() }}</h4>
+                <p>Average Event Rating</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- General Statistics Chart -->
+<div class="general-stats-section">
+  <div class="container-fluid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3 class="chart-title">
+          <i class="fas fa-chart-bar me-2"></i>
+          Platform Statistics
+        </h3>
+      </div>
+      <div class="chart-body">
+        @if (chartData().length > 0) {
+          <div class="chart-container">
+            <ngx-charts-bar-vertical
+              [results]="chartData()"
+              [gradient]="true"
+              [xAxis]="true"
+              [yAxis]="true"
+              [legend]="false"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+              xAxisLabel="Category"
+              yAxisLabel="Count"
+              [animations]="true"
+              >
+            </ngx-charts-bar-vertical>
+          </div>
+        } @else {
+          <div class="loading-state">
+            <div class="loading-spinner">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <p>Loading statistics...</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Latest Events Section -->
+<div class="latest-events-section">
+  <div class="container-fluid">
+    <div class="events-card">
+      <div class="events-header">
+        <h3 class="events-title">
+          <i class="fas fa-clock me-2"></i>
+          Latest Events
+        </h3>
+        <a routerLink="/events" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-external-link-alt me-1"></i>
+          View All
+        </a>
+      </div>
+
+      <div class="events-body">
+        @if (latestEvents().length > 0) {
+          <div class="events-table-container">
+            <table class="events-table">
+              <thead>
+                <tr>
+                  <th>Event Name</th>
+                  <th>Location</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (event of latestEvents(); track event.id) {
+                  <tr>
+                    <td>
+                      <div class="event-info">
+                        <div class="event-icon">
+                          <i class="fas fa-calendar"></i>
+                        </div>
+                        <span class="event-name">{{ event.name }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="location-info">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        {{ event.location }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="date-info">
+                        <i class="fas fa-calendar-day me-1"></i>
+                        {{ event.date | date:'MMM dd, yyyy' }}
+                      </div>
+                    </td>
+                    <td>
+                      <span class="status-badge" [class]="getEventStatus(event.date)">
+                        {{ getEventStatusText(event.date) }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="loading-state">
+            <div class="loading-spinner">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <p>Loading events...</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<!-- زر القائمة في الموبايل -->
+<button class="btn btn-dark d-lg-none m-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+  ☰ Menu
+</button>
+
+<!-- الهيكل الرئيسي -->
+<div class="d-flex" style="min-height: 100%;">
+  <!-- Sidebar -->
+  <div class="offcanvas-lg offcanvas-start bg-dark text-white p-3"
+       tabindex="-1"
+       id="sidebarOffcanvas"
+       aria-labelledby="sidebarLabel"
+       style="width: 250px; min-height: 100vh;">
+
+    <h4 id="sidebarLabel" class="mb-4">Control Panel</h4>
+    <ul class="nav flex-column">
+      <li class="nav-item mb-2">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link text-white">📊 Dashboard</a>
+      </li>
+      <li class="nav-item mb-2">
+        <a routerLink="/events" routerLinkActive="active" class="nav-link text-white">🎫 Events</a>
+      </li>
+      <li class="nav-item mb-2">
+        <a routerLink="/users" routerLinkActive="active" class="nav-link text-white">👥 Users</a>
+      </li>
+      <li class="nav-item mb-2">
+        <a routerLink="/tickets" routerLinkActive="active" class="nav-link text-white">🎟️ Tickets</a>
+      </li>
+      <li class="nav-item mt-4">
+        <a routerLink="/login" class="btn btn-outline-light w-100">Logout</a>
+      </li>
+    </ul>
+  </div>
+
+
+</div>

@@ -1,0 +1,10 @@
+{
+  "routes": [
+    "/",
+    "/dashboard",
+    "/events",
+    "/login",
+    "/tickets",
+    "/users"
+  ]
+}
