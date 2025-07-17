@@ -12,6 +12,9 @@ import "./config/passport.js";
 import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+// دول ضفتهم عشان التذاكر والايفنت
+import eventRoutes from "./routes/eventRoutes.js";
+import ticketRoutes from "./routes/ticketRoutes.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
 import "./utils/archiveOldUsers.js";
 
@@ -37,9 +40,15 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Public routes (مش محتاجة authentication)
 app.use("/auth", authRoutes);
+
+// Protected routes (محتاجة authentication)
 app.use(authMiddleware);
 app.use("/user", userRoutes);
+// 🆕 NEW: Routes جديدة للأحداث والتذاكر
+app.use("/events", eventRoutes);
+app.use("/tickets", ticketRoutes);
 
 app.use(errorMiddleware);
 
