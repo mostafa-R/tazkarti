@@ -1,38 +1,60 @@
 import asyncHandler from "express-async-handler";
 import { Ticket } from "../models/Ticket.js";
 
-// Admin بس
 export const createTicket = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
-
-  const ticket = await Ticket.create({
-    title,
+  const {
+    event,
+    type,
+    price,
+    quantity,
+    availableQuantity,
     description,
-    createdBy: req.user._id,
+    features,
+    saleStartDate,
+    saleEndDate,
+  } = req.body;
+
+  
+  const ticket = await Ticket.create({
+    event,
+    type,
+    price,
+    quantity,
+    availableQuantity,
+    description,
+    features,
+    saleStartDate,
+    saleEndDate,
+    createdBy: req.user._id, // Organizer
   });
 
   res.status(201).json(ticket);
 });
 
-// Admin أو User
 export const getTickets = asyncHandler(async (req, res) => {
-  const tickets = await Ticket.find().populate("createdBy", "name email role");
+  const tickets = await Ticket.find()
+    .populate("event", "title date")
+    .populate("createdBy", "name email role");
+
   res.json(tickets);
 });
 
-
 export const getTicketById = asyncHandler(async (req, res) => {
-  const ticket = await Ticket.findById(req.params.id).populate("createdBy", "name email role");
+  const ticket = await Ticket.findById(req.params.id)
+    .populate("event", "title date")
+    .populate("createdBy", "name email role");
+
   if (!ticket) {
     res.status(404);
     throw new Error("Ticket not found");
   }
+
   res.json(ticket);
 });
 
-// Admin بس
+//  Organizer 
 export const updateTicket = asyncHandler(async (req, res) => {
-  const { title, description, status } = req.body;
+  const { type, price, quantity, availableQuantity, description, features, saleEndDate, status } = req.body;
 
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) {
@@ -40,16 +62,21 @@ export const updateTicket = asyncHandler(async (req, res) => {
     throw new Error("Ticket not found");
   }
 
-  ticket.title = title || ticket.title;
-  ticket.description = description || ticket.description;
-  ticket.status = status || ticket.status;
+  // Optional updates
+  if (type) ticket.type = type;
+  if (price) ticket.price = price;
+  if (quantity) ticket.quantity = quantity;
+  if (availableQuantity !== undefined) ticket.availableQuantity = availableQuantity;
+  if (description) ticket.description = description;
+  if (features) ticket.features = features;
+  if (saleEndDate) ticket.saleEndDate = saleEndDate;
+  if (status) ticket.status = status;
 
   await ticket.save();
-
   res.json(ticket);
 });
 
-// Admin بس
+//  Organizer 
 export const deleteTicket = asyncHandler(async (req, res) => {
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) {
@@ -58,6 +85,5 @@ export const deleteTicket = asyncHandler(async (req, res) => {
   }
 
   await ticket.deleteOne();
-
-  res.json({ message: " deleted successfully" });
+  res.json({ message: "Ticket deleted successfully" });
 });
