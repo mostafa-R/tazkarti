@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
       // required: true,
       trim: true,
       lowercase: true,
-      min: [3, "Name must be at least 3 characters long"],
+      minlength: [3, "Name must be at least 3 characters long"],
       validate: {
         validator: (value) => {
           return /^[a-zA-Z0-9_-]{3,15}$/.test(value);
