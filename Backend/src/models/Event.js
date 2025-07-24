@@ -92,6 +92,7 @@ const eventSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    
     images: [String],
 
     trailerVideo: {
@@ -103,6 +104,11 @@ const eventSchema = new mongoose.Schema(
       type: String,
       enum: ["draft", "published", "cancelled", "completed"],
       default: "draft",
+    },
+
+    approved: {
+      type: Boolean,
+      default: false,
     },
 
     maxAttendees: {
@@ -120,6 +126,7 @@ const eventSchema = new mongoose.Schema(
         trim: true,
       },
     ],
+
     bookingticketes: [
       {
         user: {

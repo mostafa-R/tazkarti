@@ -1,13 +1,15 @@
 import express from "express";
 import passport from "passport";
 import {
+  adminLogin,
+  login,
   logout,
   register,
   registerOrganizer,
   verifyEmail,
-  login,
 } from "../controllers/authController.js";
 import { validate } from "../middleware/authMiddleware.js";
+import { roleMiddleware } from "../middleware/roleMiddleware.js";
 import {
   getOrganizerValidationSchema,
   getUserValidationSchema,
@@ -43,8 +45,7 @@ router.get(
   }
 );
 router.post("/login", login);
-
-router.post("/logout", logout );
-
+router.post("/adminlogin",  adminLogin);
+router.post("/logout", logout);
 
 export default router;

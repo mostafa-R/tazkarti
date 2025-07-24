@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
-import { parse } from "dotenv";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    // Common fields
     firstName: {
       type: String,
       // required: true,
@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
           "Name must be between 3 and 15 characters long and contain only letters, numbers, underscores, and hyphens",
       },
     },
+
     lastName: {
       type: String,
       // required: true,
@@ -32,6 +33,13 @@ const userSchema = new mongoose.Schema(
           "Name must be between 3 and 15 characters long and contain only letters, numbers, underscores, and hyphens",
       },
     },
+
+    username: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+
     email: {
       type: String,
       required: true,
@@ -44,6 +52,7 @@ const userSchema = new mongoose.Schema(
         message: "Invalid email format",
       },
     },
+
     password: {
       type: String,
       // required: true,
@@ -58,24 +67,12 @@ const userSchema = new mongoose.Schema(
           "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       },
     },
-    resetPasswordToken: {
-      type: String,
-      default: null,
-    },
-    resetPasswordExpires: {
-      type: Date,
-      default: null,
-    },
 
     profileImage: {
       type: String,
       default: "",
     },
-    bio: {
-      type: String,
-      maxlength: 300,
-      default: "",
-    },
+
     phone: {
       type: String,
       unique: true,
@@ -88,40 +85,53 @@ const userSchema = new mongoose.Schema(
         message: "Invalid phone number format",
       },
     },
-    organizationName: {
+
+    bio: {
       type: String,
-      trim: true,
-      minlength: 3,
-      maxlength: 100,
-      default: null,
+      maxlength: 300,
+      default: "",
     },
-    organizationDescription: {
+
+    role: {
       type: String,
-      trim: true,
-      maxlength: 500,
-      default: null,
+      enum: ["user", "organizer", "admin"],
+      default: "user",
     },
+
+    address: {
+      country: { type: String, default: "" },
+      city: { type: String, default: "" },
+      street: { type: String, default: "" },
+      zip: { type: String, default: "" },
+    },
+
+    // Customer-specific fields
+    tickets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ticket",
+      },
+    ],
+
+
+    // Email verification fields
     emailVerificationCode: {
       type: String,
       default: null,
     },
+
     expireVerificationAt: {
       type: Date,
       default: null,
       index: { expires: "10m" },
     },
+
     verified: {
       type: Boolean,
       default: false,
     },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    lastLogin: {
-      type: Date,
-    },
 
+    // Social login fields
     provider: {
       type: String,
       enum: ["local", "google", "facebook"],
@@ -131,21 +141,33 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
       default: null,
-      
       sparse: true,
     },
 
-    role: {
+    // Organizer-specific fields
+    organizationName: {
       type: String,
-      enum: ["user", "organizer", "admin"],
-      default: "user",
+      trim: true,
+      minlength: 3,
+      maxlength: 100,
+      default: null,
     },
-    address: {
-      country: { type: String, default: "" },
-      city: { type: String, default: "" },
-      street: { type: String, default: "" },
-      zip: { type: String, default: "" },
+
+    organizationDescription: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: null,
     },
+
+    // Admin-specific fields
+    notifications: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Notification",
+      }
+    ],
+
     deletedAt: {
       type: Date,
       default: null,
@@ -153,11 +175,38 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.set("toJSON", {
+  transform: function (doc, ret) {
+    delete ret.password;
+    delete ret.__v;
+    delete ret.verified;
+    delete ret.deletedAt;
+    delete ret.provider;
+    delete ret.emailVerificationCode;
+    delete ret.expireVerificationAt;
+    return ret;
+  },
+});
+
+
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password,10);
+    this.password = await bcrypt.hash(this.password, 10);
   }
   next();
 });
+
+userSchema.pre("save", function (next) {
+  if (
+    !this.username ||
+    this.isModified("firstName") ||
+    this.isModified("lastName")
+  ) {
+    this.username = `${this.firstName} ${this.lastName}`.toLowerCase();
+  }
+  next();
+});
+
 const User = mongoose.model("User", userSchema);
 export default User;

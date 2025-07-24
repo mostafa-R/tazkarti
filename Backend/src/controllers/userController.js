@@ -23,7 +23,7 @@ export const getUser = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await User.findById(id).select("-password");
+    const user = await User.findById(id)
     if (!user) {
       res.status(404);
       throw new Error("User not found");
@@ -36,7 +36,7 @@ export const getUserById = async (req, res) => {
 
 export const getAllUser = async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }).select("-password");
+    const users = await User.find({ role: "user" })
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error, message: error.message });
@@ -45,9 +45,7 @@ export const getAllUser = async (req, res) => {
 
 export const getAllOrganizers = async (req, res) => {
   try {
-    const organizers = await User.find({ role: "organizer" }).select(
-      "-password"
-    );
+    const organizers = await User.find({ role: "organizer" });
     res.status(200).json(organizers);
   } catch (error) {
     res.status(500).json({ error, message: error.message });
@@ -61,7 +59,14 @@ export const update = async (req, res) => {
       return res.status(401).json({ message: "You must be logged in" });
     }
 
-    const allowedFields = ["name", "phone", "bio", "address", "profileImage"];
+    const allowedFields = [
+      "firstName",
+      "lastName",
+      "phone",
+      "bio",
+      "address",
+      "profileImage",
+    ];
     const updates = {};
 
     for (const field of allowedFields) {

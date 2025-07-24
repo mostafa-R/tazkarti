@@ -89,7 +89,8 @@ export const register = async (req, res, next) => {
 export const registerOrganizer = async (req, res, next) => {
   try {
     const {
-      name,
+      firstName,
+      lastName,
       email,
       password,
       confirmPassword,
@@ -114,7 +115,8 @@ export const registerOrganizer = async (req, res, next) => {
     }
 
     const allawedFields = [
-      "name",
+      "firstName",
+      "lastName",
       "email",
       "password",
       "avatar",
@@ -160,7 +162,7 @@ export const registerOrganizer = async (req, res, next) => {
     const emailResult = await sendEmail(
       user.email,
       "Verify Your Email",
-      `Your verification code is: ${verificationCode}`,
+      `Hi ${user.firstName}, Your verification code is: ${verificationCode}`,
       generateVerificationEmail(verificationCode)
     );
 
@@ -172,7 +174,9 @@ export const registerOrganizer = async (req, res, next) => {
     }
 
     res.status(201).json({
-      message: "Organize Added Successfully. Please verify your email.",
+      message: `Organize Added Successfully. Please verify your email.
+      and wait for admin approval.
+      `,
     });
   } catch (error) {
     console.log("Register Error:", error.message);
@@ -247,6 +251,40 @@ export const login = async (req, res) => {
     res.status(200).json({ userData, token });
   } catch (error) {
     res.status(500).json({ error, message: error.message });
+  }
+};
+
+export const adminLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const admin = await User.findOne({ email }).select("+password +role");
+
+    if (!admin) {
+      return res.status(404).json({ message: "check your email and password" });
+    }
+
+    if (admin.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "You do not have admin permissions to access" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    if (!isPasswordValid) {
+      return res
+        .status(400)
+        .json({ message: "the email or password is incorrect" });
+    }
+
+    const token = generateToken(admin, res);
+
+    const { password: pwd, ...adminData } = admin.toObject();
+
+    res.status(200).json({ admin: adminData, token });
+  } catch (error) {
+    console.error("Login Error:", error.message);
+    return res.status(500).json({ error: "Server error during login" });
   }
 };
 
