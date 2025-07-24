@@ -8,7 +8,7 @@ const notificationSchema = new mongoose.Schema(
       ref: "User",
     },
     data: {
-      type: mongoose.Schema.Types.Mixed, // معلومات إضافية (eventId، ticketId، إلخ)
+      type: mongoose.Schema.Types.Mixed, 
       default: {},
     },
     read: {

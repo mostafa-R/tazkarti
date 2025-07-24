@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 
 const archivedUserSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
+      // required: true,
       trim: true,
       lowercase: true,
-      min: [3, "Name must be at least 3 characters long"],
+      minlength: [3, "Name must be at least 3 characters long"],
       validate: {
         validator: (value) => {
           return /^[a-zA-Z0-9_-]{3,15}$/.test(value);
@@ -15,6 +16,28 @@ const archivedUserSchema = new mongoose.Schema(
           "Name must be between 3 and 15 characters long and contain only letters, numbers, underscores, and hyphens",
       },
     },
+
+    lastName: {
+      type: String,
+      // required: true,
+      trim: true,
+      lowercase: true,
+      minlength: [3, "Name must be at least 3 characters long"],
+      validate: {
+        validator: (value) => {
+          return /^[a-zA-Z0-9_-]{3,15}$/.test(value);
+        },
+        message:
+          "Name must be between 3 and 15 characters long and contain only letters, numbers, underscores, and hyphens",
+      },
+    },
+
+    username: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+
     email: {
       type: String,
       required: true,
@@ -27,6 +50,7 @@ const archivedUserSchema = new mongoose.Schema(
         message: "Invalid email format",
       },
     },
+
     password: {
       type: String,
       select: false,
@@ -40,24 +64,12 @@ const archivedUserSchema = new mongoose.Schema(
           "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       },
     },
-    resetPasswordToken: {
-      type: String,
-      default: null,
-    },
-    resetPasswordExpires: {
-      type: Date,
-      default: null,
-    },
 
     profileImage: {
       type: String,
       default: "",
     },
-    bio: {
-      type: String,
-      maxlength: 300,
-      default: "",
-    },
+
     phone: {
       type: String,
       unique: true,
@@ -70,6 +82,65 @@ const archivedUserSchema = new mongoose.Schema(
         message: "Invalid phone number format",
       },
     },
+
+    bio: {
+      type: String,
+      maxlength: 300,
+      default: "",
+    },
+
+    role: {
+      type: String,
+      enum: ["user", "organizer", "admin"],
+      default: "user",
+    },
+
+    address: {
+      country: { type: String, default: "" },
+      city: { type: String, default: "" },
+      street: { type: String, default: "" },
+      zip: { type: String, default: "" },
+    },
+
+    // Customer-specific fields
+    tickets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ticket",
+      },
+    ],
+
+    // Email verification fields
+    emailVerificationCode: {
+      type: String,
+      default: null,
+    },
+
+    expireVerificationAt: {
+      type: Date,
+      default: null,
+      index: { expires: "10m" },
+    },
+
+    verified: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Social login fields
+    provider: {
+      type: String,
+      enum: ["local", "google", "facebook"],
+      default: "local",
+    },
+
+    googleId: {
+      type: String,
+      default: null,
+      sparse: true,
+    },
+
+    // Organizer-specific fields
     organizationName: {
       type: String,
       trim: true,
@@ -83,51 +154,15 @@ const archivedUserSchema = new mongoose.Schema(
       maxlength: 500,
       default: null,
     },
-    emailVerificationCode: {
-      type: String,
-      default: null,
-    },
-    expireVerificationAt: {
-      type: Date,
-      default: null,
-      index: { expires: "10m" },
-    },
-    verified: {
-      type: Boolean,
-      default: false,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    lastLogin: {
-      type: Date,
-    },
 
-    provider: {
-      type: String,
-      enum: ["local", "google", "facebook"],
-      default: "local",
-    },
+    // Admin-specific fields
+    notifications: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Notification",
+      },
+    ],
 
-    googleId: {
-      type: String,
-      default: null,
-      unique: true,
-      sparse: true,
-    },
-
-    role: {
-      type: String,
-      enum: ["user", "organizer", "admin"],
-      default: "user",
-    },
-    address: {
-      country: { type: String, default: "" },
-      city: { type: String, default: "" },
-      street: { type: String, default: "" },
-      zip: { type: String, default: "" },
-    },
     deletedAt: {
       type: Date,
       default: null,
