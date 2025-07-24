@@ -1,11 +1,10 @@
-import  axios from  "axios";
+import axios from "axios";
 import dotenv from "dotenv";
 
 dotenv.config();
 const baseURL = process.env.PAYMOB_API_URL
   ? process.env.PAYMOB_API_URL
   : "https://accept.paymob.com/api";
-
 
 export const createPayment = async (req, res) => {
   try {
@@ -17,11 +16,11 @@ export const createPayment = async (req, res) => {
 
     const token = auth.data.token;
 
-    // 💳 2. Create Order
+    //  2. Create Order
     const order = await axios.post(`${baseURL}/ecommerce/orders`, {
       auth_token: token,
       delivery_needed: false,
-      amount_cents: (price * 100).toString(), 
+      amount_cents: (price * 100).toString(),
       currency: "EGP",
       items: [
         {
@@ -41,7 +40,7 @@ export const createPayment = async (req, res) => {
       integrationId = process.env.PAYMOB_CARD_INTEGRATION_ID;
     }
 
-    // 🔑 3. Generate Payment Key
+    //  3. Generate Payment Key
     const paymentKey = await axios.post(`${baseURL}/acceptance/payment_keys`, {
       auth_token: token,
       amount_cents: parseInt(price * 100).toString(),
@@ -74,6 +73,3 @@ export const createPayment = async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
-
-
-
