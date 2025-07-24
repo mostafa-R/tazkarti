@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import User from "../models/User.js";
 import { sendEmail } from "../services/emailService.js";
+import { generateVerificationEmail } from "../utils/emailTemplates.js";
 import { generateToken } from "../utils/jwt.js";
 
 //local register from default form for user
@@ -65,20 +66,7 @@ export const register = async (req, res, next) => {
       user.email,
       "Verify Your Email",
       `Your verification code is: ${verificationCode}`,
-      `<div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
-    <div style="max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-      <h2 style="color: #333;">Welcome to Our App 👋</h2>
-      <p style="color: #555; font-size: 16px;">Thank you for registering. Please use the following verification code to verify your email:</p>
-      <div style="margin: 20px 0; text-align: center;">
-        <span style="display: inline-block; background-color: #007bff; color: white; padding: 12px 20px; font-size: 20px; border-radius: 6px; letter-spacing: 3px;">
-          ${verificationCode}
-        </span>
-      </div>
-      <p style="color: #888; font-size: 14px;">This code will expire in 10 minutes.</p>
-      <hr style="margin: 30px 0;" />
-      <p style="font-size: 13px; color: #aaa;">If you did not create an account, you can safely ignore this email.</p>
-    </div>
-  </div>`
+      generateVerificationEmail(verificationCode)
     );
 
     if (!emailResult.success) {
@@ -173,7 +161,7 @@ export const registerOrganizer = async (req, res, next) => {
       user.email,
       "Verify Your Email",
       `Your verification code is: ${verificationCode}`,
-      `<p>Your verification code is: <strong>${verificationCode}</strong></p>`
+      generateVerificationEmail(verificationCode)
     );
 
     if (!emailResult.success) {
@@ -203,8 +191,6 @@ export const verifyEmail = async (req, res, next) => {
       return res.status(404).json({ error: "User not found." });
     }
 
-
-
     if (user.verified) {
       return res.status(400).json({ error: "User is already verified." });
     }
@@ -214,7 +200,7 @@ export const verifyEmail = async (req, res, next) => {
         .status(400)
         .json({ error: "Email and verification code are required." });
     }
-    
+
     const isMatch = await bcrypt.compare(code, user.emailVerificationCode);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid verification code." });

@@ -4,7 +4,21 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
+      type: String,
+      // required: true,
+      trim: true,
+      lowercase: true,
+      minlength: [3, "Name must be at least 3 characters long"],
+      validate: {
+        validator: (value) => {
+          return /^[a-zA-Z0-9_-]{3,15}$/.test(value);
+        },
+        message:
+          "Name must be between 3 and 15 characters long and contain only letters, numbers, underscores, and hyphens",
+      },
+    },
+    lastName: {
       type: String,
       // required: true,
       trim: true,
@@ -117,8 +131,8 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
       default: null,
-      unique: true,
-      sparse : true,
+      
+      sparse: true,
     },
 
     role: {

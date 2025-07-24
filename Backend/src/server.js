@@ -17,6 +17,7 @@ import eventRoutes from "./routes/eventRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
 import "./utils/archiveOldUsers.js";
+import { createPayment } from "./controllers/paymob.controller.js";
 
 dotenv.config();
 const app = express();
@@ -50,6 +51,8 @@ app.use("/user", userRoutes);
 app.use("/events", eventRoutes);
 app.use("/tickets", ticketRoutes);
 
+// pay methode  url 
+app.post("/api/pay", createPayment);
 app.use(errorMiddleware);
 
 export const Bootstrap = async () => {

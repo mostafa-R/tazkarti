@@ -1,7 +1,17 @@
 import Joi from "joi";
 
 const baseUserSchema = {
-  name: Joi.string()
+  firstName: Joi.string()
+    .trim()
+    .lowercase()
+    .min(3)
+    .max(15)
+    .pattern(/^[a-zA-Z0-9_-]{3,15}$/)
+    .messages({
+      "string.pattern.base":
+        "Name must be between 3 and 15 characters long and contain only letters, numbers, underscores, and hyphens",
+    }),
+  lastName: Joi.string()
     .trim()
     .lowercase()
     .min(3)
@@ -84,7 +94,8 @@ export const getUserValidationSchema = ({ isUpdate = false } = {}) => {
   }
 
   return Joi.object({
-    name: schema.name.required(),
+    firstName: schema.firstName.required(),
+    lastName: schema.lastName.required(),
     email: schema.email.required(),
     password: schema.password.required(),
     confirmPassword: schema.confirmPassword.required(),
@@ -119,7 +130,8 @@ export const getOrganizerValidationSchema = ({ isUpdate = false } = {}) => {
   }
 
   return Joi.object({
-    name: schema.name.required(),
+    firstName: schema.firstName.required(),
+    lastName: schema.lastName.required(),
     email: schema.email.required(),
     password: schema.password.required(),
     confirmPassword: schema.confirmPassword.required(),
