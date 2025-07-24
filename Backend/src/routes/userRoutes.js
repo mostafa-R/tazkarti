@@ -19,7 +19,7 @@ import {
   update,
 } from "../controllers/userController.js";
 import { roleMiddleware } from "../middleware/roleMiddleware.js";
-import upload from "../middleware/upload.js";
+import profileUpload from "../middleware/uploads/profileUpload.js";
 
 const userRoutes = Router();
 
@@ -29,12 +29,13 @@ userRoutes.get("/organizers", roleMiddleware(["admin"]), getAllOrganizers);
 
 userRoutes.get("/", getUser);
 
-userRoutes.get("/:id",roleMiddleware(["admin", "user"]) , getUserById);
+userRoutes.get("/:id", roleMiddleware(["admin", "user"]), getUserById);
 
 userRoutes.patch(
   "/userimage",
   roleMiddleware(["admin", "user", "organizer"]),
-  upload.single("profileImage"),
+  profileUpload.single("profileImage"),
+
   profileImage
 );
 

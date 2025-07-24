@@ -20,9 +20,9 @@ export const getUser = async (req, res) => {
   }
 };
 
-export const getUserById = async (req, res) => { 
+export const getUserById = async (req, res) => {
   try {
-    const {id} = req.params
+    const { id } = req.params;
     const user = await User.findById(id).select("-password");
     if (!user) {
       res.status(404);
@@ -32,7 +32,7 @@ export const getUserById = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error, message: error.message });
   }
-}
+};
 
 export const getAllUser = async (req, res) => {
   try {
@@ -212,7 +212,6 @@ export const restoreUserbyId = async (req, res) => {
     res.status(500).json({ error, message: error.message });
   }
 };
-
 
 export const restoreUser = async (req, res) => {
   try {

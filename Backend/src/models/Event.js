@@ -15,31 +15,56 @@ const eventSchema = new mongoose.Schema(
       trim: true,
       maxlength: 2000,
     },
+
     category: {
       type: String,
       required: [true, "Event category is required"],
       enum: ["music", "sports", "theater", "conference", "workshop", "other"],
     },
-    date: {
+
+    // date: {
+    //   type: Date,
+    //   required: [true, "Event date is required"],
+    //   validate: {
+    //     validator: function(value) {
+    //       return value > new Date();
+    //     },
+    //     message: "Event date must be in the future"
+    //   }
+    // },
+
+    startDate: {
       type: Date,
       required: [true, "Event date is required"],
       validate: {
-        validator: function(value) {
+        validator: function (value) {
           return value > new Date();
         },
-        message: "Event date must be in the future"
-      }
+        message: "Event date must be in the future",
+      },
     },
+    endDate: {
+      type: Date,
+      required: [true, "Event end date is required"],
+      validate: {
+        validator: function (value) {
+          return value > this.startDate;
+        },
+        message: "Event end date must be after the start date",
+      },
+    },
+
     time: {
       type: String,
       required: [true, "Event time is required"],
       validate: {
-        validator: function(value) {
+        validator: function (value) {
           return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value);
         },
-        message: "Time must be in HH:MM format"
-      }
+        message: "Time must be in HH:MM format",
+      },
     },
+
     location: {
       venue: {
         type: String,
@@ -59,22 +84,28 @@ const eventSchema = new mongoose.Schema(
       coordinates: {
         lat: Number,
         lng: Number,
-      }
+      },
     },
+
     organizer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    image: {
+    images: [String],
+    
+    trailerVideo: {
       type: String,
       default: "",
+
     },
+
     status: {
       type: String,
       enum: ["draft", "published", "cancelled", "completed"],
       default: "draft",
     },
+
     maxAttendees: {
       type: Number,
       min: 1,
@@ -84,34 +115,36 @@ const eventSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    tags: [{
-      type: String,
-      trim: true,
-    }],
+    tags: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
     isActive: {
       type: Boolean,
       default: true,
-    }
+    },
   },
-  { 
+  {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
   }
 );
 
 // Virtual للتحقق من توفر أماكن
-eventSchema.virtual('isSoldOut').get(function() {
+eventSchema.virtual("isSoldOut").get(function () {
   return this.currentAttendees >= this.maxAttendees;
 });
 
 // Virtual للأماكن المتاحة
-eventSchema.virtual('availableSpots').get(function() {
+eventSchema.virtual("availableSpots").get(function () {
   return this.maxAttendees - this.currentAttendees;
 });
 
 // Index للبحث
-eventSchema.index({ title: 'text', description: 'text' });
+eventSchema.index({ title: "text", description: "text" });
 eventSchema.index({ date: 1, status: 1 });
 eventSchema.index({ organizer: 1 });
 

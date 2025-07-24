@@ -203,10 +203,18 @@ export const verifyEmail = async (req, res, next) => {
       return res.status(404).json({ error: "User not found." });
     }
 
+
+
     if (user.verified) {
       return res.status(400).json({ error: "User is already verified." });
     }
 
+    if (!email || !code) {
+      return res
+        .status(400)
+        .json({ error: "Email and verification code are required." });
+    }
+    
     const isMatch = await bcrypt.compare(code, user.emailVerificationCode);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid verification code." });
