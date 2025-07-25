@@ -9,7 +9,15 @@ import { generateToken } from "../utils/jwt.js";
 
 export const register = async (req, res, next) => {
   try {
-    const { name, email, password, confirmPassword, phone, address } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+      phone,
+      address,
+    } = req.body;
 
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match." });
@@ -26,7 +34,8 @@ export const register = async (req, res, next) => {
     }
 
     const allawedFields = [
-      "name",
+      "firstName",
+      "lastName",
       "email",
       "password",
       "avatar",
@@ -174,9 +183,7 @@ export const registerOrganizer = async (req, res, next) => {
     }
 
     res.status(201).json({
-      message: `Organize Added Successfully. Please verify your email.
-      and wait for admin approval.
-      `,
+      message: "Organize Added Successfully. Please verify your email.",
     });
   } catch (error) {
     console.log("Register Error:", error.message);
@@ -230,25 +237,18 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    if (!user.password) {
-      return res.status(400).json({
-        message: "This account has no password. Try logging in with Google.",
-      });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res
+        .status(400)
+        .json({ message: "the email or password is incorrect" });
     }
 
-    const hashedPassword = await bcrypt.compare(password, user.password);
-
-    if (!hashedPassword) {
-      return res.status(404).json({ message: "invalid password or Email" });
-    }
-
-    const token = generateToken(user, res);
-
-    const { password: pwd, ...userData } = user.toObject();
-    res.status(200).json({ userData, token });
+    generateToken(user, res);
+    res.status(200).json({ user });
   } catch (error) {
     res.status(500).json({ error, message: error.message });
   }

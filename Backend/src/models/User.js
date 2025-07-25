@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
       },
     },
 
-    username: {
+    userName: {
       type: String,
       trim: true,
       lowercase: true,
@@ -199,11 +199,11 @@ userSchema.pre("save", async function (next) {
 
 userSchema.pre("save", function (next) {
   if (
-    !this.username ||
+    !this.userName ||
     this.isModified("firstName") ||
     this.isModified("lastName")
   ) {
-    this.username = `${this.firstName} ${this.lastName}`.toLowerCase();
+    this.userName = `${this.firstName} ${this.lastName}`.toLowerCase();
   }
   next();
 });

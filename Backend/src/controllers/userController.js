@@ -1,6 +1,10 @@
 import fs from "fs";
+import { Event } from "../models/Event.js";
+import Notification from "../models/Notification.js";
 import User from "../models/User.js";
+import { sendEmail } from "../services/emailService.js";
 import cloudinary from "../utils/cloudinary.js";
+import { sendAcceptEmail, sendRejectEmail } from "../utils/emailTemplates.js";
 
 export const getUser = async (req, res) => {
   try {
@@ -23,7 +27,7 @@ export const getUser = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await User.findById(id)
+    const user = await User.findById(id);
     if (!user) {
       res.status(404);
       throw new Error("User not found");
@@ -36,7 +40,7 @@ export const getUserById = async (req, res) => {
 
 export const getAllUser = async (req, res) => {
   try {
-    const users = await User.find({ role: "user" })
+    const users = await User.find({ role: "user" });
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error, message: error.message });
@@ -148,7 +152,7 @@ export const profileImage = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    res.status(200).json({ user: newUser });
+    res.status(200).json({ message: "Image uploaded successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Upload failed" });
@@ -239,5 +243,64 @@ export const restoreUser = async (req, res) => {
   } catch (error) {
     console.error("Restore error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+/// admin notifications
+
+export const getNotifictions = async (req, res) => {
+  try {
+    const notifications = await Notification.find({}).sort({ createdAt: -1 });
+  
+    res.status(200).json(notifications);
+  } catch (error) {
+    console.error("Get Notifications Error:", error);
+    res.status(500).json({ message: "Failed to fetch notifications." });
+  }
+};
+
+//approved events
+export const approveEvent = async (req, res) => {
+  const { approved, id } = req.body;
+
+  try {
+    const event = await Event.findByIdAndUpdate(
+      id,
+      { approved },
+      { new: true }
+    );
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+  
+
+    const eventTitle = event.title;
+
+    const user = await User.findById(event.organizer);
+
+    if (approved === true || approved === "true") {
+      await sendEmail(
+        user.email,
+        "Your Event is Approved",
+        `Your Event is Approved : ${eventTitle}`,
+        sendAcceptEmail(eventTitle)
+      );
+    } else {
+      await sendEmail(
+        user.email,
+        "Your Event is Rejected",
+        `Your Event is Rejected : ${eventTitle}`,
+        sendRejectEmail(eventTitle)
+      );
+    }
+
+    res.status(200).json({
+      message: `Event approval updated to ${approved}`,
+      event,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error updating user approval status" });
   }
 };

@@ -1,3 +1,6 @@
+import Notification from "../models/Notification.js";
+import User from "../models/User.js";
+
 export const sendNotification = async ({
   type,
   message,

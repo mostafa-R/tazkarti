@@ -13,16 +13,22 @@ import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 // دول ضفتهم عشان التذاكر والايفنت
+import { createPayment } from "./controllers/paymob.controller.js";
+import { authMiddleware } from "./middleware/authMiddleware.js";
+// import bookingRoutes from "./routes/booking.routes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
-import { authMiddleware } from "./middleware/authMiddleware.js";
 import "./utils/archiveOldUsers.js";
-import { createPayment } from "./controllers/paymob.controller.js";
 
 dotenv.config();
 const app = express();
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
@@ -51,8 +57,9 @@ app.use("/user", userRoutes);
 app.use("/events", eventRoutes);
 app.use("/tickets", ticketRoutes);
 
-// pay methode  url 
-app.post("/api/pay", createPayment);
+// pay methode  url
+// app.post("/api/pay", createPayment);
+// app.use("/bookings", bookingRoutes);
 app.use(errorMiddleware);
 
 export const Bootstrap = async () => {

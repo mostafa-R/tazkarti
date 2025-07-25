@@ -5,27 +5,27 @@ const bookingSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "User is required"],
+      required: true,
     },
     event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Event",
-      required: [true, "Event is required"],
+      required: true,
     },
     ticket: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Ticket",
-      required: [true, "Ticket is required"],
+      required: true,
     },
     quantity: {
       type: Number,
-      required: [true, "Quantity is required"],
+      required: true,
       min: 1,
       default: 1,
     },
     totalPrice: {
       type: Number,
-      required: [true, "Total price is required"],
+      required: true,
       min: 0,
     },
     status: {
@@ -40,7 +40,7 @@ const bookingSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["credit_card", "paypal", "bank_transfer", "cash"],
+      enum: ["credit_card", "paypal", "bank_transfer", "cash", "wallet"],
       default: "credit_card",
     },
     transactionId: {
@@ -56,18 +56,22 @@ const bookingSchema = new mongoose.Schema(
     attendeeInfo: {
       name: {
         type: String,
-        required: [true, "Attendee name is required"],
+        required: true,
         trim: true,
       },
       email: {
         type: String,
-        required: [true, "Attendee email is required"],
+        required: true,
+        trim: true,
         lowercase: true,
+        match: [/\S+@\S+\.\S+/, "Invalid email format"],
       },
       phone: {
         type: String,
-        required: [true, "Attendee phone is required"],
-      }
+        required: true,
+        trim: true,
+        match: [/^01[0-2,5]{1}[0-9]{8}$/, "Invalid Egyptian phone number"], // مثال
+      },
     },
     notes: {
       type: String,
@@ -87,6 +91,7 @@ const bookingSchema = new mongoose.Schema(
     refundAmount: {
       type: Number,
       default: 0,
+      min: 0,
     },
     refundReason: {
       type: String,
@@ -95,33 +100,35 @@ const bookingSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
-    }
+    },
   },
-  { 
+  {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
   }
 );
 
-//  للتحقق من صحة الحجز
-bookingSchema.virtual('isValid').get(function() {
-  return this.status === 'confirmed' && this.paymentStatus === 'completed';
+// ✅ Virtual للتحقق من صلاحية الحجز
+bookingSchema.virtual("isValid").get(function () {
+  return this.status === "confirmed" && this.paymentStatus === "completed";
 });
 
-// Generate booking code before saving
-bookingSchema.pre('save', async function(next) {
+// ✅ توليد كود الحجز بشكل ذكي
+bookingSchema.pre("save", async function (next) {
   if (!this.bookingCode) {
     const timestamp = Date.now().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    this.bookingCode = `BK${timestamp}${random}`;
+    const random = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, "0");
+    this.bookingCode = `BK-${timestamp}-${random}`;
   }
   next();
 });
 
-// Index للبحث
+// ✅ Indexes لتحسين البحث والأداء
 bookingSchema.index({ user: 1, event: 1 });
-bookingSchema.index({ bookingCode: 1 });
+bookingSchema.index({ bookingCode: 1 }, { unique: true });
 bookingSchema.index({ status: 1, paymentStatus: 1 });
 bookingSchema.index({ event: 1, status: 1 });
 
