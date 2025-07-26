@@ -106,13 +106,12 @@ const userSchema = new mongoose.Schema(
     },
 
     // Customer-specific fields
-    tickets: [
+    ticketsBooked: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Ticket",
+        ref: "Booking",
       },
     ],
-
 
     // Email verification fields
     emailVerificationCode: {
@@ -165,7 +164,7 @@ const userSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Notification",
-      }
+      },
     ],
 
     deletedAt: {

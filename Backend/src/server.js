@@ -13,9 +13,8 @@ import { errorMiddleware } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 // دول ضفتهم عشان التذاكر والايفنت
-import { createPayment } from "./controllers/paymob.controller.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
-// import bookingRoutes from "./routes/booking.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import "./utils/archiveOldUsers.js";
@@ -56,10 +55,10 @@ app.use("/user", userRoutes);
 // 🆕 NEW: Routes جديدة للأحداث والتذاكر
 app.use("/events", eventRoutes);
 app.use("/tickets", ticketRoutes);
+app.use("/booking", bookingRoutes);
 
 // pay methode  url
 // app.post("/api/pay", createPayment);
-// app.use("/bookings", bookingRoutes);
 app.use(errorMiddleware);
 
 export const Bootstrap = async () => {

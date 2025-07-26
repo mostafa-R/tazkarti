@@ -92,7 +92,7 @@ const eventSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    
+
     images: [String],
 
     trailerVideo: {
@@ -127,29 +127,14 @@ const eventSchema = new mongoose.Schema(
       },
     ],
 
-    bookingticketes: [
+    tickets: [
       {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        ticketType: {
-          type: String,
-          enum: ["regular", "vip", "vvip"],
-          default: "regular",
-        },
-        quantity: {
-          type: Number,
-          min: 1,
-          default: 1,
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Ticket",
+        
       },
     ],
+
     isActive: {
       type: Boolean,
       default: true,

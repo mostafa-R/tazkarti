@@ -122,7 +122,6 @@ const Login = () => {
             </span>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
@@ -131,7 +130,6 @@ const Login = () => {
           </button>
         </form>
 
-        {/* Footer */}
         <p className="mt-4 text-sm text-center text-gray-600">
           Don't have an account?{" "}
           <a href="#" className="text-blue-500 hover:underline">

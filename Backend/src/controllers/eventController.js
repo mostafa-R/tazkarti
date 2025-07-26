@@ -82,35 +82,7 @@ export const createEvent = async (req, res) => {
     await event.save();
 
     const user = req.user;
-    console.log(user);
 
-    // try {
-
-    //   await sendNotification({
-    //     type: "New Event Created",
-    //     message: `A organizer has ${user.organizationName} add an event. Please check it out.
-    //     Event Title: ${event.title}
-    //     Event Description: ${event.description}
-    //     Event Category: ${event.category}
-    //     Event Start Date: ${event.startDate}
-    //     Event End Date: ${event.endDate}
-    //     Event Time: ${event.time}
-    //     Event Location: ${event.location}
-    //     Event Images: ${event.images}
-    //     Event Trailer Video: ${event.trailerVideo}
-    //     Event Status: ${event.status}
-    //     Event Max Attendees: ${event.maxAttendees}
-    //     Event Tags: ${event.tags}
-    //     `,
-    //     data: {
-    //       organizerId: user._id,
-    //       organizationName: user.organizationName,
-    //     },
-    //   });
-    // } catch (error) {
-    //   console.error("Notification Error:", error);
-    //   return res.status(500).json({ message: "Failed to send notification." });
-    // }
 
     try {
       await sendNotification({
@@ -139,6 +111,24 @@ export const getAllEvents = async (req, res) => {
     const events = await Event.find().populate("organizer", "name email");
 
     res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getEventById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id).populate([
+      { path: "organizer", select: "name email" },
+      { path: "tickets" },
+    ]);
+    
+    if (!event) {
+      return res.status(404).json({ message: "Event not found." });
+    }
+    res.status(200).json(event);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

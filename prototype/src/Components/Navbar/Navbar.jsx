@@ -34,7 +34,6 @@ function Navbar() {
           </li>
         </ul>
 
-        {/* Mobile Toggle */}
         <div className="md:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -66,7 +65,6 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
         <ul className="md:hidden bg-white px-4 pb-4 space-y-2 shadow-md">
           <li>

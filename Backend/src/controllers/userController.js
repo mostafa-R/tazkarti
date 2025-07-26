@@ -13,7 +13,9 @@ export const getUser = async (req, res) => {
       res.status(404);
       throw new Error("you must be logged in");
     }
-    const user = await User.findById(id).select("-password");
+    const user = await User.findById(id)
+      .select("-password")
+      .populate("ticketsBooked");
     if (!user) {
       res.status(404);
       throw new Error("User not found");

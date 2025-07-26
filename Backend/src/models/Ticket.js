@@ -65,6 +65,7 @@ const ticketSchema = new mongoose.Schema(
       enum: ["active", "sold_out", "sale_ended", "cancelled"],
       default: "active",
     },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -1,9 +1,10 @@
 import asyncHandler from "express-async-handler";
+import { Event } from "../models/Event.js";
 import { Ticket } from "../models/Ticket.js";
 
 export const createTicket = asyncHandler(async (req, res) => {
   const {
-    event,
+    eventId,
     type,
     price,
     quantity,
@@ -12,21 +13,28 @@ export const createTicket = asyncHandler(async (req, res) => {
     features,
     saleStartDate,
     saleEndDate,
+    status,
   } = req.body;
 
-  
   const ticket = await Ticket.create({
-    event,
+    event: eventId,
     type,
     price,
     quantity,
     availableQuantity,
     description,
     features,
+    status: status || "active",
     saleStartDate,
     saleEndDate,
-    createdBy: req.user._id, // Organizer
+    createdBy: req.user._id,
   });
+
+  await Event.findByIdAndUpdate(
+    eventId,
+    { $push: { tickets: ticket._id } },
+    { new: true }
+  );
 
   res.status(201).json(ticket);
 });
@@ -52,9 +60,18 @@ export const getTicketById = asyncHandler(async (req, res) => {
   res.json(ticket);
 });
 
-//  Organizer 
+//  Organizer
 export const updateTicket = asyncHandler(async (req, res) => {
-  const { type, price, quantity, availableQuantity, description, features, saleEndDate, status } = req.body;
+  const {
+    type,
+    price,
+    quantity,
+    availableQuantity,
+    description,
+    features,
+    saleEndDate,
+    status,
+  } = req.body;
 
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) {
@@ -66,7 +83,8 @@ export const updateTicket = asyncHandler(async (req, res) => {
   if (type) ticket.type = type;
   if (price) ticket.price = price;
   if (quantity) ticket.quantity = quantity;
-  if (availableQuantity !== undefined) ticket.availableQuantity = availableQuantity;
+  if (availableQuantity !== undefined)
+    ticket.availableQuantity = availableQuantity;
   if (description) ticket.description = description;
   if (features) ticket.features = features;
   if (saleEndDate) ticket.saleEndDate = saleEndDate;
@@ -76,7 +94,7 @@ export const updateTicket = asyncHandler(async (req, res) => {
   res.json(ticket);
 });
 
-//  Organizer 
+//  Organizer
 export const deleteTicket = asyncHandler(async (req, res) => {
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) {
