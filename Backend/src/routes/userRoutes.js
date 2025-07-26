@@ -3,8 +3,7 @@ import {
   approveEvent,
   deleteUser,
   deleteUserById,
-  getAllOrganizers,
-  getAllUser,
+  getAllUsers,
   getNotifictions,
   getUser,
   getUserById,
@@ -18,9 +17,10 @@ import profileUpload from "../middleware/uploads/profileUpload.js";
 
 const userRoutes = Router();
 
-userRoutes.get("/allusers", roleMiddleware(["admin"]), getAllUser);
+userRoutes.get("/allusers", roleMiddleware(["admin"]), getAllUsers);
 
-userRoutes.get("/organizers", roleMiddleware(["admin"]), getAllOrganizers);
+// userRoutes.get("/organizers", roleMiddleware(["admin"]), getAllOrganizers);
+
 
 userRoutes.get("/notifications", roleMiddleware(["admin"]), getNotifictions);
 

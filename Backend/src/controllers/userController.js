@@ -38,23 +38,23 @@ export const getUserById = async (req, res) => {
   }
 };
 
-export const getAllUser = async (req, res) => {
+export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({ role: "user" });
+    const users = await User.find({ deletedAt: null });
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ error, message: error.message });
   }
 };
 
-export const getAllOrganizers = async (req, res) => {
-  try {
-    const organizers = await User.find({ role: "organizer" });
-    res.status(200).json(organizers);
-  } catch (error) {
-    res.status(500).json({ error, message: error.message });
-  }
-};
+// export const getAllOrganizers = async (req, res) => {
+//   try {
+//     const organizers = await User.find({ role: "organizer" });
+//     res.status(200).json(organizers);
+//   } catch (error) {
+//     res.status(500).json({ error, message: error.message });
+//   }
+// };
 
 export const update = async (req, res) => {
   try {
