@@ -18,6 +18,11 @@ const ticketSchema = new mongoose.Schema(
       required: [true, "Price is required"],
       min: 0,
     },
+    currency: {
+      type: String,
+      enum: ["EGP", "USD", "EUR"],
+      default: "EGP",
+    },
     quantity: {
       type: Number,
       required: [true, "Quantity is required"],
