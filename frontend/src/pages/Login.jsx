@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
   
   const [loginForm, setLoginForm] = useState({
     email: '',
@@ -13,6 +15,8 @@ const LoginPage = () => {
   const handleLoginSubmit = () => {
     console.log('Login submitted:', loginForm);
     // Add your login logic here
+    // بعد نجاح اللوجن يروح على الهوم
+    navigate('/home');
   };
 
   return (
@@ -141,12 +145,12 @@ const LoginPage = () => {
             {/* Sign Up Link */}
             <p className="text-center text-sm text-gray-600" style={{fontFamily: 'Inter, sans-serif'}}>
               Don't have an account?{' '}
-              <a
-                href="/register"
+              <Link
+                to="/signup"
                 className="text-blue-600 hover:text-blue-800 font-medium"
               >
                 Register
-              </a>
+              </Link>
             </p>
           </div>
 
