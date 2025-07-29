@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // ✅ إضافة useNavigate
 import { Search, Calendar, MapPin, ChevronDown, Users } from 'lucide-react';
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate(); // ✅ إضافة navigate hook
 
   const categories = [
     { name: 'Sports', icon: '🏈', color: 'bg-red-100 text-red-600' },
@@ -64,6 +66,44 @@ const HomePage = () => {
     }
   ];
 
+  // ✅ Function للتعامل مع Book Now
+  const handleBookNow = (event) => {
+    navigate(`/booking/${event.id}`, { 
+      state: { 
+        eventData: event 
+      } 
+    });
+  };
+
+  // ✅ Function للتعامل مع Categories
+  const handleCategoryClick = (category) => {
+    navigate('/events', { 
+      state: { 
+        selectedCategory: category.name 
+      } 
+    });
+  };
+
+  // ✅ Function للتعامل مع Search
+  const handleSearchEvents = () => {
+    if (searchQuery.trim()) {
+      navigate('/events', { 
+        state: { 
+          searchQuery: searchQuery 
+        } 
+      });
+    } else {
+      navigate('/events');
+    }
+  };
+
+  // ✅ Function للتعامل مع Enter في Search
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearchEvents();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
     
@@ -91,6 +131,7 @@ const HomePage = () => {
                   className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleSearchKeyPress} // ✅ إضافة Enter support
                 />
               </div>
               
@@ -106,7 +147,10 @@ const HomePage = () => {
                 <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
               </div>
               
-              <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={handleSearchEvents} // ✅ إضافة onClick handler
+                className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 Search Events
               </button>
             </div>
@@ -123,7 +167,11 @@ const HomePage = () => {
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {categories.map((category, index) => (
-            <div key={index} className="text-center group cursor-pointer">
+            <div 
+              key={index} 
+              className="text-center group cursor-pointer"
+              onClick={() => handleCategoryClick(category)} // ✅ إضافة onClick handler
+            >
               <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${category.color} flex items-center justify-center text-2xl group-hover:scale-110 transition-transform`}>
                 {category.icon}
               </div>
@@ -165,7 +213,10 @@ const HomePage = () => {
                   <span className="text-sm">{event.venue}</span>
                 </div>
                 
-                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                <button 
+                  onClick={() => handleBookNow(event)} // ✅ إضافة onClick handler مع تمرير event data
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                >
                   Book Now →
                 </button>
               </div>
