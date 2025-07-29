@@ -30,12 +30,12 @@ const bookingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled", "refunded"],
+      enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "completed", "failed", "refunded"],
+      enum: ["pending", "completed", "failed", "expired"],
       default: "pending",
     },
     paymentMethod: {
@@ -51,8 +51,8 @@ const bookingSchema = new mongoose.Schema(
     bookingCode: {
       type: String,
       unique: true,
-      required: true,
     },
+
     attendeeInfo: {
       name: {
         type: String,
@@ -101,6 +101,13 @@ const bookingSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    
+    // حقول PayMob الجديدة
+    paymentOrderId: String,
+    paymentKey: String,
+    transactionId: String,
+    paymentDate: Date,
   },
   {
     timestamps: true,

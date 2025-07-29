@@ -1,12 +1,25 @@
 import express from "express";
+import { bookingTicketWithPayment } from "../controllers/booking.controller.js";
 import {
-  bookingTicket
- 
-} from "../controllers/booking.controller.js";
-// import { roleMiddleware } from "../middleware/roleMiddleware.js";
+  cancelExpiredBookings,
+  checkPaymentStatus,
+  handlePayMobWebhook,
+} from "../controllers/paymob.controller.js";
+
 
 const router = express.Router();
 
+// إنشاء حجز جديد مع الدفع
+router.post("/book-ticket", bookingTicketWithPayment);
 
-router.post("/", bookingTicket);
+// Webhook من PayMob
+router.post("/paymob-webhook", handlePayMobWebhook);
+
+// التحقق من حالة الدفع
+router.get("/payment-status/:bookingId", checkPaymentStatus);
+
+// إعداد Cron Job لإلغاء الحجوزات المنتهية الصلاحية
+// يتم تشغيله كل 5 دقائق
+setInterval(cancelExpiredBookings, 5 * 60 * 1000);
+
 export default router;
