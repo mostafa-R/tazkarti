@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom'; // ✅ إضافة Navigation
 import { Search, Calendar, MapPin, Filter, ChevronDown, Grid, List, Star, Users } from 'lucide-react';
 
 const EventsPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate(); 
+  const location = useLocation(); 
+  
+  const searchParams = new URLSearchParams(location.search);
+  const initialSearch = searchParams.get('search') || '';
+  const initialCategory = searchParams.get('category') || 'All';
+
+  const [searchQuery, setSearchQuery] = useState(initialSearch); 
   const [selectedLocation, setSelectedLocation] = useState('All Locations');
   const [selectedDate, setSelectedDate] = useState('');
-  const [activeFilter, setActiveFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState(initialCategory); 
   const [viewMode, setViewMode] = useState('grid');
 
   const categories = ['All', 'Sports', 'Music', 'Theater', 'Education', 'Movies'];
@@ -117,11 +125,26 @@ const EventsPage = () => {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
+  
+  const handleEventClick = (event) => {
+    navigate(`/event/${event.id}`, { state: { event } });
+  };
+
+ 
+  const handleBookNow = (event, e) => {
+    e.stopPropagation(); // منع تشغيل click الخاص بالـ card
+    navigate(`/booking/${event.id}`, { state: { event } });
+  };
+
+  
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      // يمكن إضافة منطق إضافي هنا إذا احتجت
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      
-
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -143,6 +166,7 @@ const EventsPage = () => {
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleSearchKeyPress} 
               />
             </div>
             
@@ -224,7 +248,7 @@ const EventsPage = () => {
           {filteredEvents.map((event) => (
             <div 
               key={event.id} 
-              onClick={() => window.location.href = `/events/${event.id}`}
+              onClick={() => handleEventClick(event)} 
               className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group transform hover:-translate-y-1 cursor-pointer ${viewMode === 'list' ? 'flex' : ''}`}
             >
               <div className={`relative ${viewMode === 'list' ? 'w-48 flex-shrink-0' : ''}`}>
@@ -273,9 +297,12 @@ const EventsPage = () => {
                 </div>
                 
                 <div className={`${viewMode === 'list' ? 'flex items-center justify-between' : ''}`}>
-                  <button className={`bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl ${
-                    viewMode === 'list' ? '' : 'w-full'
-                  }`}>
+                  <button 
+                    onClick={(e) => handleBookNow(event, e)} 
+                    className={`bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl ${
+                      viewMode === 'list' ? '' : 'w-full'
+                    }`}
+                  >
                     Book Now →
                   </button>
                 </div>
