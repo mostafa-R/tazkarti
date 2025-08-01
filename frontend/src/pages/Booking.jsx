@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
   Calendar,
@@ -22,12 +22,37 @@ const Booking = () => {
     phone: ''
   });
 
-  const navigate = useNavigate(); // ✅ تعديل مهم
+  const navigate = useNavigate();
+  const { id } = useParams(); // ✅ للحصول على event ID من URL
+  const location = useLocation(); // ✅ للحصول على event data من state
 
+  // ✅ الحصول على بيانات الـ event المرسلة من Home page
+  const eventData = location.state?.eventData || {
+    id: id,
+    title: "Default Event",
+    date: "TBD",
+    venue: "TBD",
+    price: 0,
+    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=120&h=120&fit=crop"
+  };
+
+  // ✅ تحديث ticket types بناءً على سعر الـ event
   const ticketTypes = {
-    regular: { name: 'Regular', description: 'Standard seating', price: 75 },
-    vip: { name: 'VIP', description: 'Premium seating with complimentary drinks', price: 150 },
-    table: { name: 'Table for 4', description: 'Reserved table with bottle service', price: 500 }
+    regular: { 
+      name: 'Regular', 
+      description: 'Standard seating', 
+      price: eventData.price || 75 
+    },
+    vip: { 
+      name: 'VIP', 
+      description: 'Premium seating with complimentary drinks', 
+      price: Math.round((eventData.price || 75) * 1.5) 
+    },
+    table: { 
+      name: 'Table for 4', 
+      description: 'Reserved table with bottle service', 
+      price: Math.round((eventData.price || 75) * 4) 
+    }
   };
 
   const serviceFee = 4;
@@ -48,18 +73,56 @@ const Booking = () => {
     }));
   };
 
+  // ✅ إضافة Back button functionality
+  const handleGoBack = () => {
+    navigate('/home');
+  };
+
   const handleConfirmBooking = () => {
-    // ✅ بدل window.location.href => navigate
-    navigate(`/payment?ticket=${selectedTicket}&quantity=${quantity}&total=${total}`);
+    // ✅ تمرير بيانات أكثر للـ payment page
+    navigate('/payment', {
+      state: {
+        eventData: eventData,
+        bookingData: {
+          selectedTicket: selectedTicket,
+          quantity: quantity,
+          total: total,
+          customerInfo: formData
+        }
+      }
+    });
   };
 
   const isFormValid = () => {
     return formData.fullName && formData.email && formData.phone;
   };
 
+  // ✅ Format date for better display
+  const formatEventDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return date.toLocaleDateString('en-US', options);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header with Back Button */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <button
+            onClick={handleGoBack}
+            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Events
+          </button>
+        </div>
+      </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Page Title */}
@@ -76,16 +139,16 @@ const Booking = () => {
               <h2 className="text-xl font-semibold mb-4">Event Summary</h2>
               <div className="flex space-x-4">
                 <img
-                  src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=120&h=120&fit=crop"
-                  alt="Jazz Night 2024"
+                  src={eventData.image}
+                  alt={eventData.title}
                   className="w-20 h-20 rounded-xl object-cover"
                 />
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-2">Jazz Night 2024</h3>
+                  <h3 className="text-lg font-semibold mb-2">{eventData.title}</h3>
                   <div className="space-y-1 text-sm text-gray-600">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-blue-500" />
-                      <span>December 10, 2024 • Tuesday</span>
+                      <span>{formatEventDate(eventData.date)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Clock className="w-4 h-4 text-green-500" />
@@ -93,7 +156,7 @@ const Booking = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <MapPin className="w-4 h-4 text-red-500" />
-                      <span>Blue Note Club, Downtown</span>
+                      <span>{eventData.venue}</span>
                     </div>
                   </div>
                 </div>
@@ -131,6 +194,7 @@ const Booking = () => {
                   <button
                     onClick={() => handleQuantityChange(-1)}
                     className="p-2 rounded-full border hover:bg-gray-50 transition-colors"
+                    disabled={quantity <= 1}
                   >
                     <Minus className="w-4 h-4" />
                   </button>
