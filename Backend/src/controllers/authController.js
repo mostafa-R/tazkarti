@@ -247,8 +247,9 @@ export const login = async (req, res) => {
         .json({ message: "the email or password is incorrect" });
     }
 
-    generateToken(user, res);
-    res.status(200).json({ user });
+    const token = generateToken(user, res);
+    
+    res.status(200).json({ user , token });
   } catch (error) {
     res.status(500).json({ error, message: error.message });
   }
