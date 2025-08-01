@@ -3,6 +3,7 @@ import passport from "passport";
 import {
   adminLogin,
   login,
+  logingoogle,
   logout,
   register,
   registerOrganizer,
@@ -38,10 +39,11 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/" }),
-  (req, res) => {
-    res.redirect("/");
-  }
+  passport.authenticate("google", {
+    failureRedirect: "/auth/login",
+    session: false,
+  }),
+  logingoogle
 );
 
 router.post("/login", login);

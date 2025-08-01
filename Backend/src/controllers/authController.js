@@ -254,6 +254,25 @@ export const login = async (req, res) => {
   }
 };
 
+export const logingoogle = async (req, res) => {
+  try {
+    const user = req.user;
+    const token = generateToken(user, res);
+
+    if (!token) {
+      return res
+        .status(404)
+        .json({ message: "something went wrong, please try again" });
+    }
+
+    res.setItem.localstorge = "isLoggedIn", true
+    
+    res.redirect(`${process.env.FRONT_URL}/home`);
+  } catch (error) {
+    res.status(500).json({ error, message: error.message });
+  }
+};
+
 export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
 
