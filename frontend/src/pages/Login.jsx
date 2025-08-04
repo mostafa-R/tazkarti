@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
+
+
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,12 +15,35 @@ const LoginPage = () => {
     password: ''
   });
 
-  const handleLoginSubmit = () => {
-    console.log('Login submitted:', loginForm);
-    // Add your login logic here
-    // بعد نجاح اللوجن يروح على الهوم
+  // const handleLoginSubmit = () => {
+  //   console.log('Login submitted:', loginForm);
+  //   // Add your login logic here
+  //   // بعد نجاح اللوجن يروح على الهوم
+   
+   
+   
+  //   navigate('/home');
+  // };
+
+  const handleLoginSubmit = async () => {
+  try {
+    const response = await axios.post('http://localhost:5000/auth/login', loginForm, {
+      withCredentials: true // مهمة لو السيرفر بيحط التوكن في الـ cookies
+    });
+
+    const { token, user } = response.data;
+
+    // احفظ التوكن في localStorage
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('user', JSON.stringify(user));
+
+    // بعد ما يسجل الدخول بنجاح
     navigate('/home');
-  };
+  } catch (error) {
+    console.error('Login error:', error.response?.data?.message || error.message);
+    alert(error.response?.data?.message || 'Login failed');
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8">

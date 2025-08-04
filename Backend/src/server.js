@@ -21,10 +21,15 @@ import "./utils/archiveOldUsers.js";
 
 dotenv.config();
 const app = express();
+// Add a root route for GET /
+app.get('/', (req, res) => {
+  res.send('API is running');
+});
 app.use(cookieParser());
+// Update: Explicitly set allowed origin for frontend and credentials for cookies
 app.use(
   cors({
-    origin: true,
+    origin: "http://localhost:5173", // Updated to match your frontend port
     credentials: true,
   })
 );
