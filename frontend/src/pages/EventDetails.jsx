@@ -3,12 +3,22 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, MapPin, Heart, Share2, Star, Users, Music, Award } from 'lucide-react';
 import { eventsAPI } from '../services/api';
 
+import { ticketsAPI } from '../services/api';   
+
 const EventDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams(); 
   const location = useLocation(); 
   
-  const [selectedTicket, setSelectedTicket] = useState('Regular');
+  // const [selectedTicket, setSelectedTicket] = useState('Regular');
+
+
+// ..............................................................
+const [tickets, setTickets] = useState([]);
+const [selectedTicket, setSelectedTicket] = useState(null);
+const [loadingTickets, setLoadingTickets] = useState(true);
+
+
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   
@@ -53,23 +63,23 @@ const EventDetailsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('🔍 Fetching event details for ID:', id);
-      console.log('🌐 API URL:', `http://localhost:5000/events/${id}`);
+
+      console.log(' Fetching event details for ID:', id);
+      console.log('API URL:', `http://localhost:5000/events/${id}`);
       
       // Call the API to get event details
       const response = await eventsAPI.getEventById(id);
       
-      console.log('✅ API Response:', response.data);
+      console.log('API Response:', response.data);
       
       // Normalize and update state with real event data
       const normalizedEvent = normalizeEventData(response.data);
-      console.log('🔄 Normalized Event Data:', normalizedEvent);
+      console.log('Normalized Event Data:', normalizedEvent);
       setEvent(normalizedEvent);
       
     } catch (err) {
-      console.error('❌ Error fetching event details:', err);
-      console.error('❌ Error details:', err.response?.data || err.message);
+      console.error('Error fetching event details:', err);
+      console.error('Error details:', err.response?.data || err.message);
       setError('Failed to load event details');
       setEvent(null);
     } finally {
@@ -77,13 +87,46 @@ const EventDetailsPage = () => {
     }
   };
 
-  // useEffect to fetch event details when component loads
+  // NEW: Function to fetch tickets for this event
+  const fetchTickets = async () => {
+    try {
+      setLoadingTickets(true);
+      console.log('Fetching tickets for event ID:', id);
+      
+      // Call the API to get tickets for this event
+      const response = await ticketsAPI.getTicketsForEvent(id);
+      
+      console.log('Tickets API Response:', response.data);
+      setTickets(response.data);
+      
+      // Select the first ticket by default if tickets exist
+      if (response.data && response.data.length > 0) {
+        setSelectedTicket(response.data[0]);
+        console.log('Default selected ticket:', response.data[0]);
+      }
+      
+    } catch (err) {
+      console.error('Error fetching tickets:', err);
+      console.error('Tickets error details:', err.response?.data || err.message);
+      
+      // If no tickets found, that's okay - just log it
+      if (err.response?.status === 404) {
+        console.log('No tickets found for this event');
+        setTickets([]);
+      }
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
+
+  // useEffect to fetch event details and tickets when component loads
   useEffect(() => {
-    console.log('🎯 EventDetails component mounted with ID:', id);
+    console.log('EventDetails component mounted with ID:', id);
     if (id) {
       fetchEventDetails();
+      fetchTickets(); // NEW: Also fetch tickets for this event
     } else {
-      console.log('⚠️ No event ID provided');
+      console.log('No event ID provided');
       setLoading(false);
       setError('No event ID provided');
     }
@@ -135,14 +178,14 @@ const EventDetailsPage = () => {
     );
   }
 
-  // Helper function to get ticket price
-  const getTicketPrice = (ticketType) => {
-    const prices = {
-      'Regular': 45,
-      'VIP': 85,
-      'Premium': 120
-    };
-    return prices[ticketType] || 45;
+  // Helper function to get ticket price from real ticket data
+  const getTicketPrice = () => {
+    return selectedTicket ? selectedTicket.price : 0;
+  };
+
+  // Helper function to get available quantity for selected ticket
+  const getAvailableQuantity = () => {
+    return selectedTicket ? selectedTicket.availableQuantity : 0;
   };
 
   const relatedEvents = [
@@ -163,15 +206,20 @@ const EventDetailsPage = () => {
   ];
 
   const handleBookNow = () => {
+    if (!selectedTicket) {
+      alert('Please select a ticket type first');
+      return;
+    }
+
     navigate(`/booking/${event._id}`, { 
       state: { 
         event: {
           ...event,
-          selectedTicket,
+          selectedTicket: selectedTicket, // Real ticket object with all data
           quantity,
-          subtotal: getTicketPrice(selectedTicket) * quantity,
+          subtotal: getTicketPrice() * quantity,
           serviceFee: 5,
-          total: getTicketPrice(selectedTicket) * quantity + 5
+          total: getTicketPrice() * quantity + 5
         }
       }
     });
@@ -234,39 +282,61 @@ const EventDetailsPage = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-700 mb-1">Ticket Type</label>
-                <select
-                  value={selectedTicket}
-                  onChange={(e) => setSelectedTicket(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="Regular">Regular - $45</option>
-                  <option value="VIP">VIP - $85</option>
-                  <option value="Premium">Premium - $120</option>
-                </select>
+                {loadingTickets ? (
+                  <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500">
+                    Loading tickets...
+                  </div>
+                ) : tickets.length > 0 ? (
+                  <select
+                    value={selectedTicket?._id || ''}
+                    onChange={(e) => {
+                      const ticket = tickets.find(t => t._id === e.target.value);
+                      setSelectedTicket(ticket);
+                    }}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {tickets.map(ticket => (
+                      <option key={ticket._id} value={ticket._id}>
+                        {ticket.type} - {ticket.price} {ticket.currency} 
+                        ({ticket.availableQuantity} available)
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500">
+                    No tickets available for this event
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-gray-700 mb-1">Quantity</label>
                 <input
                   type="number"
                   min="1"
-                  max={Math.min(event.maxAttendees - event.currentAttendees, 10)} 
+                  max={Math.min(getAvailableQuantity(), 10)} 
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={!selectedTicket || getAvailableQuantity() === 0}
                 />
+                {selectedTicket && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    {getAvailableQuantity()} tickets available
+                  </p>
+                )}
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between text-gray-700 font-medium mb-2">
                   <span>Subtotal</span>
-                  <span>${getTicketPrice(selectedTicket) * quantity}</span>
+                  <span>{getTicketPrice() * quantity} {selectedTicket?.currency || 'EGP'}</span>
                 </div>
                 <div className="flex justify-between text-gray-700 mb-2">
                   <span>Service Fee</span>
-                  <span>$5</span>
+                  <span>5 {selectedTicket?.currency || 'EGP'}</span>
                 </div>
                 <div className="flex justify-between text-gray-900 font-bold text-lg">
                   <span>Total</span>
-                  <span>${getTicketPrice(selectedTicket) * quantity + 5}</span>
+                  <span>{getTicketPrice() * quantity + 5} {selectedTicket?.currency || 'EGP'}</span>
                 </div>
               </div>
               <button
