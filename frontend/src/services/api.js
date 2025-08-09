@@ -1,4 +1,5 @@
 
+
 import axios from 'axios';
 
 // Step 1: Create an axios instance with your backend URL
@@ -49,6 +50,18 @@ export const eventsAPI = {
   createEvent: (eventData) => api.post('/events/create', eventData),
 };
 
+// NEW: Tickets API
+export const ticketsAPI = {
+  // Get all tickets for a specific event
+  getTicketsForEvent: (eventId) => api.get(`/tickets/event/${eventId}`),
+  
+  // Get single ticket details
+  getTicketById: (ticketId) => api.get(`/tickets/${ticketId}`),
+  
+  // Get all tickets (admin/organizer)
+  getAllTickets: () => api.get('/tickets'),
+};
+
 export const authAPI = {
   // Login user
   login: (credentials) => api.post('/auth/login', credentials),
@@ -59,6 +72,9 @@ export const authAPI = {
   // Verify email
   verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
 };
+
+
+
 
 export default api;
 

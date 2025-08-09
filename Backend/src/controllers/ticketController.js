@@ -60,6 +60,28 @@ export const getTicketById = asyncHandler(async (req, res) => {
   res.json(ticket);
 });
 
+// NEW: Get tickets for a specific event
+export const getTicketsByEvent = asyncHandler(async (req, res) => {
+  const { eventId } = req.params;
+  
+  // Find all tickets for this event
+  const tickets = await Ticket.find({ 
+    event: eventId, 
+    isActive: true 
+  })
+    .populate("event", "title startDate endDate")
+    .populate("createdBy", "firstName lastName email role")
+    .sort({ price: 1 }); // Sort by price (cheapest first)
+
+  if (!tickets || tickets.length === 0) {
+    return res.status(404).json({ 
+      message: "No tickets found for this event" 
+    });
+  }
+
+  res.json(tickets);
+});
+
 //  Organizer
 export const updateTicket = asyncHandler(async (req, res) => {
   const {
