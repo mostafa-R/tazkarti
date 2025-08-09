@@ -14,8 +14,6 @@ import {
 } from 'lucide-react';
 
 const Booking = () => {
-  const [selectedTicket, setSelectedTicket] = useState('regular');
-  const [quantity, setQuantity] = useState(1);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -23,48 +21,45 @@ const Booking = () => {
   });
 
   const navigate = useNavigate();
-  const { id } = useParams(); // ✅ للحصول على event ID من URL
-  const location = useLocation(); // ✅ للحصول على event data من state
+  const { id } = useParams(); // Event ID from URL
+  const location = useLocation(); // Event data from EventDetails page
 
-  // ✅ الحصول على بيانات الـ event المرسلة من Home page
-  const eventData = location.state?.eventData || {
-    id: id,
+  // NEW: Get real event and ticket data from EventDetails
+  const eventData = location.state?.event || {
+    _id: id,
     title: "Default Event",
-    date: "TBD",
-    venue: "TBD",
-    price: 0,
-    image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=120&h=120&fit=crop"
+    startDate: "TBD",
+    location: { venue: "TBD", city: "TBD" },
+    images: ["https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=120&h=120&fit=crop"]
   };
 
-  // ✅ تحديث ticket types بناءً على سعر الـ event
-  const ticketTypes = {
-    regular: { 
-      name: 'Regular', 
-      description: 'Standard seating', 
-      price: eventData.price || 75 
-    },
-    vip: { 
-      name: 'VIP', 
-      description: 'Premium seating with complimentary drinks', 
-      price: Math.round((eventData.price || 75) * 1.5) 
-    },
-    table: { 
-      name: 'Table for 4', 
-      description: 'Reserved table with bottle service', 
-      price: Math.round((eventData.price || 75) * 4) 
-    }
+  // NEW: Get real selected ticket data from EventDetails
+  const selectedTicketData = eventData.selectedTicket || null;
+  const quantity = eventData.quantity || 1;
+  const subtotal = eventData.subtotal || 0;
+  const serviceFee = eventData.serviceFee || 5;
+  const total = eventData.total || 0;
+
+  // Helper functions for displaying real ticket data
+  const getTicketDisplayName = () => {
+    return selectedTicketData ? selectedTicketData.type : 'No Ticket Selected';
   };
 
-  const serviceFee = 4;
-  const subtotal = ticketTypes[selectedTicket].price * quantity;
-  const total = subtotal + serviceFee;
-
-  const handleQuantityChange = (change) => {
-    const newQuantity = quantity + change;
-    if (newQuantity >= 1) {
-      setQuantity(newQuantity);
-    }
+  const getTicketPrice = () => {
+    return selectedTicketData ? selectedTicketData.price : 0;
   };
+
+  const getTicketCurrency = () => {
+    return selectedTicketData ? selectedTicketData.currency : 'EGP';
+  };
+
+  // Remove quantity change handler since quantity is now fixed from EventDetails
+  // const handleQuantityChange = (change) => {
+  //   const newQuantity = quantity + change;
+  //   if (newQuantity >= 1) {
+  //     setQuantity(newQuantity);
+  //   }
+  // };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -79,13 +74,15 @@ const Booking = () => {
   };
 
   const handleConfirmBooking = () => {
-    // ✅ تمرير بيانات أكثر للـ payment page
+    // NEW: Pass real ticket data to payment page
     navigate('/payment', {
       state: {
         eventData: eventData,
         bookingData: {
-          selectedTicket: selectedTicket,
+          selectedTicket: selectedTicketData, // Real ticket object
           quantity: quantity,
+          subtotal: subtotal,
+          serviceFee: serviceFee,
           total: total,
           customerInfo: formData
         }
@@ -139,7 +136,7 @@ const Booking = () => {
               <h2 className="text-xl font-semibold mb-4">Event Summary</h2>
               <div className="flex space-x-4">
                 <img
-                  src={eventData.image}
+                  src={eventData.images ? eventData.images[0] : eventData.image}
                   alt={eventData.title}
                   className="w-20 h-20 rounded-xl object-cover"
                 />
@@ -148,64 +145,65 @@ const Booking = () => {
                   <div className="space-y-1 text-sm text-gray-600">
                     <div className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4 text-blue-500" />
-                      <span>{formatEventDate(eventData.date)}</span>
+                      <span>{formatEventDate(eventData.startDate)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Clock className="w-4 h-4 text-green-500" />
-                      <span>8:00 PM - 11:00 PM</span>
+                      <span>{eventData.time || '8:00 PM - 11:00 PM'}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <MapPin className="w-4 h-4 text-red-500" />
-                      <span>{eventData.venue}</span>
+                      <span>{eventData.location?.venue || eventData.venue}, {eventData.location?.city || ''}</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Ticket Selection */}
+            {/* Selected Ticket Display */}
             <div className="bg-white rounded-xl shadow-lg border p-6">
-              <h2 className="text-xl font-semibold mb-4">Select Your Tickets</h2>
+              <h2 className="text-xl font-semibold mb-4">Your Selected Tickets</h2>
 
-              <div className="mb-6">
-                <h3 className="font-medium mb-3">Ticket Type</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {Object.entries(ticketTypes).map(([key, ticket]) => (
-                    <div
-                      key={key}
-                      onClick={() => setSelectedTicket(key)}
-                      className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        selectedTicket === key
-                          ? 'border-blue-500 bg-blue-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
-                      }`}
-                    >
-                      <h4 className="font-semibold">{ticket.name}</h4>
-                      <p className="text-sm text-gray-600 mb-2">{ticket.description}</p>
-                      <p className="font-bold text-lg text-blue-600">${ticket.price}</p>
+              {selectedTicketData ? (
+                <div className="mb-6">
+                  <div className="p-4 rounded-xl border-2 border-blue-500 bg-blue-50">
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-semibold text-lg">{getTicketDisplayName()}</h4>
+                      <span className="font-bold text-lg text-blue-600">
+                        {getTicketPrice()} {getTicketCurrency()}
+                      </span>
                     </div>
-                  ))}
+                    {selectedTicketData.description && (
+                      <p className="text-sm text-gray-600 mb-2">{selectedTicketData.description}</p>
+                    )}
+                    {selectedTicketData.features && selectedTicketData.features.length > 0 && (
+                      <div className="text-sm text-gray-600">
+                        <p className="font-medium">Features:</p>
+                        <ul className="list-disc list-inside">
+                          {selectedTicketData.features.map((feature, index) => (
+                            <li key={index}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="mb-6 p-4 rounded-xl border-2 border-gray-200 text-center text-gray-500">
+                  No ticket selected. Please go back and select a ticket.
+                </div>
+              )}
 
               <div className="mb-6">
                 <h3 className="font-medium mb-3">Quantity</h3>
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => handleQuantityChange(-1)}
-                    className="p-2 rounded-full border hover:bg-gray-50 transition-colors"
-                    disabled={quantity <= 1}
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="text-lg font-semibold w-8 text-center">{quantity}</span>
-                  <button
-                    onClick={() => handleQuantityChange(1)}
-                    className="p-2 rounded-full border hover:bg-gray-50 transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center justify-center">
+                  <span className="text-lg font-semibold bg-gray-100 px-4 py-2 rounded-lg">
+                    {quantity} ticket{quantity > 1 ? 's' : ''}
+                  </span>
                 </div>
+                <p className="text-sm text-gray-500 text-center mt-2">
+                  Quantity was selected on the previous page
+                </p>
               </div>
             </div>
 
@@ -265,17 +263,17 @@ const Booking = () => {
 
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between">
-                  <span>{ticketTypes[selectedTicket].name} × {quantity}</span>
-                  <span>${subtotal}</span>
+                  <span>{getTicketDisplayName()} × {quantity}</span>
+                  <span>{subtotal} {getTicketCurrency()}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Service Fee</span>
-                  <span>${serviceFee}</span>
+                  <span>{serviceFee} {getTicketCurrency()}</span>
                 </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span className="text-orange-500">${total}</span>
+                    <span className="text-orange-500">{total} {getTicketCurrency()}</span>
                   </div>
                 </div>
               </div>
