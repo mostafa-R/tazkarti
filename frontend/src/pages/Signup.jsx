@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from 'react-toastify';
 import axios from "axios";
 
 const SignUpPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [signupForm, setSignupForm] = useState({
     firstName: "",
@@ -24,10 +25,155 @@ const SignUpPage = () => {
     },
   });
 
+  const [fieldErrors, setFieldErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    country: '',
+    city: ''
+  });
+
+  // Validation patterns (matching backend requirements)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^01[0-9]{9}$/;
+  
+  // Password strength checker
+  const checkPasswordStrength = (password) => {
+    const checks = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+    
+    const score = Object.values(checks).filter(Boolean).length;
+    let strength = 'Very Weak';
+    let color = 'bg-red-500';
+    
+    if (score >= 4) {
+      strength = 'Strong';
+      color = 'bg-green-500';
+    } else if (score >= 3) {
+      strength = 'Medium';
+      color = 'bg-yellow-500';
+    } else if (score >= 2) {
+      strength = 'Weak';
+      color = 'bg-orange-500';
+    }
+    
+    return { checks, score, strength, color, percentage: (score / 5) * 100 };
+  };
+
+  const [passwordStrength, setPasswordStrength] = useState(checkPasswordStrength(''));
+
+  // Real-time field validation
+  const validateField = (fieldName, value) => {
+    let error = '';
+    
+    switch (fieldName) {
+      case 'firstName':
+        if (!value.trim()) {
+          error = 'First name is required';
+        } else if (value.trim().length < 3) {
+          error = 'First name must be at least 3 characters';
+        } else if (value.trim().length > 15) {
+          error = 'First name must be no more than 15 characters';
+        } else if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
+          error = 'First name can only contain letters, numbers, underscores, and hyphens';
+        }
+        break;
+      case 'lastName':
+        if (!value.trim()) {
+          error = 'Last name is required';
+        } else if (value.trim().length < 3) {
+          error = 'Last name must be at least 3 characters';
+        } else if (value.trim().length > 15) {
+          error = 'Last name must be no more than 15 characters';
+        } else if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
+          error = 'Last name can only contain letters, numbers, underscores, and hyphens';
+        }
+        break;
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email is required';
+        } else if (!emailRegex.test(value)) {
+          error = 'Please enter a valid email address';
+        }
+        break;
+      case 'password':
+        if (!value) {
+          error = 'Password is required';
+        } else if (value.length < 8) {
+          error = 'Password must be at least 8 characters';
+        } else {
+          const strength = checkPasswordStrength(value);
+          if (strength.score < 3) {
+            error = 'Password is too weak. Include uppercase, lowercase, numbers, and special characters';
+          }
+        }
+        break;
+      case 'confirmPassword':
+        if (!value) {
+          error = 'Please confirm your password';
+        } else if (value !== signupForm.password) {
+          error = 'Passwords do not match';
+        }
+        break;
+      case 'phone':
+        if (!value.trim()) {
+          error = 'Phone number is required';
+        } else if (!phoneRegex.test(value)) {
+          error = 'Please enter a valid phone number';
+        }
+        break;
+      case 'country':
+        if (!value.trim()) {
+          error = 'Country is required';
+        }
+        break;
+      case 'city':
+        if (!value.trim()) {
+          error = 'City is required';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+    return error === '';
+  };
+
+  const validateForm = () => {
+    const { firstName, lastName, email, password, confirmPassword, phone, address } = signupForm;
+    
+    const validations = [
+      validateField('firstName', firstName),
+      validateField('lastName', lastName),
+      validateField('email', email),
+      validateField('password', password),
+      validateField('confirmPassword', confirmPassword),
+      validateField('phone', phone),
+      validateField('country', address.country),
+      validateField('city', address.city)
+    ];
+    
+    return validations.every(isValid => isValid);
+  };
+
   const handleSignupSubmit = async () => {
     console.log("Signup submitted:", signupForm);
 
-    // Add your signup logic here
+    if (!validateForm()) {
+      toast.error('Please fix the errors below');
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
       const {
@@ -39,11 +185,6 @@ const SignUpPage = () => {
         phone,
         address,
       } = signupForm;
-
-      if (password !== confirmPassword) {
-        alert("Passwords do not match");
-        return;
-      }
 
       const response = await axios.post(
         "http://localhost:5000/auth/register",
@@ -62,17 +203,61 @@ const SignUpPage = () => {
       );
 
       console.log("✅ Signup successful:", response.data);
-      alert("Account created successfully!");
-      // ✅ بعد التسجيل الناجح، يروح على صفحة الـ login
-      navigate("/login");
+      
+      // Show success message with user's name
+      toast.success(`Welcome to Tazkarti, ${firstName}! 🎉 Account created successfully!`);
+      
+      // Navigate after a short delay to let user see the success message
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
 
-      // Redirect or clear form
-      // navigate("/login") لو عندك React Router
     } catch (error) {
       console.error("❌ Signup failed:", error.response?.data || error.message);
-      alert(error.response?.data?.message || "Signup failed");
+      
+      // Handle different error scenarios with user-friendly messages
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (error.response?.status === 400) {
+        const backendMessage = error.response.data?.error || error.response.data?.message;
+        
+        if (backendMessage) {
+          // Handle specific backend error messages
+          if (backendMessage.includes('Email already exists')) {
+            errorMessage = 'An account with this email already exists. Please try logging in instead.';
+          } else if (backendMessage.includes('Phone number already exists')) {
+            errorMessage = 'This phone number is already registered. Please use a different phone number.';
+          } else if (backendMessage.includes('Passwords do not match')) {
+            errorMessage = 'Passwords do not match. Please check your password confirmation.';
+          } else if (backendMessage.includes('Name must be between 3 and 15 characters')) {
+            errorMessage = 'First name and last name must be between 3 and 15 characters long.';
+          } else if (backendMessage.includes('Invalid email format')) {
+            errorMessage = 'Please enter a valid email address.';
+          } else if (backendMessage.includes('Invalid phone number format')) {
+            errorMessage = 'Please enter a valid phone number (format: 01xxxxxxxxx).';
+          } else if (backendMessage.includes('Password must be at least 8 characters')) {
+            errorMessage = 'Password must be at least 8 characters long with uppercase, lowercase, numbers, and special characters.';
+          } else {
+            // Use the backend message directly if it doesn't match specific patterns
+            errorMessage = backendMessage;
+          }
+        } else {
+          errorMessage = 'Invalid registration data. Please check your information.';
+        }
+      } else if (error.response?.status === 409) {
+        errorMessage = 'An account with this email already exists. Please try logging in instead.';
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.response?.data?.error || error.response?.data?.message) {
+        errorMessage = error.response.data.error || error.response.data.message;
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
@@ -117,15 +302,31 @@ const SignUpPage = () => {
                 <input
                   type="text"
                   value={signupForm.firstName}
-                  onChange={(e) =>
-                    setSignupForm({ ...signupForm, firstName: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSignupForm({ ...signupForm, firstName: value });
+                    setTimeout(() => validateField('firstName', value), 300);
+                  }}
+                  onBlur={(e) => validateField('firstName', e.target.value)}
                   placeholder="Enter your first name"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.firstName 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.firstName && !fieldErrors.firstName 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
               </div>
+              {fieldErrors.firstName && (
+                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  {fieldErrors.firstName}
+                </p>
+              )}
             </div>
+            
             {/* Last Name Field */}
             <div>
               <label
@@ -139,15 +340,31 @@ const SignUpPage = () => {
                 <input
                   type="text"
                   value={signupForm.lastName}
-                  onChange={(e) =>
-                    setSignupForm({ ...signupForm, lastName: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSignupForm({ ...signupForm, lastName: value });
+                    setTimeout(() => validateField('lastName', value), 300);
+                  }}
+                  onBlur={(e) => validateField('lastName', e.target.value)}
                   placeholder="Enter your last name"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.lastName 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.lastName && !fieldErrors.lastName 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
               </div>
+              {fieldErrors.lastName && (
+                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  {fieldErrors.lastName}
+                </p>
+              )}
             </div>
+            
             {/* Phone Field */}
             <div>
               <label
@@ -158,17 +375,33 @@ const SignUpPage = () => {
               </label>
               <div className="relative">
                 <input
-                  type="text"
+                  type="tel"
                   value={signupForm.phone}
-                  onChange={(e) =>
-                    setSignupForm({ ...signupForm, phone: e.target.value })
-                  }
-                  placeholder="Enter your phone number"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSignupForm({ ...signupForm, phone: value });
+                    setTimeout(() => validateField('phone', value), 300);
+                  }}
+                  onBlur={(e) => validateField('phone', e.target.value)}
+                  placeholder="Enter your phone number (e.g., 01234567890)"
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.phone 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.phone && !fieldErrors.phone 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
               </div>
+              {fieldErrors.phone && (
+                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  {fieldErrors.phone}
+                </p>
+              )}
             </div>
+            
             {/* Address Fields */}
             <div>
               <label
@@ -181,57 +414,121 @@ const SignUpPage = () => {
                 <input
                   type="text"
                   value={signupForm.address.country}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setSignupForm({
                       ...signupForm,
                       address: {
                         ...signupForm.address,
-                        country: e.target.value,
+                        country: value,
                       },
-                    })
-                  }
-                  placeholder="Country"
-                  className="w-full pl-2 pr-2 py-2 border border-gray-300 rounded-lg"
+                    });
+                    setTimeout(() => validateField('country', value), 300);
+                  }}
+                  onBlur={(e) => validateField('country', e.target.value)}
+                  placeholder="Enter your country"
+                  disabled={isLoading}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.country 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.address.country && !fieldErrors.country 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
+                  style={{ fontFamily: "Roboto, sans-serif" }}
                 />
+                {fieldErrors.country && (
+                  <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                    {fieldErrors.country}
+                  </p>
+                )}
                 <input
                   type="text"
                   value={signupForm.address.city}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setSignupForm({
                       ...signupForm,
-                      address: { ...signupForm.address, city: e.target.value },
-                    })
-                  }
-                  placeholder="City"
-                  className="w-full pl-2 pr-2 py-2 border border-gray-300 rounded-lg"
+                      address: { ...signupForm.address, city: value },
+                    });
+                    setTimeout(() => validateField('city', value), 300);
+                  }}
+                  onBlur={(e) => validateField('city', e.target.value)}
+                  placeholder="Enter your city"
+                  disabled={isLoading}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.city 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.address.city && !fieldErrors.city 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
+                  style={{ fontFamily: "Roboto, sans-serif" }}
                 />
+                {fieldErrors.city && (
+                  <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                    {fieldErrors.city}
+                  </p>
+                )}
                 <input
                   type="text"
                   value={signupForm.address.street}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setSignupForm({
                       ...signupForm,
                       address: {
                         ...signupForm.address,
-                        street: e.target.value,
+                        street: value,
                       },
-                    })
-                  }
-                  placeholder="Street"
-                  className="w-full pl-2 pr-2 py-2 border border-gray-300 rounded-lg"
+                    });
+                    setTimeout(() => validateField('street', value), 300);
+                  }}
+                  onBlur={(e) => validateField('street', e.target.value)}
+                  placeholder="Enter your street"
+                  disabled={isLoading}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.street 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.address.street && !fieldErrors.street 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
+                  style={{ fontFamily: "Roboto, sans-serif" }}
                 />
+                {fieldErrors.street && (
+                  <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                    {fieldErrors.street}
+                  </p>
+                )}
                 <input
                   type="text"
                   value={signupForm.address.zip}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setSignupForm({
                       ...signupForm,
-                      address: { ...signupForm.address, zip: e.target.value },
-                    })
-                  }
-                  placeholder="Zip"
-                  className="w-full pl-2 pr-2 py-2 border border-gray-300 rounded-lg"
+                      address: { ...signupForm.address, zip: value },
+                    });
+                    setTimeout(() => validateField('zip', value), 300);
+                  }}
+                  onBlur={(e) => validateField('zip', e.target.value)}
+                  placeholder="Enter your zip"
+                  disabled={isLoading}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.zip 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.address.zip && !fieldErrors.zip 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
+                  style={{ fontFamily: "Roboto, sans-serif" }}
                 />
+                {fieldErrors.zip && (
+                  <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                    {fieldErrors.zip}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -248,14 +545,29 @@ const SignUpPage = () => {
                 <input
                   type="email"
                   value={signupForm.email}
-                  onChange={(e) =>
-                    setSignupForm({ ...signupForm, email: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSignupForm({ ...signupForm, email: value });
+                    setTimeout(() => validateField('email', value), 300);
+                  }}
+                  onBlur={(e) => validateField('email', e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.email 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.email && !fieldErrors.email 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
               </div>
+              {fieldErrors.email && (
+                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -271,17 +583,29 @@ const SignUpPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   value={signupForm.password}
-                  onChange={(e) =>
-                    setSignupForm({ ...signupForm, password: e.target.value })
-                  }
-                  placeholder="Create a password"
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSignupForm({ ...signupForm, password: value });
+                    setPasswordStrength(checkPasswordStrength(value));
+                    setTimeout(() => validateField('password', value), 300);
+                  }}
+                  onBlur={(e) => validateField('password', e.target.value)}
+                  placeholder="Enter your password"
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.password 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.password && !fieldErrors.password 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -290,6 +614,53 @@ const SignUpPage = () => {
                   )}
                 </button>
               </div>
+              
+              {/* Password Strength Indicator */}
+              {signupForm.password && (
+                <div className="mt-2">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span style={{ fontFamily: "Inter, sans-serif" }}>Password Strength:</span>
+                    <span className={`font-medium ${
+                      passwordStrength.strength === 'Strong' ? 'text-green-600' :
+                      passwordStrength.strength === 'Medium' ? 'text-yellow-600' :
+                      passwordStrength.strength === 'Weak' ? 'text-orange-600' : 'text-red-600'
+                    }`} style={{ fontFamily: "Inter, sans-serif" }}>
+                      {passwordStrength.strength}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                      style={{ width: `${passwordStrength.percentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="mt-1 text-xs text-gray-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                    <div className="grid grid-cols-2 gap-1">
+                      <span className={passwordStrength.checks.length ? 'text-green-600' : 'text-gray-400'}>
+                        ✓ 8+ characters
+                      </span>
+                      <span className={passwordStrength.checks.uppercase ? 'text-green-600' : 'text-gray-400'}>
+                        ✓ Uppercase
+                      </span>
+                      <span className={passwordStrength.checks.lowercase ? 'text-green-600' : 'text-gray-400'}>
+                        ✓ Lowercase
+                      </span>
+                      <span className={passwordStrength.checks.number ? 'text-green-600' : 'text-gray-400'}>
+                        ✓ Number
+                      </span>
+                      <span className={passwordStrength.checks.special ? 'text-green-600' : 'text-gray-400'}>
+                        ✓ Special char
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {fieldErrors.password && (
+                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             {/* Confirm Password Field */}
@@ -305,20 +676,31 @@ const SignUpPage = () => {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   value={signupForm.confirmPassword}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setSignupForm({
                       ...signupForm,
-                      confirmPassword: e.target.value,
-                    })
-                  }
+                      confirmPassword: value,
+                    });
+                    setTimeout(() => validateField('confirmPassword', value), 300);
+                  }}
+                  onBlur={(e) => validateField('confirmPassword', e.target.value)}
                   placeholder="Confirm your password"
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.confirmPassword 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : signupForm.confirmPassword && !fieldErrors.confirmPassword 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -327,6 +709,11 @@ const SignUpPage = () => {
                   )}
                 </button>
               </div>
+              {fieldErrors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  {fieldErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             {/* Register Button */}
