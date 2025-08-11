@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import axios from 'axios';
-
-
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   
   const [loginForm, setLoginForm] = useState({
@@ -15,35 +15,98 @@ const LoginPage = () => {
     password: ''
   });
 
-  // const handleLoginSubmit = () => {
-  //   console.log('Login submitted:', loginForm);
-  //   // Add your login logic here
-  //   // بعد نجاح اللوجن يروح على الهوم
-   
-   
-   
-  //   navigate('/home');
-  // };
+  const [fieldErrors, setFieldErrors] = useState({
+    email: '',
+    password: ''
+  });
+
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Real-time field validation
+  const validateField = (fieldName, value) => {
+    let error = '';
+    
+    switch (fieldName) {
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email is required';
+        } else if (!emailRegex.test(value)) {
+          error = 'Please enter a valid email address';
+        }
+        break;
+      case 'password':
+        if (!value) {
+          error = 'Password is required';
+        } else if (value.length < 6) {
+          error = 'Password must be at least 6 characters';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+    return error === '';
+  };
+
+  const validateForm = () => {
+    const emailValid = validateField('email', loginForm.email);
+    const passwordValid = validateField('password', loginForm.password);
+    
+    return emailValid && passwordValid;
+  };
 
   const handleLoginSubmit = async () => {
-  try {
-    const response = await axios.post('http://localhost:5000/auth/login', loginForm, {
-      withCredentials: true // مهمة لو السيرفر بيحط التوكن في الـ cookies
-    });
+    // Enhanced validation
+    if (!validateForm()) {
+      toast.error('Please fix the errors below');
+      return;
+    }
 
-    const { token, user } = response.data;
+    setIsLoading(true);
+    
+    try {
+      const response = await axios.post('http://localhost:5000/auth/login', loginForm, {
+        withCredentials: true
+      });
 
-    // احفظ التوكن في localStorage
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('user', JSON.stringify(user));
+      const { token, user } = response.data;
 
-    // بعد ما يسجل الدخول بنجاح
-    navigate('/home');
-  } catch (error) {
-    console.error('Login error:', error.response?.data?.message || error.message);
-    alert(error.response?.data?.message || 'Login failed');
-  }
-};
+      // Save token to localStorage
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // Show success message with user's name
+      const userName = user.firstName || user.name || 'there';
+      toast.success(`Welcome back, ${userName}! 🎉`);
+
+      // Navigate after a short delay to let user see the success message
+      setTimeout(() => {
+        navigate('/home');
+      }, 1000);
+
+    } catch (error) {
+      console.error('Login error:', error.response?.data?.message || error.message);
+      
+      // Handle different error scenarios with user-friendly messages
+      let errorMessage = 'Login failed. Please try again.';
+      
+      if (error.response?.status === 401) {
+        errorMessage = 'Invalid email or password. Please check your credentials.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Account not found. Please check your email or sign up.';
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8">
@@ -77,12 +140,30 @@ const LoginPage = () => {
                 <input
                   type="email"
                   value={loginForm.email}
-                  onChange={(e) => setLoginForm({...loginForm, email: e.target.value})}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setLoginForm({...loginForm, email: value});
+                    // Real-time validation with debounce
+                    setTimeout(() => validateField('email', value), 300);
+                  }}
+                  onBlur={(e) => validateField('email', e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm"
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.email 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : loginForm.email && !fieldErrors.email 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
                   style={{fontFamily: 'Roboto, sans-serif'}}
                 />
               </div>
+              {fieldErrors.email && (
+                <p className="mt-1 text-sm text-red-600" style={{fontFamily: 'Inter, sans-serif'}}>
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -95,19 +176,38 @@ const LoginPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   value={loginForm.password}
-                  onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setLoginForm({...loginForm, password: value});
+                    // Real-time validation with debounce
+                    setTimeout(() => validateField('password', value), 300);
+                  }}
+                  onBlur={(e) => validateField('password', e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-sm"
+                  disabled={isLoading}
+                  className={`w-full pl-10 pr-12 py-2.5 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all text-sm disabled:bg-gray-100 disabled:cursor-not-allowed ${
+                    fieldErrors.password 
+                      ? 'border-red-500 focus:ring-red-500' 
+                      : loginForm.password && !fieldErrors.password 
+                        ? 'border-green-500 focus:ring-green-500'
+                        : 'border-gray-300 focus:ring-blue-600'
+                  }`}
                   style={{fontFamily: 'Roboto, sans-serif'}}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <p className="mt-1 text-sm text-red-600" style={{fontFamily: 'Inter, sans-serif'}}>
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             {/* Remember Me & Forgot Password */}
@@ -117,7 +217,8 @@ const LoginPage = () => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-600"
+                  disabled={isLoading}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-600 disabled:cursor-not-allowed"
                 />
                 <span className="ml-2 text-sm text-gray-700" style={{fontFamily: 'Inter, sans-serif'}}>
                   Remember me
@@ -125,7 +226,8 @@ const LoginPage = () => {
               </label>
               <button
                 type="button"
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                disabled={isLoading}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
                 style={{fontFamily: 'Inter, sans-serif'}}
               >
                 Forgot password?
@@ -135,10 +237,21 @@ const LoginPage = () => {
             {/* Login Button */}
             <button
               onClick={handleLoginSubmit}
-              className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
-              style={{backgroundColor: '#0052CC', fontFamily: 'Inter, sans-serif'}}
+              disabled={isLoading}
+              className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center"
+              style={{backgroundColor: isLoading ? '#60A5FA' : '#0052CC', fontFamily: 'Inter, sans-serif'}}
             >
-              Login
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Logging in...
+                </>
+              ) : (
+                'Login'
+              )}
             </button>
 
             {/* Divider */}
@@ -156,7 +269,8 @@ const LoginPage = () => {
             {/* Google Button */}
             <button
               type="button"
-              className="w-full border border-gray-300 bg-white text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center text-sm"
+              disabled={isLoading}
+              className="w-full border border-gray-300 bg-white text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
               style={{fontFamily: 'Inter, sans-serif'}}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
