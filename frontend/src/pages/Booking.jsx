@@ -20,6 +20,17 @@ const Booking = () => {
     phone: ''
   });
 
+  const [fieldErrors, setFieldErrors] = useState({
+    fullName: '',
+    email: '',
+    phone: ''
+  });
+
+  // Validation patterns
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^01[0-9]{9}$/; // Egyptian phone format
+  const nameRegex = /^[a-zA-Z\s]{2,50}$/; // Letters and spaces, 2-50 characters
+
   const navigate = useNavigate();
   const { id } = useParams(); // Event ID from URL
   const location = useLocation(); // Event data from EventDetails page
@@ -61,11 +72,60 @@ const Booking = () => {
   //   }
   // };
 
+  // Real-time field validation
+  const validateField = (fieldName, value) => {
+    let error = '';
+    
+    switch (fieldName) {
+      case 'fullName':
+        if (!value.trim()) {
+          error = 'Full name is required';
+        } else if (value.trim().length < 2) {
+          error = 'Full name must be at least 2 characters';
+        } else if (value.trim().length > 50) {
+          error = 'Full name must be no more than 50 characters';
+        } else if (!nameRegex.test(value.trim())) {
+          error = 'Full name can only contain letters and spaces';
+        }
+        break;
+      case 'email':
+        if (!value.trim()) {
+          error = 'Email address is required';
+        } else if (!emailRegex.test(value)) {
+          error = 'Please enter a valid email address';
+        }
+        break;
+      case 'phone':
+        if (!value.trim()) {
+          error = 'Phone number is required';
+        } else if (!phoneRegex.test(value)) {
+          error = 'Please enter a valid phone number (format: 01xxxxxxxxx)';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
+    return error === '';
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+    
+    // Real-time validation with debounce
+    setTimeout(() => validateField(field, value), 300);
+  };
+
+  const validateAllFields = () => {
+    const fullNameValid = validateField('fullName', formData.fullName);
+    const emailValid = validateField('email', formData.email);
+    const phoneValid = validateField('phone', formData.phone);
+    
+    return fullNameValid && emailValid && phoneValid;
   };
 
   // ✅ إضافة Back button functionality
@@ -74,6 +134,13 @@ const Booking = () => {
   };
 
   const handleConfirmBooking = () => {
+    // Validate all fields before proceeding
+    if (!validateAllFields()) {
+      // Show error message or toast notification
+      alert('Please fix the errors in the form before proceeding.');
+      return;
+    }
+
     // NEW: Pass real ticket data to payment page
     navigate('/payment', {
       state: {
@@ -91,7 +158,8 @@ const Booking = () => {
   };
 
   const isFormValid = () => {
-    return formData.fullName && formData.email && formData.phone;
+    return formData.fullName && formData.email && formData.phone && 
+           !fieldErrors.fullName && !fieldErrors.email && !fieldErrors.phone;
   };
 
   // ✅ Format date for better display
@@ -219,10 +287,22 @@ const Booking = () => {
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => handleInputChange('fullName', e.target.value)}
+                      onBlur={(e) => validateField('fullName', e.target.value)}
                       placeholder="Enter your full name"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all ${
+                        fieldErrors.fullName 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : formData.fullName && !fieldErrors.fullName 
+                            ? 'border-green-500 focus:ring-green-500'
+                            : 'border-gray-300 focus:ring-blue-500'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.fullName && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {fieldErrors.fullName}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -233,10 +313,22 @@ const Booking = () => {
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
+                      onBlur={(e) => validateField('email', e.target.value)}
                       placeholder="Enter your email address"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all ${
+                        fieldErrors.email 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : formData.email && !fieldErrors.email 
+                            ? 'border-green-500 focus:ring-green-500'
+                            : 'border-gray-300 focus:ring-blue-500'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.email && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -247,10 +339,22 @@ const Booking = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="Enter your phone number"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      onBlur={(e) => validateField('phone', e.target.value)}
+                      placeholder="Enter your phone number (e.g., 01234567890)"
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all ${
+                        fieldErrors.phone 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : formData.phone && !fieldErrors.phone 
+                            ? 'border-green-500 focus:ring-green-500'
+                            : 'border-gray-300 focus:ring-blue-500'
+                      }`}
                     />
                   </div>
+                  {fieldErrors.phone && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {fieldErrors.phone}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
