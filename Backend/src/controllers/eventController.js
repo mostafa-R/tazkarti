@@ -73,6 +73,7 @@ export const createEvent = async (req, res) => {
       location: parsedLocation,
       images: imageUrls,
       trailerVideo: trailerVideoUrl,
+      upcoming,
       status: status || "draft",
       maxAttendees: maxAttendees || 100,
       organizer: req.user._id,
@@ -129,6 +130,22 @@ export const getEventById = async (req, res) => {
       return res.status(404).json({ message: "Event not found." });
     }
     res.status(200).json(event);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+export const getUpcomingEvents = async (req, res) => {
+  try {
+    const events = await Event.find({
+      upcoming: true,
+      approved: true,
+    })
+      .populate("organizer", "name email")
+      .sort({ startDate: 1 });
+
+    res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

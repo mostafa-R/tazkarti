@@ -54,13 +54,14 @@ app.use(passport.session());
 // Public routes (مش محتاجة authentication)
 app.use("/auth", authRoutes);
 
+// Public API routes (accessible without authentication)
+app.use("/api/events", eventRoutes);
+
 // Protected routes (محتاجة authentication)
 app.use(authMiddleware);
 app.use("/user", userRoutes);
-// 🆕 NEW: Routes جديدة للأحداث والتذاكر
-app.use("/events", eventRoutes);
-app.use("/tickets", ticketRoutes);
-app.use("/booking", bookingRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/booking", bookingRoutes);
 
 // pay methode  url
 // app.post("/api/pay", createPayment);

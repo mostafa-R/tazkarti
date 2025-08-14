@@ -1,72 +1,50 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ إضافة useNavigate
-import { Search, Calendar, MapPin, ChevronDown, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Calendar, MapPin, ChevronDown, Users, Loader2 } from 'lucide-react';
+import EventService from '../services/eventService';
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate(); // ✅ إضافة navigate hook
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const categories = [
-    { name: 'Sports', icon: '🏈', color: 'bg-red-100 text-red-600' },
-    { name: 'Music', icon: '🎵', color: 'bg-purple-100 text-purple-600' },
-    { name: 'Theater', icon: '🎭', color: 'bg-green-100 text-green-600' },
-    { name: 'Education', icon: '🎓', color: 'bg-blue-100 text-blue-600' },
-    { name: 'Movies', icon: '🎬', color: 'bg-orange-100 text-orange-600' },
-    { name: 'Others', icon: '⭐', color: 'bg-pink-100 text-pink-600' }
+    { name: 'Sports', icon: '', color: 'bg-red-100 text-red-600' },
+    { name: 'Music', icon: '', color: 'bg-purple-100 text-purple-600' },
+    { name: 'Theater', icon: '', color: 'bg-green-100 text-green-600' },
+    { name: 'Education', icon: '', color: 'bg-blue-100 text-blue-600' },
+    { name: 'Movies', icon: '', color: 'bg-orange-100 text-orange-600' },
+    { name: 'Others', icon: '', color: 'bg-pink-100 text-pink-600' }
   ];
 
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: "Rock Concert 2024",
-      date: "March 15, 2024",
-      venue: "Stadium Arena",
-      price: 45,
-      image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=300&fit=crop"
-    },
-    {
-      id: 2,
-      title: "Football Championship",
-      date: "March 20, 2024",
-      venue: "National Stadium",
-      price: 30,
-      image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop"
-    },
-    {
-      id: 3,
-      title: "Tech Conference 2024",
-      date: "March 25, 2024",
-      venue: "Convention Center",
-      price: 120,
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop"
-    },
-    {
-      id: 4,
-      title: "Broadway Musical",
-      date: "April 1, 2024",
-      venue: "City Theater",
-      price: 75,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop"
-    },
-    {
-      id: 5,
-      title: "Movie Premiere",
-      date: "April 5, 2024",
-      venue: "Cinema Complex",
-      price: 25,
-      image: "https://images.unsplash.com/photo-1489599511777-9c0c0c41b2c4?w=400&h=300&fit=crop"
-    },
-    {
-      id: 6,
-      title: "Jazz Festival",
-      date: "April 10, 2024",
-      venue: "Park Amphitheater",
-      price: 60,
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop"
-    }
-  ];
+  // Fetch upcoming events from API
+  useEffect(() => {
+    const fetchUpcomingEvents = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const result = await EventService.getUpcomingEvents();
+        
+        if (result.success) {
+          setUpcomingEvents(result.data);
+        } else {
+          setError(result.error);
+        }
+      } catch (err) {
+        setError('Failed to load upcoming events');
+        console.error('Error fetching upcoming events:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // ✅ Function للتعامل مع Book Now
+    fetchUpcomingEvents();
+  }, []);
+
+  // Function للتعامل مع Book Now
   const handleBookNow = (event) => {
     navigate(`/booking/${event.id}`, { 
       state: { 
@@ -188,41 +166,93 @@ const HomePage = () => {
           <p className="text-gray-600">Don't miss out on these amazing events</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {upcomingEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
-              <div className="relative">
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold">
-                  ${event.price}
-                </div>
-              </div>
-              
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
-                <div className="flex items-center text-gray-600 mb-2">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <span className="text-sm">{event.date}</span>
-                </div>
-                <div className="flex items-center text-gray-600 mb-4">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  <span className="text-sm">{event.venue}</span>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="ml-2 text-gray-600">Loading upcoming events...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+              <p className="text-red-600 mb-4">⚠️ {error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && upcomingEvents.length === 0 && (
+          <div className="text-center py-12">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
+              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Upcoming Events</h3>
+              <p className="text-gray-600">Check back later for new events!</p>
+            </div>
+          </div>
+        )}
+
+        {/* Events Grid */}
+        {!loading && !error && upcomingEvents.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {upcomingEvents.map((event) => (
+              <div key={event._id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
+                <div className="relative">
+                  <img
+                    src={EventService.getEventImage(event)}
+                    alt={event.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      e.target.src = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop";
+                    }}
+                  />
+                  <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold capitalize">
+                    {event.category}
+                  </div>
+                  {event.status && (
+                    <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      {event.status}
+                    </div>
+                  )}
                 </div>
                 
-                <button 
-                  onClick={() => handleBookNow(event)} // ✅ إضافة onClick handler مع تمرير event data
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Book Now →
-                </button>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{event.title}</h3>
+                  <div className="flex items-center text-gray-600 mb-2">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{EventService.formatEventDate(event.startDate)}</span>
+                  </div>
+                  <div className="flex items-center text-gray-600 mb-4">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{event.location?.venue || 'Venue TBA'}</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm text-gray-600">
+                      <Users className="h-4 w-4 inline mr-1" />
+                      {event.currentAttendees || 0}/{event.maxAttendees} attendees
+                    </div>
+                  </div>
+                  
+                  <button 
+                    onClick={() => handleBookNow(event)}
+                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Book Now →
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* How It Works */}

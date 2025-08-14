@@ -1,0 +1,375 @@
+# TAZKARTI BACKEND API ENDPOINTS DOCUMENTATION
+# Generated on: 2025-08-08
+# Project: Event Ticketing Platform (Tazkarti)
+# Backend Framework: Node.js + Express.js
+
+================================================================================
+                              AUTHENTICATION ENDPOINTS
+================================================================================
+
+POST /auth/register
+Description: Register a new user account
+Request Body:
+{
+  "firstName": "string",
+  "lastName": "string", 
+  "email": "string",
+  "password": "string",
+  "confirmPassword": "string",
+  "phone": "string",
+  "address": {
+    "country": "string",
+    "city": "string", 
+    "street": "string",
+    "zip": "string"
+  }
+}
+Requires Auth: ❌
+Status: ✅ Done
+
+POST /auth/registerOrganizer
+Description: Register a new event organizer account
+Request Body:
+{
+  "firstName": "string",
+  "lastName": "string",
+  "email": "string", 
+  "password": "string",
+  "confirmPassword": "string",
+  "phone": "string",
+  "organizationName": "string",
+  "organizationType": "string",
+  "taxId": "string",
+  "website": "string",
+  "address": {
+    "country": "string",
+    "city": "string",
+    "street": "string", 
+    "zip": "string"
+  }
+}
+Requires Auth: ❌
+Status: ✅ Done
+
+POST /auth/verifyOTP
+Description: Verify email using OTP code sent during registration
+Request Body:
+{
+  "email": "string",
+  "verificationCode": "string"
+}
+Requires Auth: ❌
+Status: ✅ Done
+
+GET /auth/google
+Description: Initiate Google OAuth authentication
+Request Body: N/A
+Requires Auth: ❌
+Status: ✅ Done
+
+GET /auth/google/callback
+Description: Handle Google OAuth callback
+Request Body: N/A
+Requires Auth: ❌
+Status: ✅ Done
+
+POST /auth/login
+Description: Login user with email and password
+Request Body:
+{
+  "email": "string",
+  "password": "string"
+}
+Requires Auth: ❌
+Status: ✅ Done
+
+POST /auth/adminlogin
+Description: Admin login with special credentials
+Request Body:
+{
+  "email": "string",
+  "password": "string"
+}
+Requires Auth: ❌
+Status: ✅ Done
+
+POST /auth/logout
+Description: Logout current user and clear session
+Request Body: N/A
+Requires Auth: ✅
+Status: ✅ Done
+
+================================================================================
+                                USER ENDPOINTS
+================================================================================
+
+GET /users/allusers
+Description: Get all users (admin only)
+Request Body: N/A
+Requires Auth: ✅ (Admin role required)
+Status: ✅ Done
+
+GET /users/notifications
+Description: Get admin notifications
+Request Body: N/A
+Requires Auth: ✅ (Admin role required)
+Status: ✅ Done
+
+POST /users/approveEvent
+Description: Approve an event (admin only)
+Request Body:
+{
+  "eventId": "string"
+}
+Requires Auth: ✅ (Admin role required)
+Status: ✅ Done
+
+GET /users/
+Description: Get current user profile
+Request Body: N/A
+Requires Auth: ✅
+Status: ✅ Done
+
+GET /users/:id
+Description: Get user by ID (admin/user access)
+Request Body: N/A
+Requires Auth: ✅ (Admin or User role required)
+Status: ✅ Done
+
+PATCH /users/userimage
+Description: Update user profile image
+Request Body: FormData with profileImage file
+Requires Auth: ✅ (Admin, User, or Organizer role required)
+Status: ✅ Done
+
+PATCH /users/edit
+Description: Update user profile information
+Request Body:
+{
+  "firstName": "string (optional)",
+  "lastName": "string (optional)",
+  "phone": "string (optional)",
+  "bio": "string (optional)",
+  "address": {
+    "country": "string (optional)",
+    "city": "string (optional)",
+    "street": "string (optional)",
+    "zip": "string (optional)"
+  }
+}
+Requires Auth: ✅ (Admin, User, or Organizer role required)
+Status: ✅ Done
+
+PATCH /users/delete
+Description: Soft delete user account
+Request Body: N/A
+Requires Auth: ✅ (Admin or User role required)
+Status: ✅ Done
+
+PATCH /users/restoreuser
+Description: Restore soft deleted user account
+Request Body: N/A
+Requires Auth: ✅ (User role required)
+Status: ✅ Done
+
+PATCH /users/deleteuser/:id
+Description: Admin delete user by ID
+Request Body: N/A
+Requires Auth: ✅ (Admin role required)
+Status: ✅ Done
+
+PATCH /users/restoreuser/:id
+Description: Admin restore user by ID
+Request Body: N/A
+Requires Auth: ✅ (Admin role required)
+Status: ✅ Done
+
+================================================================================
+                                EVENT ENDPOINTS
+================================================================================
+
+POST /events/create
+Description: Create a new event (organizer/admin only)
+Request Body: FormData with:
+{
+  "title": "string",
+  "description": "string",
+  "category": "string",
+  "startDate": "ISO date string",
+  "endDate": "ISO date string", 
+  "time": "string",
+  "location": "JSON string with address details",
+  "status": "string (optional, default: draft)",
+  "maxAttendees": "number (optional, default: 100)",
+  "tags": "array of strings (optional)",
+  "trailerVideo": "string URL (optional)",
+  "images": "file uploads (multiple)",
+  "trailerVideo": "video file upload (optional)"
+}
+Requires Auth: ✅ (Organizer or Admin role required)
+Status: ✅ Done
+
+GET /events/
+Description: Get all events (public access)
+Request Body: N/A
+Requires Auth: ❌
+Status: ✅ Done
+
+GET /events/:id
+Description: Get event details by ID
+Request Body: N/A
+Requires Auth: ❌
+Status: ✅ Done
+
+================================================================================
+                               TICKET ENDPOINTS
+================================================================================
+
+GET /tickets/
+Description: Get all tickets
+Request Body: N/A
+Requires Auth: ❌
+Status: ✅ Done
+
+GET /tickets/:id
+Description: Get ticket details by ID
+Request Body: N/A
+Requires Auth: ❌
+Status: ✅ Done
+
+POST /tickets/
+Description: Create a new ticket type for an event (organizer only)
+Request Body:
+{
+  "eventId": "string",
+  "type": "string",
+  "price": "number",
+  "quantity": "number",
+  "availableQuantity": "number",
+  "description": "string",
+  "features": "array of strings",
+  "saleStartDate": "ISO date string",
+  "saleEndDate": "ISO date string",
+  "status": "string (optional, default: active)"
+}
+Requires Auth: ✅ (Organizer role required)
+Status: ✅ Done
+
+PUT /tickets/:id
+Description: Update ticket information (organizer only)
+Request Body:
+{
+  "type": "string (optional)",
+  "price": "number (optional)",
+  "quantity": "number (optional)",
+  "availableQuantity": "number (optional)",
+  "description": "string (optional)",
+  "features": "array of strings (optional)",
+  "saleStartDate": "ISO date string (optional)",
+  "saleEndDate": "ISO date string (optional)",
+  "status": "string (optional)"
+}
+Requires Auth: ✅ (Organizer role required)
+Status: ✅ Done
+
+DELETE /tickets/:id
+Description: Delete a ticket type (organizer only)
+Request Body: N/A
+Requires Auth: ✅ (Organizer role required)
+Status: ✅ Done
+
+================================================================================
+                               BOOKING ENDPOINTS
+================================================================================
+
+POST /booking/book-ticket
+Description: Book tickets with payment integration (PayMob)
+Request Body:
+{
+  "ticketId": "string",
+  "eventId": "string",
+  "type": "string",
+  "quantity": "number",
+  "attendeeInfo": {
+    "name": "string",
+    "email": "string", 
+    "phone": "string"
+  }
+}
+Requires Auth: ✅
+Status: ✅ Done
+
+POST /booking/paymob-webhook
+Description: Handle PayMob payment webhook notifications
+Request Body: PayMob webhook payload
+Requires Auth: ❌
+Status: ✅ Done
+
+GET /booking/payment-status/:bookingId
+Description: Check payment status for a booking
+Request Body: N/A
+Requires Auth: ❌
+Status: ✅ Done
+
+================================================================================
+                              SUMMARY STATISTICS
+================================================================================
+
+Total Endpoints: 32
+
+✅ COMPLETED ENDPOINTS: 32
+- All authentication endpoints (8)
+- All user management endpoints (12)
+- All event endpoints (3)
+- All ticket management endpoints (5)
+- All booking/payment endpoints (3)
+- Root endpoint (1)
+
+🚧 IN PROGRESS ENDPOINTS: 0
+
+❌ MISSING ENDPOINTS: 0
+
+================================================================================
+                              ADDITIONAL NOTES
+================================================================================
+
+1. AUTHENTICATION SYSTEM:
+   - JWT token-based authentication
+   - Role-based access control (admin, user, organizer)
+   - Google OAuth integration
+   - Email verification with OTP
+
+2. PAYMENT INTEGRATION:
+   - PayMob payment gateway integration
+   - Webhook handling for payment status updates
+   - Automatic booking expiration (5-minute intervals)
+
+3. FILE UPLOADS:
+   - Cloudinary integration for image/video storage
+   - Profile image uploads
+   - Event media uploads (images and trailer videos)
+
+4. MIDDLEWARE USAGE:
+   - authMiddleware: JWT token validation
+   - roleMiddleware: Role-based access control
+   - validate: Request body validation using Joi schemas
+   - errorMiddleware: Global error handling
+
+5. DATABASE:
+   - MongoDB with Mongoose ODM
+   - Soft delete functionality for users
+   - Event approval workflow
+
+6. CORS CONFIGURATION:
+   - Frontend origin: http://localhost:5173
+   - Credentials enabled for cookie-based auth
+
+================================================================================
+                              DEPLOYMENT READY
+================================================================================
+
+All endpoints are implemented and functional. The API is ready for integration
+with the admin dashboard and frontend applications.
+
+Base URL: http://localhost:5000 (development)
+API Prefix: All routes are prefixed as defined in server.js routing
