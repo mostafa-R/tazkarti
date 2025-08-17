@@ -9,4 +9,7 @@ export const transporter = nodemailer.createTransport({
     user: "apikey", 
     pass: process.env.SENDGRID_API_KEY,
   },
+    tls: {
+    rejectUnauthorized: false,
+  },
 });

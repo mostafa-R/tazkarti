@@ -26,3 +26,8 @@ yarn-error.log*
 
 
 .vscode
+
+/EVENT_DETAILS_INTEGRATION_GUIDE.md
+/project_endpoints.txt
+
+

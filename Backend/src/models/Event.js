@@ -111,6 +111,11 @@ const eventSchema = new mongoose.Schema(
       default: false,
     },
 
+     upcoming: {
+      type: Boolean,
+      default: false,
+    },
+
     maxAttendees: {
       type: Number,
       min: 1,

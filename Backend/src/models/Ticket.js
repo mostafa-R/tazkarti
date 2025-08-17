@@ -10,7 +10,7 @@ const ticketSchema = new mongoose.Schema(
     type: {
       type: String,
       required: [true, "Ticket type is required"],
-      enum: ["standard", "vip", "premium", "student"],
+      enum: ["standard", "vip"],
       default: "standard",
     },
     price: {
@@ -20,7 +20,7 @@ const ticketSchema = new mongoose.Schema(
     },
     currency: {
       type: String,
-      enum: ["EGP", "USD", "EUR"],
+      enum: ["EGP", "USD"],
       default: "EGP",
     },
     quantity: {

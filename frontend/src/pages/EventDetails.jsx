@@ -1,106 +1,192 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom'; 
 import { ArrowLeft, Calendar, Clock, MapPin, Heart, Share2, Star, Users, Music, Award } from 'lucide-react';
+import { eventsAPI } from '../services/api';
+
+import { ticketsAPI } from '../services/api';   
 
 const EventDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams(); 
   const location = useLocation(); 
   
-  const [selectedTicket, setSelectedTicket] = useState('Regular');
+  // const [selectedTicket, setSelectedTicket] = useState('Regular');
+
+
+// ..............................................................
+const [tickets, setTickets] = useState([]);
+const [selectedTicket, setSelectedTicket] = useState(null);
+const [loadingTickets, setLoadingTickets] = useState(true);
+
+
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
-
-  const receivedEvent = location.state?.event;
   
-  const defaultEvents = {
-    '1': {
-      id: '1',
-      title: 'Rock Concert 2024',
-      date: 'March 15, 2024',
-      time: '8:00 PM - 12:00 AM',
-      location: 'Stadium Arena, New York',
-      image: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=300&fit=crop',
-      description: 'Experience the best rock music live! Join thousands of fans for an unforgettable night of electrifying performances by top rock bands.',
-      price: { Regular: 45, VIP: 85, Premium: 120 },
-      availableTickets: 250,
-      category: 'Music',
-      organizer: 'Rock Events Co.',
-      rating: 4.8,
-    },
-    '2': {
-      id: '2',
-      title: 'Football Championship',
-      date: 'March 20, 2024',
-      time: '6:00 PM - 9:00 PM',
-      location: 'National Stadium, Los Angeles',
-      image: 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop',
-      description: 'Championship final match! Witness the ultimate showdown between the top teams in an epic football championship final.',
-      price: { Regular: 30, VIP: 60, Premium: 90 },
-      availableTickets: 500,
-      category: 'Sports',
-      organizer: 'Sports League',
-      rating: 4.5,
-    },
-    '3': {
-      id: '3',
-      title: 'Tech Conference 2024',
-      date: 'March 25, 2024',
-      time: '9:00 AM - 6:00 PM',
-      location: 'Convention Center, Chicago',
-      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop',
-      description: 'Latest trends in technology. Connect with industry leaders and discover cutting-edge innovations shaping our future.',
-      price: { Regular: 120, VIP: 200, Premium: 300 },
-      availableTickets: 80,
-      category: 'Education',
-      organizer: 'Tech Innovators',
-      rating: 4.7,
-    },
-    '4': {
-      id: '4',
-      title: 'Broadway Musical',
-      date: 'April 1, 2024',
-      time: '7:30 PM - 10:00 PM',
-      location: 'City Theater, New York',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
-      description: 'Award-winning Broadway show. Experience the magic of live theater with this critically acclaimed musical performance.',
-      price: { Regular: 75, VIP: 125, Premium: 180 },
-      availableTickets: 120,
-      category: 'Theater',
-      organizer: 'Broadway Productions',
-      rating: 4.9,
-    },
-    '5': {
-      id: '5',
-      title: 'Movie Premiere',
-      date: 'April 5, 2024',
-      time: '9:00 PM - 11:30 PM',
-      location: 'Cinema Complex, Los Angeles',
-      image: 'https://images.unsplash.com/photo-1489599511777-9c0c0c41b2c4?w=400&h=300&fit=crop',
-      description: 'Exclusive movie premiere. Be among the first to watch this highly anticipated blockbuster with the cast and crew.',
-      price: { Regular: 25, VIP: 45, Premium: 65 },
-      availableTickets: 30,
-      category: 'Movies',
-      organizer: 'Film Studios',
-      rating: 4.3,
-    },
-    '6': {
-      id: '6',
-      title: 'Jazz Festival',
-      date: 'April 10, 2024',
-      time: '7:00 PM - 11:00 PM',
-      location: 'Park Amphitheater, Chicago',
-      image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop',
-      description: 'Smooth jazz under the stars. Enjoy an evening of soulful jazz music performed by renowned artists in a beautiful outdoor setting.',
-      price: { Regular: 60, VIP: 100, Premium: 140 },
-      availableTickets: 150,
-      category: 'Music',
-      organizer: 'Jazz Society',
-      rating: 4.6,
+  // State for real event data
+  const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // FIXED: Move helper function to the top before it's used
+  const normalizeEventData = (eventData) => {
+    return {
+      ...eventData,
+      // Handle location (could be string or object)
+      location: typeof eventData.location === 'string' 
+        ? { venue: eventData.location, city: eventData.location }
+        : eventData.location || { venue: 'TBD', city: 'TBD' },
+      
+      // Handle organizer (could be missing)
+      organizer: eventData.organizer || { name: 'Unknown Organizer', email: 'unknown@example.com' },
+      
+      // Handle images (could be empty array or missing)
+      images: eventData.images && eventData.images.length > 0 
+        ? eventData.images.map(img => img.startsWith('http') ? img : `http://localhost:5000/uploads/${img}`)
+        : eventData.image 
+          ? [eventData.image] 
+          : ['https://via.placeholder.com/800x400?text=No+Image'],
+      
+      // Handle date fields
+      startDate: eventData.startDate ? new Date(eventData.startDate).toLocaleDateString() : eventData.date,
+      
+      // Handle missing fields with defaults
+      currentAttendees: eventData.currentAttendees || 0,
+      maxAttendees: eventData.maxAttendees || 100,
+      category: eventData.category || 'Other',
+      description: eventData.description || 'No description available',
+      time: eventData.time || 'TBD'
+    };
+  };
+
+  // Function to fetch event data from backend
+  const fetchEventDetails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log(' Fetching event details for ID:', id);
+      console.log('API URL:', `http://localhost:5000/events/${id}`);
+      
+      // Call the API to get event details
+      const response = await eventsAPI.getEventById(id);
+      
+      console.log('API Response:', response.data);
+      
+      // Normalize and update state with real event data
+      const normalizedEvent = normalizeEventData(response.data);
+      console.log('Normalized Event Data:', normalizedEvent);
+      setEvent(normalizedEvent);
+      
+    } catch (err) {
+      console.error('Error fetching event details:', err);
+      console.error('Error details:', err.response?.data || err.message);
+      setError('Failed to load event details');
+      setEvent(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const event = receivedEvent || defaultEvents[id] || defaultEvents['1'];
+  // NEW: Function to fetch tickets for this event
+  const fetchTickets = async () => {
+    try {
+      setLoadingTickets(true);
+      console.log('Fetching tickets for event ID:', id);
+      
+      // Call the API to get tickets for this event
+      const response = await ticketsAPI.getTicketsForEvent(id);
+      
+      console.log('Tickets API Response:', response.data);
+      setTickets(response.data);
+      
+      // Select the first ticket by default if tickets exist
+      if (response.data && response.data.length > 0) {
+        setSelectedTicket(response.data[0]);
+        console.log('Default selected ticket:', response.data[0]);
+      }
+      
+    } catch (err) {
+      console.error('Error fetching tickets:', err);
+      console.error('Tickets error details:', err.response?.data || err.message);
+      
+      // If no tickets found, that's okay - just log it
+      if (err.response?.status === 404) {
+        console.log('No tickets found for this event');
+        setTickets([]);
+      }
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
+
+  // useEffect to fetch event details and tickets when component loads
+  useEffect(() => {
+    console.log('EventDetails component mounted with ID:', id);
+    if (id) {
+      fetchEventDetails();
+      fetchTickets(); // NEW: Also fetch tickets for this event
+    } else {
+      console.log('No event ID provided');
+      setLoading(false);
+      setError('No event ID provided');
+    }
+  }, [id]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-gray-600">Loading event details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && !event) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button 
+            onClick={fetchEventDetails}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // No event found
+  if (!event) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500">Event not found.</p>
+          <button 
+            onClick={() => navigate('/events')}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4"
+          >
+            Back to Events
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Helper function to get ticket price from real ticket data
+  const getTicketPrice = () => {
+    return selectedTicket ? selectedTicket.price : 0;
+  };
+
+  // Helper function to get available quantity for selected ticket
+  const getAvailableQuantity = () => {
+    return selectedTicket ? selectedTicket.availableQuantity : 0;
+  };
 
   const relatedEvents = [
     {
@@ -119,29 +205,30 @@ const EventDetailsPage = () => {
     }
   ];
 
-  
   const handleBookNow = () => {
-    navigate(`/booking/${event.id}`, { 
+    if (!selectedTicket) {
+      alert('Please select a ticket type first');
+      return;
+    }
+
+    navigate(`/booking/${event._id}`, { 
       state: { 
         event: {
           ...event,
-          selectedTicket,
+          selectedTicket: selectedTicket, // Real ticket object with all data
           quantity,
-          subtotal: event.price[selectedTicket] * quantity,
+          subtotal: getTicketPrice() * quantity,
           serviceFee: 5,
-          total: event.price[selectedTicket] * quantity + 5
+          total: getTicketPrice() * quantity + 5
         }
       }
     });
   };
 
-  
   const handleRelatedEventClick = (relatedEventId) => {
-    
     navigate(`/event/${relatedEventId}`);
   };
 
- 
   const handleBack = () => {
     if (document.referrer.includes('/events')) {
       navigate('/events');
@@ -165,13 +252,13 @@ const EventDetailsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {/* Left Section: Image & Info */}
           <div className="md:col-span-2 space-y-6">
-            <img src={event.image} alt={event.title} className="w-full h-96 object-cover rounded-xl shadow-lg" />
+            <img src={event.images[0]} alt={event.title} className="w-full h-96 object-cover rounded-xl shadow-lg" />
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-4xl font-bold text-gray-800 mb-2">{event.title}</h1>
-                <p className="text-gray-500 flex items-center"><Calendar className="mr-2" size={18} /> {event.date}</p>
+                <p className="text-gray-500 flex items-center"><Calendar className="mr-2" size={18} /> {event.startDate}</p>
                 <p className="text-gray-500 flex items-center"><Clock className="mr-2" size={18} /> {event.time}</p>
-                <p className="text-gray-500 flex items-center"><MapPin className="mr-2" size={18} /> {event.location}</p>
+                <p className="text-gray-500 flex items-center"><MapPin className="mr-2" size={18} /> {event.location.venue}, {event.location.city}</p>
               </div>
               <div className="flex space-x-4">
                 <button onClick={() => setIsLiked(!isLiked)}>
@@ -182,10 +269,10 @@ const EventDetailsPage = () => {
             </div>
             <p className="text-gray-700 leading-relaxed">{event.description}</p>
             <div className="flex space-x-6 text-gray-600 mt-4 flex-wrap">
-              <span className="flex items-center mb-2"><Users className="mr-2" size={18} /> {event.availableTickets} Tickets</span>
+              <span className="flex items-center mb-2"><Users className="mr-2" size={18} /> {event.currentAttendees} / {event.maxAttendees} Tickets</span>
               <span className="flex items-center mb-2"><Music className="mr-2" size={18} /> {event.category}</span>
-              <span className="flex items-center mb-2"><Award className="mr-2" size={18} /> {event.organizer}</span>
-              <span className="flex items-center mb-2"><Star className="mr-2" size={18} /> {event.rating}</span>
+              <span className="flex items-center mb-2"><Award className="mr-2" size={18} /> {event.organizer.name}</span>
+              <span className="flex items-center mb-2"><Star className="mr-2" size={18} /> 4.8</span>
             </div>
           </div>
 
@@ -195,39 +282,61 @@ const EventDetailsPage = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-700 mb-1">Ticket Type</label>
-                <select
-                  value={selectedTicket}
-                  onChange={(e) => setSelectedTicket(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="Regular">Regular - ${event.price.Regular}</option>
-                  <option value="VIP">VIP - ${event.price.VIP}</option>
-                  <option value="Premium">Premium - ${event.price.Premium}</option>
-                </select>
+                {loadingTickets ? (
+                  <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500">
+                    Loading tickets...
+                  </div>
+                ) : tickets.length > 0 ? (
+                  <select
+                    value={selectedTicket?._id || ''}
+                    onChange={(e) => {
+                      const ticket = tickets.find(t => t._id === e.target.value);
+                      setSelectedTicket(ticket);
+                    }}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {tickets.map(ticket => (
+                      <option key={ticket._id} value={ticket._id}>
+                        {ticket.type} - {ticket.price} {ticket.currency} 
+                        ({ticket.availableQuantity} available)
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-500">
+                    No tickets available for this event
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-gray-700 mb-1">Quantity</label>
                 <input
                   type="number"
                   min="1"
-                  max={Math.min(event.availableTickets, 10)} 
+                  max={Math.min(getAvailableQuantity(), 10)} 
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={!selectedTicket || getAvailableQuantity() === 0}
                 />
+                {selectedTicket && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    {getAvailableQuantity()} tickets available
+                  </p>
+                )}
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between text-gray-700 font-medium mb-2">
                   <span>Subtotal</span>
-                  <span>${event.price[selectedTicket] * quantity}</span>
+                  <span>{getTicketPrice() * quantity} {selectedTicket?.currency || 'EGP'}</span>
                 </div>
                 <div className="flex justify-between text-gray-700 mb-2">
                   <span>Service Fee</span>
-                  <span>$5</span>
+                  <span>5 {selectedTicket?.currency || 'EGP'}</span>
                 </div>
                 <div className="flex justify-between text-gray-900 font-bold text-lg">
                   <span>Total</span>
-                  <span>${event.price[selectedTicket] * quantity + 5}</span>
+                  <span>{getTicketPrice() * quantity + 5} {selectedTicket?.currency || 'EGP'}</span>
                 </div>
               </div>
               <button
