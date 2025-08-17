@@ -41,25 +41,25 @@ api.interceptors.response.use(
 // Step 4: Create functions for different API calls
 export const eventsAPI = {
   // Get all events from backend
-  getAllEvents: () => api.get('/events'),
+  getAllEvents: () => api.get('/api/events'),
   
   // Get single event by ID
-  getEventById: (id) => api.get(`/events/${id}`),
+  getEventById: (id) => api.get(`/api/events/${id}`),
   
   // Create new event (for organizers)
-  createEvent: (eventData) => api.post('/events/create', eventData),
+  createEvent: (eventData) => api.post('/api/events/create', eventData),
 };
 
 // NEW: Tickets API
 export const ticketsAPI = {
   // Get all tickets for a specific event
-  getTicketsForEvent: (eventId) => api.get(`/tickets/event/${eventId}`),
+  getTicketsForEvent: (eventId) => api.get(`/api/tickets/event/${eventId}`),
   
   // Get single ticket details
-  getTicketById: (ticketId) => api.get(`/tickets/${ticketId}`),
+  getTicketById: (ticketId) => api.get(`/api/tickets/${ticketId}`),
   
   // Get all tickets (admin/organizer)
-  getAllTickets: () => api.get('/tickets'),
+  getAllTickets: () => api.get('/api/tickets'),
 };
 
 export const authAPI = {
