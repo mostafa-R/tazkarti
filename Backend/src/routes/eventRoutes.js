@@ -3,6 +3,7 @@ import {
   createEvent,
   getAllEvents,
   getEventById,
+  getUpcomingEvents,
 } from "../controllers/eventController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { roleMiddleware } from "../middleware/roleMiddleware.js";
@@ -19,6 +20,8 @@ router.post(
 );
 
 router.get("/", getAllEvents);
+
+router.get("/upcoming", getUpcomingEvents);
 
 router.get("/:id", getEventById);
 

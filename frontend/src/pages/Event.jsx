@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom'; // ✅ إضافة Navigation
 import { Search, Calendar, MapPin, Filter, ChevronDown, Grid, List, Star, Users } from 'lucide-react';
+import { eventsAPI } from '../services/api.js';
 
 const EventsPage = () => {
   const navigate = useNavigate(); 
@@ -15,104 +16,73 @@ const EventsPage = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [activeFilter, setActiveFilter] = useState(initialCategory); 
   const [viewMode, setViewMode] = useState('grid');
+  
+  // NEW: Add state for real events from backend
+  const [allEvents, setAllEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const categories = ['All', 'Sports', 'Music', 'Theater', 'Education', 'Movies'];
 
-  const events = [
-    {
-      id: 1,
-      title: "Rock Concert 2024",
-      date: "March 15, 2024",
-      time: "20:00",
-      location: "New York",
-      venue: "Stadium Arena",
-      price: 45,
-      category: "Music",
-      image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=300&fit=crop",
-      rating: 4.8,
-      attendees: 2500,
-      description: "Experience the best rock music live!"
-    },
-    {
-      id: 2,
-      title: "Football Championship",
-      date: "March 20, 2024",
-      time: "18:00",
-      location: "Los Angeles",
-      venue: "National Stadium",
-      price: 30,
-      category: "Sports",
-      image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop",
-      rating: 4.5,
-      attendees: 5000,
-      description: "Championship final match!"
-    },
-    {
-      id: 3,
-      title: "Tech Conference 2024",
-      date: "March 25, 2024",
-      time: "09:00",
-      location: "Chicago",
-      venue: "Convention Center",
-      price: 120,
-      category: "Education",
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop",
-      rating: 4.7,
-      attendees: 800,
-      description: "Latest trends in technology"
-    },
-    {
-      id: 4,
-      title: "Broadway Musical",
-      date: "April 1, 2024",
-      time: "19:30",
-      location: "New York",
-      venue: "City Theater",
-      price: 75,
-      category: "Theater",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop",
-      rating: 4.9,
-      attendees: 1200,
-      description: "Award-winning Broadway show"
-    },
-    {
-      id: 5,
-      title: "Movie Premiere",
-      date: "April 5, 2024",
-      time: "21:00",
-      location: "Los Angeles",
-      venue: "Cinema Complex",
-      price: 25,
-      category: "Movies",
-      image: "https://images.unsplash.com/photo-1489599511777-9c0c0c41b2c4?w=400&h=300&fit=crop",
-      rating: 4.3,
-      attendees: 300,
-      description: "Exclusive movie premiere"
-    },
-    {
-      id: 6,
-      title: "Jazz Festival",
-      date: "April 10, 2024",
-      time: "19:00",
-      location: "Chicago",
-      venue: "Park Amphitheater",
-      price: 60,
-      category: "Music",
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop",
-      rating: 4.6,
-      attendees: 1500,
-      description: "Smooth jazz under the stars"
+  // NEW: Function to fetch events from backend
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Call the API to get events from backend
+      const response = await eventsAPI.getAllEvents();
+      
+      // Update state with real events from database
+      setAllEvents(response.data);
+      
+    } catch (err) {
+      console.error('Error fetching events:', err);
+      setError('Failed to load events from server');
+      
+      // Fallback to mock data if API fails
+      setAllEvents([
+        {
+          _id: 1,
+          title: "Rock Concert 2024",
+          startDate: "2024-03-15",
+          time: "20:00",
+          location: { city: "New York", venue: "Stadium Arena" },
+          category: "Music",
+          images: ["https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&h=300&fit=crop"],
+          maxAttendees: 2500,
+          description: "Experience the best rock music live!"
+        },
+        {
+          _id: 2,
+          title: "Football Championship",
+          startDate: "2024-03-20",
+          time: "18:00",
+          location: { city: "Los Angeles", venue: "National Stadium" },
+          category: "Sports",
+          images: ["https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=400&h=300&fit=crop"],
+          maxAttendees: 5000,
+          description: "Championship final match!"
+        }
+      ]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const filteredEvents = events.filter(event => {
-    const matchesCategory = activeFilter === 'All' || event.category === activeFilter;
+  // NEW: useEffect to fetch events when component loads
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  // NEW: Filter events based on search and category
+  const filteredEvents = allEvents.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLocation = selectedLocation === 'All Locations' || event.location === selectedLocation;
-    
-    return matchesCategory && matchesSearch && matchesLocation;
+                         event.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeFilter === 'All' || event.category === activeFilter;
+    return matchesSearch && matchesCategory;
   });
+
 
   const getCategoryBadgeColor = (category) => {
     const colors = {
@@ -127,13 +97,13 @@ const EventsPage = () => {
 
   
   const handleEventClick = (event) => {
-    navigate(`/event/${event.id}`, { state: { event } });
+    navigate(`/event/${event._id}`, { state: { event } });
   };
 
  
   const handleBookNow = (event, e) => {
     e.stopPropagation(); // منع تشغيل click الخاص بالـ card
-    navigate(`/booking/${event.id}`, { state: { event } });
+    navigate(`/booking/${event._id}`, { state: { event } });
   };
 
   
@@ -244,72 +214,104 @@ const EventsPage = () => {
           </div>
         </div>
 
-        <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-          {filteredEvents.map((event) => (
-            <div 
-              key={event.id} 
-              onClick={() => handleEventClick(event)} 
-              className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group transform hover:-translate-y-1 cursor-pointer ${viewMode === 'list' ? 'flex' : ''}`}
+        {/* Loading State */}
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600">Loading events...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-12">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button 
+              onClick={fetchEvents}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
-              <div className={`relative ${viewMode === 'list' ? 'w-48 flex-shrink-0' : ''}`}>
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className={`object-cover group-hover:scale-105 transition-transform duration-300 ${
-                    viewMode === 'list' ? 'w-full h-full' : 'w-full h-48'
-                  }`}
-                />
-                <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                  ${event.price}
-                </div>
-                <div className="absolute top-4 left-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium shadow-sm ${getCategoryBadgeColor(event.category)}`}>
-                    {event.category}
-                  </span>
-                </div>
-                <div className="absolute bottom-4 left-4 flex items-center space-x-2">
-                  <div className="flex items-center bg-black bg-opacity-50 text-white px-2 py-1 rounded-md text-xs">
-                    <Star className="h-3 w-3 text-yellow-400 mr-1" />
-                    {event.rating}
-                  </div>
-                  <div className="flex items-center bg-black bg-opacity-50 text-white px-2 py-1 rounded-md text-xs">
-                    <Users className="h-3 w-3 mr-1" />
-                    {event.attendees}
-                  </div>
-                </div>
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Events Grid */}
+        {!loading && !error && (
+          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+            {filteredEvents.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500">No events found matching your criteria.</p>
               </div>
-              
-              <div className={`p-6 ${viewMode === 'list' ? 'flex-1' : ''}`}>
-                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                  {event.title}
-                </h3>
-                
-                <p className="text-gray-600 text-sm mb-3">{event.description}</p>
-                
-                <div className="flex items-center text-gray-600 mb-2">
-                  <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                  <span className="text-sm">{event.date} at {event.time}</span>
+            ) : (
+              filteredEvents.map((event) => (
+                <div 
+                  key={event._id} 
+                  onClick={() => handleEventClick(event)} 
+                  className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group transform hover:-translate-y-1 cursor-pointer ${viewMode === 'list' ? 'flex' : ''}`}
+                >
+                  <div className={`relative ${viewMode === 'list' ? 'w-48 flex-shrink-0' : ''}`}>
+                    <img
+                      src={event.images && event.images[0] ? event.images[0] : 'https://via.placeholder.com/400x300?text=No+Image'}
+                      alt={event.title}
+                      className={`object-cover group-hover:scale-105 transition-transform duration-300 ${
+                        viewMode === 'list' ? 'w-full h-full' : 'w-full h-48'
+                      }`}
+                    />
+                    <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                      ${event.price || 'Free'}
+                    </div>
+                    <div className="absolute top-4 left-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium shadow-sm ${getCategoryBadgeColor(event.category)}`}>
+                        {event.category}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-4 left-4 flex items-center space-x-2">
+                      <div className="flex items-center bg-black bg-opacity-50 text-white px-2 py-1 rounded-md text-xs">
+                        <Star className="h-3 w-3 text-yellow-400 mr-1" />
+                        {event.rating || 'N/A'}
+                      </div>
+                      <div className="flex items-center bg-black bg-opacity-50 text-white px-2 py-1 rounded-md text-xs">
+                        <Users className="h-3 w-3 mr-1" />
+                        {event.maxAttendees || 'Unlimited'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className={`p-6 ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {event.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 text-sm mb-3">{event.description}</p>
+                    
+                    <div className="flex items-center text-gray-600 mb-2">
+                      <Calendar className="h-4 w-4 mr-2 text-blue-500" />
+                      <span className="text-sm">{event.startDate} at {event.time}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-gray-600 mb-4">
+                      <MapPin className="h-4 w-4 mr-2 text-red-500" />
+                      <span className="text-sm">
+                        {event.location?.venue || 'TBD'}, {event.location?.city || 'TBD'}
+                      </span>
+                    </div>
+                    
+                    <div className={`${viewMode === 'list' ? 'flex items-center justify-between' : ''}`}>
+                      <button 
+                        onClick={(e) => handleBookNow(event, e)} 
+                        className={`bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl ${
+                          viewMode === 'list' ? '' : 'w-full'
+                        }`}
+                      >
+                        Book Now →
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="flex items-center text-gray-600 mb-4">
-                  <MapPin className="h-4 w-4 mr-2 text-red-500" />
-                  <span className="text-sm">{event.venue}, {event.location}</span>
-                </div>
-                
-                <div className={`${viewMode === 'list' ? 'flex items-center justify-between' : ''}`}>
-                  <button 
-                    onClick={(e) => handleBookNow(event, e)} 
-                    className={`bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl ${
-                      viewMode === 'list' ? '' : 'w-full'
-                    }`}
-                  >
-                    Book Now →
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              ))
+            )}
+          </div>
+        )}
 
         {/* Load More Button */}
         <div className="text-center mt-12">

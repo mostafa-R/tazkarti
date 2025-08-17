@@ -21,10 +21,15 @@ import "./utils/archiveOldUsers.js";
 
 dotenv.config();
 const app = express();
+// Add a root route for GET /
+app.get('/', (req, res) => {
+  res.send('API is running');
+});
 app.use(cookieParser());
+// Update: Explicitly set allowed origin for frontend and credentials for cookies
 app.use(
   cors({
-    origin: true,
+    origin: "http://localhost:5173", // Updated to match your frontend port
     credentials: true,
   })
 );
@@ -49,13 +54,14 @@ app.use(passport.session());
 // Public routes (مش محتاجة authentication)
 app.use("/auth", authRoutes);
 
+// Public API routes (accessible without authentication)
+app.use("/api/events", eventRoutes);
+
 // Protected routes (محتاجة authentication)
 app.use(authMiddleware);
 app.use("/user", userRoutes);
-// 🆕 NEW: Routes جديدة للأحداث والتذاكر
-app.use("/events", eventRoutes);
-app.use("/tickets", ticketRoutes);
-app.use("/booking", bookingRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/booking", bookingRoutes);
 
 // pay methode  url
 // app.post("/api/pay", createPayment);
