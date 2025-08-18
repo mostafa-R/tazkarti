@@ -1,0 +1,277 @@
+{
+  "home": "Home",
+  "activities": "Events",
+  "mybooking": "My Tickets",
+  "login": "Login",
+  "register": "Register",
+  "logout": "Logout",
+  "language": "Language",
+  "hero": {
+    "title": "Book Tickets for Any Event You Love",
+    "description": "Concerts, Sports, Conferences, Movies – All in one place"
+  },
+  "search": {
+    "placeholder": "Search events, artists, venues...",
+    "allCategories": "All Categories",
+    "button": "Search Events"
+  },
+  "category": {
+    "sports": "Sports",
+    "music": "Music",
+    "theater": "Theater",
+    "education": "Education",
+    "movies": "Movies",
+    "others": "Others"
+  },
+  "categories": {
+    "title": "Explore Categories",
+    "description": "Find events that match your interests"
+  },
+  "events": {
+    "title": "Upcoming Events",
+    "description": "Don't miss out on these amazing events",
+    "loading": "Loading upcoming events...",
+    "emptyTitle": "No Upcoming Events",
+    "emptyDescription": "Check back later for new events!",
+    "venueTBA": "Venue TBA",
+    "attendees": "attendees",
+    "bookNow": "Book Now →"
+  },
+  "error": {
+    "fetchEvents": "Failed to load upcoming events",
+    "tryAgain": "Try Again"
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "description": "Book your tickets in just three simple steps",
+    "discoverTitle": "Discover Events",
+    "discoverDescription": "Browse through thousands of events across different categories",
+    "chooseTitle": "Choose Tickets",
+    "chooseDescription": "Select your preferred seats and ticket options",
+    "confirmTitle": "Confirm Booking",
+    "confirmDescription": "Complete your purchase and receive instant confirmation"
+  },
+  "footer": {
+    "brand": "Tazkarti",
+    "description": "Your one-stop platform for booking tickets to concerts, sports events, theater shows, and more. Experience entertainment like never before.",
+    "quickLinks": {
+      "title": "Quick Links",
+      "about": "About",
+      "contact": "Contact",
+      "help": "Help Center",
+      "careers": "Careers"
+    },
+    "legal": {
+      "title": "Legal",
+      "terms": "Terms & Conditions",
+      "privacy": "Privacy Policy",
+      "cookies": "Cookie Policy",
+      "refund": "Refund Policy"
+    },
+    "copyright": "© {{year}} Tazkarti. All rights reserved."
+  },
+  
+  "eventsPage": {
+    "title": "Discover Events",
+    "subtitle": "Find and book tickets for amazing events near you",
+    "searchPlaceholder": "Search for events...",
+    "allLocations": "All Locations",
+    "selectDate": "Select date",
+    "showingEvents": "Showing {{count}} events",
+    "loadMore": "Load More Events",
+    "bookNow": "Book Now",
+    "free": "Free",
+    "unlimited": "Unlimited",
+    "noEvents": "No events found matching your criteria",
+    "categories": {
+      "all": "All",
+      "sports": "Sports",
+      "music": "Music",
+      "theater": "Theater",
+      "education": "Education",
+      "movies": "Movies"
+    }
+  },
+  "eventDetails": {
+    "unknownOrganizer": "Unknown Organizer",
+    "other": "Other",
+    "noDescription": "No description available",
+    "loadError": "Failed to load event details",
+    "noEventId": "No event ID provided",
+    "loading": "Loading event details...",
+    "tryAgain": "Try Again",
+    "notFound": "Event not found",
+    "backToEvents": "Back to Events",
+    "selectTicketAlert": "Please select a ticket type first",
+    "backButton": "Back to Events",
+    "date": "Date",
+    "time": "Time",
+    "location": "Location",
+    "organizer": "Organizer",
+    "aboutEvent": "About this event",
+    "bookYourSpot": "Book Your Spot",
+    "ticketType": "Ticket Type",
+    "loadingTickets": "Loading tickets...",
+    "available": "available",
+    "noTickets": "No tickets available",
+    "quantity": "Quantity",
+    "ticketsAvailable": "tickets available",
+    "subtotal": "Subtotal",
+    "serviceFee": "Service Fee",
+    "total": "Total",
+    "bookNow": "Book Now",
+    "youMightLike": "You Might Also Like",
+    "relatedEvents": {
+      "sunsetVibes": "Sunset Vibes",
+      "sep2": "September 2, 2025",
+      "northCoast": "North Coast Arena",
+      "nightPulse": "Night Pulse",
+      "oct12": "October 12, 2025",
+      "cairoFestival": "Cairo Festival City"
+    }
+  },
+  "booking": {
+    "defaultEventTitle": "Default Event",
+    "noTicketSelected": "No Ticket Selected",
+    "errors": {
+      "fullNameRequired": "Full name is required",
+      "fullNameMinLength": "Full name must be at least 2 characters",
+      "fullNameMaxLength": "Full name must be no more than 50 characters",
+      "fullNameInvalid": "Full name can only contain letters and spaces",
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "Please enter a valid phone number (format: 01xxxxxxxxx)"
+    },
+    "fixErrorsAlert": "Please fix the errors in the form before proceeding.",
+    "backButton": "Back to Events",
+    "pageTitle": "Complete Your Booking",
+    "pageSubtitle": "Secure your tickets in just a few steps",
+    "eventSummary": "Event Summary",
+    "defaultTime": "8:00 PM - 11:00 PM",
+    "yourTickets": "Your Selected Tickets",
+    "features": "Features",
+    "noTicketMessage": "No ticket selected. Please go back and select a ticket.",
+    "quantity": "Quantity",
+    "ticket": {
+      "one": "ticket",
+      "other": "tickets"
+    },
+    "quantityNote": "Quantity was selected on the previous page",
+    "yourInformation": "Your Information",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "email": "Email Address",
+    "emailPlaceholder": "Enter your email address",
+    "phone": "Phone Number",
+    "phonePlaceholder": "Enter your phone number (e.g., 01234567890)",
+    "orderSummary": "Order Summary",
+    "serviceFee": "Service Fee",
+    "total": "Total",
+    "secureBooking": "Secure Booking",
+    "securityMessage": "Your payment information is encrypted and secure. Free cancellation up to 24 hours before the event.",
+    "continueToPayment": "Continue to Payment",
+    "termsAgreement": "By confirming, you agree to our Terms of Service and Privacy Policy"
+  },
+  
+  "confirmation": {
+    "defaultEventTitle": "Default Event",
+    "defaultVenue": "Default Venue",
+    "defaultCity": "Default City",
+    "defaultTicketType": "Standard",
+    "defaultCustomer": "Guest User",
+    "dateNotSpecified": "Date not specified",
+    "progress": {
+      "eventSelected": "Event Selected",
+      "paymentComplete": "Payment Complete",
+      "confirmed": "Confirmed"
+    },
+    "title": "Your booking is confirmed!",
+    "subtitle": "Thank you for choosing Tazkarti. Your ticket details are below.",
+    "status": {
+      "confirmed": "Confirmed"
+    },
+    "at": "at",
+    "ticketInfo": "Ticket Information",
+    "ticketType": "Ticket Type",
+    "quantity": "Quantity",
+    "tickets": {
+      "one": "ticket",
+      "other": "tickets"
+    },
+    "totalPrice": "Total Price",
+    "bookingDetails": "Booking Details",
+    "customer": "Customer",
+    "bookingCode": "Booking Code",
+    "qrCode": "QR Code",
+    "qrInstructions": "Show this QR code at the venue entrance",
+    "downloadTicket": "Download Ticket",
+    "share": "Share",
+    "goToTickets": "Go to My Tickets",
+    "backToEvents": "Back to Events",
+    "importantReminders": "Important Reminders",
+    "reminders": [
+      "Please arrive 30 minutes before the event starts",
+      "Bring a valid ID for verification",
+      "Screenshots of tickets are not accepted",
+      "Contact support if you need to make changes"
+    ],
+    "needHelp": "Need help? Contact our support team at"
+  },
+  
+  "myTickets": {
+    "title": "My Tickets",
+    "subtitle": "Manage and access all your event tickets",
+    "searchPlaceholder": "Search events or venues...",
+    "filters": {
+      "all": "All",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "cancelled": "Cancelled"
+    },
+    "status": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "cancelled": "Cancelled"
+    },
+    "events": {
+      "jazzNight": "Jazz Night 2024",
+      "rockFestival": "Rock Festival 2024",
+      "electronicFestival": "Electronic Music Festival"
+    },
+    "locations": {
+      "blueNote": "Blue Note Jazz Club",
+      "centralPark": "Central Park Arena",
+      "warehouse": "Warehouse District"
+    },
+    "ticketTypes": {
+      "vip": "VIP",
+      "regular": "Regular"
+    },
+    "ticketType": "Ticket Type",
+    "quantity": "Quantity",
+    "tickets": {
+      "one": "ticket",
+      "other": "tickets"
+    },
+    "totalPrice": "Total Price",
+    "bookingCode": "Booking Code",
+    "viewTicket": "View Ticket",
+    "downloadQR": "Download QR",
+    "noTickets": {
+      "title": "No tickets found",
+      "searchMessage": "Try adjusting your search criteria",
+      "defaultMessage": "You don't have any tickets yet. Start exploring events!"
+    },
+    "needHelp": {
+      "title": "Need Help?",
+      "description": "Having trouble with your tickets? Our support team is here to help."
+    }
+  }
+
+
+
+
+
+}
+

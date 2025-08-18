@@ -1,0 +1,271 @@
+{
+  "home": "الرئيسية",
+  "activities": "الفعاليات",
+  "mybooking": "تذاكري",
+  "login": "تسجيل الدخول",
+  "register": "تسجيل",
+  "logout": "تسجيل الخروج",
+  "language": "اللغة",
+
+  "hero": {
+    "title": "احجز تذاكر لأي حدث تحبه",
+    "description": "الحفلات، الرياضة، المؤتمرات، الأفلام – كلها في مكان واحد"
+  },
+  "search": {
+    "placeholder": "ابحث عن الفعاليات، الفنانين، الأماكن...",
+    "allCategories": "جميع الفئات",
+    "button": "البحث عن الفعاليات"
+  },
+  "category": {
+    "sports": "رياضة",
+    "music": "موسيقى",
+    "theater": "مسرح",
+    "education": "تعليم",
+    "movies": "أفلام",
+    "others": "أخرى"
+  },
+  "categories": {
+    "title": "استكشف الفئات",
+    "description": "اعثر على الفعاليات التي تتناسب مع اهتماماتك"
+  },
+  "الفعاليات": {
+    "title": "الفعاليات القادمة",
+    "description": "لا تفوت هذه الفعاليات الرائعة",
+    "loading": "جارٍ تحميل الفعاليات القادمة...",
+    "emptyTitle": "لا توجد فعاليات قادمة",
+    "emptyDescription": "تحقق لاحقاً لمعرفة الفعاليات الجديدة!",
+    "venueTBA": "المكان لم يُحدد بعد",
+    "attendees": "حاضرين",
+    "bookNow": "احجز الآن ←"
+  },
+  "error": {
+    "fetchEvents": "فشل تحميل الفعاليات القادمة",
+    "tryAgain": "حاول مرة أخرى"
+  },
+  "howItWorks": {
+    "title": "كيف يعمل",
+    "description": "احجز تذكرتك في ثلاث خطوات بسيطة",
+    "discoverTitle": "اكتشف الفعاليات",
+    "discoverDescription": "تصفح آلاف الفعاليات عبر فئات مختلفة",
+    "chooseTitle": "اختر التذاكر",
+    "chooseDescription": "اختر المقاعد وخيارات التذاكر المفضلة لديك",
+    "confirmTitle": "تأكيد الحجز",
+    "confirmDescription": "أكمل عملية الشراء واحصل على تأكيد فوري"
+  },
+  "footer": {
+    "brand": "تذكرتي",
+    "description": "منصتك الشاملة لحجز تذاكر الحفلات، الفعاليات الرياضية، العروض المسرحية، وأكثر. استمتع بالترفيه كما لم يحدث من قبل.",
+    "quickLinks": {
+      "title": "روابط سريعة",
+      "about": "عنّا",
+      "contact": "اتصل بنا",
+      "help": "مركز المساعدة",
+      "careers": "وظائف"
+    },
+    "legal": {
+      "title": "قانوني",
+      "terms": "الشروط والأحكام",
+      "privacy": "سياسة الخصوصية",
+      "cookies": "سياسة ملفات تعريف الارتباط",
+      "refund": "سياسة الاسترداد"
+    },
+    "copyright": "© {{year}} تذكرتي. جميع الحقوق محفوظة."
+  },
+  
+  "eventsPage": {
+    "title": "اكتشف الفعاليات",
+    "subtitle": "ابحث واحجز تذاكر لأروع الفعاليات بالقرب منك",
+    "searchPlaceholder": "ابحث عن فعاليات...",
+    "allLocations": "جميع المواقع",
+    "selectDate": "اختر تاريخ",
+    "showingEvents": "عرض {{count}} فعالية",
+    "loadMore": "تحميل المزيد",
+    "bookNow": "احجز الآن",
+    "free": "مجاني",
+    "unlimited": "غير محدود",
+    "noEvents": "لا توجد فعاليات تطابق معايير البحث",
+    "categories": {
+      "all": "الكل",
+      "sports": "رياضة",
+      "music": "موسيقى",
+      "theater": "مسرح",
+      "education": "تعليم",
+      "movies": "أفلام"
+    }
+  },
+  "eventDetails": {
+    "unknownOrganizer": "منظم غير معروف",
+    "other": "أخرى",
+    "noDescription": "لا يوجد وصف متاح",
+    "loadError": "فشل تحميل تفاصيل الفعالية",
+    "noEventId": "لم يتم تقديم معرف الفعالية",
+    "loading": "جاري تحميل تفاصيل الفعالية...",
+    "tryAgain": "حاول مرة أخرى",
+    "notFound": "الفعالية غير موجودة",
+    "backToEvents": "العودة إلى الفعاليات",
+    "selectTicketAlert": "الرجاء اختيار نوع التذكرة أولاً",
+    "backButton": "العودة إلى الفعاليات",
+    "date": "التاريخ",
+    "time": "الوقت",
+    "location": "الموقع",
+    "organizer": "المنظم",
+    "aboutEvent": "حول هذه الفعالية",
+    "bookYourSpot": "احجز مكانك",
+    "ticketType": "نوع التذكرة",
+    "loadingTickets": "جاري تحميل التذاكر...",
+    "available": "متاح",
+    "noTickets": "لا توجد تذاكر متاحة",
+    "quantity": "الكمية",
+    "ticketsAvailable": "تذاكر متاحة",
+    "subtotal": "المجموع الفرعي",
+    "serviceFee": "رسوم الخدمة",
+    "total": "الإجمالي",
+    "bookNow": "احجز الآن",
+    "youMightLike": "قد يعجبك أيضاً",
+    "relatedEvents": {
+      "sunsetVibes": "أجواء الغروب",
+      "sep2": "2 سبتمبر 2025",
+      "northCoast": "ساحل الساحل الشمالي",
+      "nightPulse": "نبض الليل",
+      "oct12": "12 أكتوبر 2025",
+      "cairoFestival": "مدينة القاهرة للمهرجانات"
+    }
+  },
+  
+  "booking": {
+    "defaultEventTitle": "فعالية افتراضية",
+    "noTicketSelected": "لم يتم اختيار تذكرة",
+    "errors": {
+      "fullNameRequired": "الاسم الكامل مطلوب",
+      "fullNameMinLength": "يجب أن يكون الاسم الكامل على الأقل حرفين",
+      "fullNameMaxLength": "يجب ألا يزيد الاسم الكامل عن 50 حرفًا",
+      "fullNameInvalid": "يمكن أن يحتوي الاسم الكامل على أحرف ومسافات فقط",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "emailInvalid": "الرجاء إدخال بريد إلكتروني صالح",
+      "phoneRequired": "رقم الهاتف مطلوب",
+      "phoneInvalid": "الرجاء إدخال رقم هاتف صالح (صيغة: 01xxxxxxxxx)"
+    },
+    "fixErrorsAlert": "الرجاء إصلاح الأخطاء في النموذج قبل المتابعة.",
+    "backButton": "العودة إلى الفعاليات",
+    "pageTitle": "أكمل حجزك",
+    "pageSubtitle": "احجز تذاكرك في بضع خطوات",
+    "eventSummary": " الفعالية",
+    "defaultTime": "8:00 مساءً - 11:00 مساءً",
+    "yourTickets": "التذاكر المختارة",
+    "features": "المميزات",
+    "noTicketMessage": "لم يتم اختيار تذكرة. الرجاء العودة واختيار تذكرة.",
+    "quantity": "الكمية",
+    "ticket": {
+      "one": "تذكرة",
+      "other": "تذاكر"
+    },
+    "quantityNote": "تم اختيار الكمية في الصفحة السابقة",
+    "yourInformation": "معلوماتك",
+    "fullName": "الاسم الكامل",
+    "fullNamePlaceholder": "أدخل اسمك الكامل",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "phone": "رقم الهاتف",
+    "phonePlaceholder": "أدخل رقم هاتفك (مثال: 01234567890)",
+    "orderSummary": "ملخص الطلب",
+    "serviceFee": "رسوم الخدمة",
+    "total": "الإجمالي",
+    "secureBooking": "حجز آمن",
+    "securityMessage": "معلومات الدفع الخاصة بك مشفرة وآمنة. إلغاء مجاني حتى 24 ساعة قبل الفعالية.",
+    "continueToPayment": " تأكيد الدفع",
+    "termsAgreement": "بالموافقة، أنت توافق على شروط الخدمة وسياسة الخصوصية الخاصة بنا"
+  },
+  
+  "confirmation": {
+    "defaultEventTitle": "فعالية افتراضية",
+    "defaultVenue": "مكان افتراضي",
+    "defaultCity": "مدينة افتراضية",
+    "defaultTicketType": "عادي",
+    "defaultCustomer": "مستخدم زائر",
+    "dateNotSpecified": "تاريخ غير محدد",
+    "progress": {
+      "eventSelected": "تم اختيار الفعالية",
+      "paymentComplete": "اكتمل الدفع",
+      "confirmed": "تم التأكيد"
+    },
+    "title": "تم تأكيد حجزك!",
+    "subtitle": "شكراً لاختيارك تذكري. تفاصيل التذكرة أدناه.",
+    "status": {
+      "confirmed": "تم التأكيد"
+    },
+    "at": "في",
+    "ticketInfo": "معلومات التذكرة",
+    "ticketType": "نوع التذكرة",
+    "quantity": "الكمية",
+    "tickets": {
+      "one": "تذكرة",
+      "other": "تذاكر"
+    },
+    "totalPrice": "السعر الإجمالي",
+    "bookingDetails": "تفاصيل الحجز",
+    "customer": "العميل",
+    "bookingCode": "رمز الحجز",
+    "qrCode": "رمز الاستجابة السريعة",
+    "qrInstructions": "اعرض رمز الاستجابة السريعة عند مدخل المكان",
+    "downloadTicket": "تحميل التذكرة",
+    "share": "مشاركة",
+    "goToTickets": "الذهاب إلى تذاكري",
+    "backToEvents": "العودة إلى الفعاليات",
+    "importantReminders": "تذكيرات مهمة",
+    "reminders": [
+      "يرجى الوصول قبل 30 دقيقة من بدء الفعالية",
+      "احضر بطاقة هوية سارية للتحقق",
+      "لن يتم قبول لقطات الشاشة للتذاكر",
+      "اتصل بالدعم إذا كنت بحاجة إلى إجراء تغييرات"
+    ],
+    "needHelp": "بحاجة إلى مساعدة؟ اتصل بفريق الدعم على"
+  },
+
+  "myTickets": {
+    "title": "تذاكري",
+    "subtitle": "إدارة والوصول إلى جميع تذاكر الفعاليات الخاصة بك",
+    "searchPlaceholder": "ابحث عن فعاليات أو أماكن...",
+    "filters": {
+      "all": "الكل",
+      "upcoming": "القادمة",
+      "past": "السابقة",
+      "cancelled": "ملغاة"
+    },
+    "status": {
+      "upcoming": "قادمة",
+      "past": "سابقة",
+      "cancelled": "ملغاة"
+    },
+    
+    "locations": {
+      "blueNote": "نادي بلو نوت للجاز",
+      "centralPark": "ساحة سنترال بارك",
+      "warehouse": "منطقة المستودعات"
+    },
+    "ticketTypes": {
+      "vip": "VIP",
+      "regular": "عادي"
+    },
+    "ticketType": "نوع التذكرة",
+    "quantity": "الكمية",
+    "tickets": {
+      "one": "تذكرة",
+      "other": "تذاكر"
+    },
+    "totalPrice": "السعر الإجمالي",
+    "bookingCode": "رمز الحجز",
+    "viewTicket": "عرض التذكرة",
+    "downloadQR": "تحميل  ",
+    "noTickets": {
+      "title": "لا توجد تذاكر",
+      "searchMessage": "حاول تعديل معايير البحث الخاصة بك",
+      "defaultMessage": "ليس لديك أي تذاكر حتى الآن. ابدأ استكشاف الفعاليات!"
+    },
+    "needHelp": {
+      "title": "بحاجة إلى مساعدة؟",
+      "description": "تواجه مشكلة مع تذاكرك؟ فريق الدعم لدينا هنا لمساعدتك."
+    }
+  }
+
+
+}
