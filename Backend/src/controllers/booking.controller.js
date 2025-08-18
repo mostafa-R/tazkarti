@@ -105,7 +105,7 @@ import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import {PayMobService} from "../controllers/paymob.controller.js";
 import { Ticket } from "../models/Ticket.js";
-import { Booking } from "../models/Booking.js";
+import Booking from "../models/Booking.js";
 
 
 export const bookingTicketWithPayment = async (req, res) => {

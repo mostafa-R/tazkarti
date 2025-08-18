@@ -1,7 +1,7 @@
 import axios from "axios";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import { Booking } from "../models/Booking.js";
+import Booking from "../models/Booking.js";
 import { Ticket } from "../models/Ticket.js";
 
 dotenv.config();
