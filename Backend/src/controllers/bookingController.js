@@ -1,4 +1,4 @@
-import { Booking } from "../models/Booking.js";
+import Booking from "../models/Booking.js";
 import { Event } from "../models/Event.js";
 import User from "../models/User.js";
 

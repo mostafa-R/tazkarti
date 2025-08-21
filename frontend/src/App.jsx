@@ -12,23 +12,15 @@ import EventsPage from './pages/Event.jsx';
 import EventDetailsPage from './pages/EventDetails.jsx';
 import BookingPage from './pages/Booking.jsx';
 import LoginPage from './pages/Login.jsx';
-import SignUpPage from './pages/Signup.jsx';
 import BookingConfirmationPage from './pages/BookingConfirmation.jsx';
 import PaymentPage from './pages/Payment.jsx';
 import MyTicketsPage from './pages/Ticket.jsx';
-
-import TicketDetailsPage from './pages/TicketDetailsPage.jsx'; 
+import TicketDetailsPage from './pages/TicketDetailsPage.jsx';
 import OrganizerDashboard from './pages/OrganizerDashboard.jsx';
 import CreateEventPage from './pages/CreateEvent.jsx';
 import EmailVerification from './Components/EmailVerification.jsx';
-=======
-
-
-// ✅ ChatBot Component
 import ChatBot from './Components/ChatWidget.jsx';
-
-
-import SignupPage from './pages/SignupPage.jsx'; 
+import SignupPage from './pages/SignupPage.jsx';
 
 // Layout Component
 const Layout = ({ children }) => {
@@ -38,7 +30,6 @@ const Layout = ({ children }) => {
 
   const hideNavbarRoutes = ['/', '/login', '/signup', '/booking-confirm', '/payment', '/verify-email'];
   const hideNavbarPatterns = ['/event/', '/ticket/', '/my-tickets/', '/booking/', '/organizer-dashboard', '/admin-dashboard', '/create-event']; // ✅ إضافة /booking/ للـ patterns
-=======
   
 
 
@@ -57,110 +48,83 @@ const Layout = ({ children }) => {
 function App() {
   return (
 
-    <AuthProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            {/* Public routes - no authentication required */}
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/verify-email" element={<EmailVerification />} />
-
+  <AuthProvider>
     <Router>
       <Layout>
         <Routes>
-          {/* صفحات بدون Navbar */}
-          
-          
-         
+          {/* Public routes - no authentication required */}
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
           <Route path="/booking/:id" element={<BookingPage />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/booking-confirm" element={<BookingConfirmationPage />} />
 
+          {/* Protected routes - authentication required */}
+          <Route path="/home" element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/events" element={
+            <ProtectedRoute>
+              <EventsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/event/:id" element={
+            <ProtectedRoute>
+              <EventDetailsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-tickets" element={
+            <ProtectedRoute>
+              <MyTicketsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-tickets/:id" element={
+            <ProtectedRoute>
+              <TicketDetailsPage />
+            </ProtectedRoute>
+          } />
 
-            {/* Protected routes - authentication required */}
-            <Route path="/home" element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/events" element={
-              <ProtectedRoute>
-                <EventsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/event/:id" element={
-              <ProtectedRoute>
-                <EventDetailsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/booking/:id" element={
-              <ProtectedRoute>
-                <BookingPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/payment" element={
-              <ProtectedRoute>
-                <PaymentPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/booking-confirm" element={
-              <ProtectedRoute>
-                <BookingConfirmationPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/my-tickets" element={
-              <ProtectedRoute>
-                <MyTicketsPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/my-tickets/:id" element={
-              <ProtectedRoute>
-                <TicketDetailsPage />
-              </ProtectedRoute>
-            } />
+          {/* Organizer-only routes */}
+          <Route path="/organizer-dashboard" element={
+            <ProtectedRoute requiredRole="organizer">
+              <OrganizerDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/create-event" element={
+            <ProtectedRoute requiredRole="organizer">
+              <CreateEventPage />
+            </ProtectedRoute>
+          } />
 
-            {/* Organizer-only routes */}
-            <Route path="/organizer-dashboard" element={
-              <ProtectedRoute requiredRole="organizer">
-                <OrganizerDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/create-event" element={
-              <ProtectedRoute requiredRole="organizer">
-                <CreateEventPage />
-              </ProtectedRoute>
-            } />
-
-            {/* Admin-only routes */}
-            <Route path="/admin-dashboard" element={
-              <ProtectedRoute requiredRole="admin">
-                <div>Admin Dashboard (To be implemented)</div>
-              </ProtectedRoute>
-            } />
-
-          </Routes>
-        </Layout>
-
-        {/* Toast Notifications (single instance) */}
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-
-        {/* Floating ChatBot */}
-        <ChatBot />
-      </Router>
-    </AuthProvider>
+          {/* Admin-only routes */}
+          <Route path="/admin-dashboard" element={
+            <ProtectedRoute requiredRole="admin">
+              <div>Admin Dashboard (To be implemented)</div>
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </Layout>
+      {/* Toast Notifications (single instance) */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+      {/* Floating ChatBot */}
+      <ChatBot />
+    </Router>
+  </AuthProvider>
   );
 }
 

@@ -1,44 +1,11 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 
-const ProtectedRoute = ({ children, requiredRole = null, redirectTo = '/login' }) => {
-  const { isAuthenticated, user, isLoading } = useAuth();
-  const location = useLocation();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0052CC] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    return <Navigate to="/login" replace />;
   }
-
-  if (!isAuthenticated) {
-    // Redirect to login page with return url
-    return <Navigate to={redirectTo} state={{ from: location }} replace />;
-  }
-
-  if (requiredRole && user?.role !== requiredRole) {
-    console.log('🔍 ProtectedRoute Debug - Required role:', requiredRole);
-    console.log('🔍 ProtectedRoute Debug - User role:', user?.role);
-    console.log('🔍 ProtectedRoute Debug - User object:', user);
-    
-    // Redirect based on user role
-    const roleRedirects = {
-      'admin': '/admin-dashboard',
-      'organizer': '/organizer-dashboard',
-      'user': '/home'
-    };
-    
-    const redirectPath = roleRedirects[user?.role] || '/home';
-    console.log('🔍 ProtectedRoute Debug - Redirecting to:', redirectPath);
-    return <Navigate to={redirectPath} replace />;
-  }
-
   return children;
 };
 
