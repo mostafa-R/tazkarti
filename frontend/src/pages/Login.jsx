@@ -80,12 +80,19 @@ const LoginPage = () => {
       toast.success(`Welcome back, ${userName}! 🎉`);
 
       // Role-based navigation
+      console.log('🔍 Login Debug - User data:', user);
+      console.log('🔍 Login Debug - User role:', user.role);
+      console.log('🔍 Login Debug - Role type:', typeof user.role);
+      
       setTimeout(() => {
         if (user.role === 'organizer') {
+          console.log('✅ Navigating to organizer dashboard');
           navigate('/organizer-dashboard');
         } else if (user.role === 'admin') {
+          console.log('✅ Navigating to admin dashboard');
           navigate('/admin-dashboard');
         } else {
+          console.log('✅ Navigating to home page');
           navigate('/home');
         }
       }, 1000);

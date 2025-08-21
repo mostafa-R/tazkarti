@@ -18,6 +18,7 @@ import PaymentPage from './pages/Payment.jsx';
 import MyTicketsPage from './pages/Ticket.jsx';
 import TicketDetailsPage from './pages/TicketDetailsPage.jsx'; 
 import OrganizerDashboard from './pages/OrganizerDashboard.jsx';
+import CreateEventPage from './pages/CreateEvent.jsx';
 import EmailVerification from './Components/EmailVerification.jsx';
 
 import SignupPage from './pages/SignupPage.jsx'; 
@@ -28,7 +29,7 @@ const Layout = ({ children }) => {
   const pathname = location.pathname;
 
   const hideNavbarRoutes = ['/', '/login', '/signup', '/booking-confirm', '/payment', '/verify-email'];
-  const hideNavbarPatterns = ['/event/', '/ticket/', '/my-tickets/', '/booking/', '/organizer-dashboard', '/admin-dashboard']; // ✅ إضافة /booking/ للـ patterns
+  const hideNavbarPatterns = ['/event/', '/ticket/', '/my-tickets/', '/booking/', '/organizer-dashboard', '/admin-dashboard', '/create-event']; // ✅ إضافة /booking/ للـ patterns
 
   const shouldHideNavbar =
     hideNavbarRoutes.includes(pathname) ||
@@ -100,6 +101,11 @@ function App() {
             <Route path="/organizer-dashboard" element={
               <ProtectedRoute requiredRole="organizer">
                 <OrganizerDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/create-event" element={
+              <ProtectedRoute requiredRole="organizer">
+                <CreateEventPage />
               </ProtectedRoute>
             } />
 

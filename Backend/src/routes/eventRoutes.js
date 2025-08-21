@@ -2,6 +2,7 @@ import express from "express";
 import {
   createEvent,
   getAllEvents,
+  getAllEventsAdmin,
   getEventById,
   getUpcomingEvents,
 } from "../controllers/eventController.js";
@@ -20,6 +21,8 @@ router.post(
 );
 
 router.get("/", getAllEvents);
+
+router.get("/admin", authMiddleware, roleMiddleware(["admin", "organizer"]), getAllEventsAdmin);
 
 router.get("/upcoming", getUpcomingEvents);
 

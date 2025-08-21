@@ -23,6 +23,10 @@ const ProtectedRoute = ({ children, requiredRole = null, redirectTo = '/login' }
   }
 
   if (requiredRole && user?.role !== requiredRole) {
+    console.log('🔍 ProtectedRoute Debug - Required role:', requiredRole);
+    console.log('🔍 ProtectedRoute Debug - User role:', user?.role);
+    console.log('🔍 ProtectedRoute Debug - User object:', user);
+    
     // Redirect based on user role
     const roleRedirects = {
       'admin': '/admin-dashboard',
@@ -31,6 +35,7 @@ const ProtectedRoute = ({ children, requiredRole = null, redirectTo = '/login' }
     };
     
     const redirectPath = roleRedirects[user?.role] || '/home';
+    console.log('🔍 ProtectedRoute Debug - Redirecting to:', redirectPath);
     return <Navigate to={redirectPath} replace />;
   }
 

@@ -46,8 +46,15 @@ export const eventsAPI = {
   // Get single event by ID
   getEventById: (id) => api.get(`/api/events/${id}`),
   
+  // Get upcoming events
+  getUpcomingEvents: () => api.get('/api/events/upcoming'),
+  
   // Create new event (for organizers)
-  createEvent: (eventData) => api.post('/api/events/create', eventData),
+  createEvent: (eventData) => api.post('/api/events/create', eventData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
 };
 
 // NEW: Tickets API
