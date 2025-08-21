@@ -19,6 +19,8 @@ import TicketDetailsPage from './pages/TicketDetailsPage.jsx';
 // ✅ ChatBot Component
 import ChatBot from './Components/ChatWidget.jsx';
 
+import SignupPage from './pages/SignupPage.jsx'; 
+
 // Layout Component
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -52,12 +54,15 @@ function App() {
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/booking-confirm" element={<BookingConfirmationPage />} />
 
+
           {/* صفحات مع Navbar */}
           <Route path="/home" element={<HomePage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/event/:id" element={<EventDetailsPage />} />
           <Route path="/my-tickets" element={<MyTicketsPage />} />
           <Route path="/my-tickets/:id" element={<TicketDetailsPage />} /> 
+
+          <Route path="/signupPage" element={<SignupPage/>} />
         </Routes>
       </Layout>
 
