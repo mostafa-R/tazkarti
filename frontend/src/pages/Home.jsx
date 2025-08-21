@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { eventsAPI } from '../services/api';
+
 import { Search, Calendar, MapPin, ChevronDown, Users, Loader2, Music, Trophy, Theater, GraduationCap, Film, MoreHorizontal } from 'lucide-react';
 import EventService from '../services/eventService';
 import { useTranslation } from "react-i18next";
+
 
 const HomePage = () => {
   const { t, i18n } = useTranslation();
@@ -53,18 +56,22 @@ const HomePage = () => {
     }
   ], [t]);
 
-  // تحسين استدعاء البيانات
-  const fetchUpcomingEvents = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const result = await EventService.getUpcomingEvents();
-      
-      if (result.success) {
-        setUpcomingEvents(result.data);
-      } else {
-        setError(t('error.fetchEvents'));
+
+  // Fetch upcoming events from API
+  useEffect(() => {
+    const fetchUpcomingEvents = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await eventsAPI.getUpcomingEvents();
+        setUpcomingEvents(response.data);
+      } catch (err) {
+        setError('Failed to load upcoming events');
+        console.error('Error fetching upcoming events:', err);
+      } finally {
+        setLoading(false);
+
       }
     } catch (err) {
       setError(t('error.fetchEvents'));
@@ -264,86 +271,101 @@ const HomePage = () => {
             </div>
           )}
 
-          {/* Events Grid */}
-          {!loading && !error && upcomingEvents.length > 0 && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {upcomingEvents.slice(0, 6).map((event) => (
-                  <div 
-                    key={event._id} 
-                    className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 group transform hover:scale-105 border border-gray-100"
-                  >
-                    {/* Event Image */}
-                    <div className="relative overflow-hidden h-48">
-                      <img
-                        src={EventService.getEventImage(event)}
-                        alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        onError={(e) => {
-                          e.target.src = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop";
-                        }}
-                      />
-                      
-                      <div className="absolute inset-0 bg-gradient-to-t from-black opacity-30 via-transparent to-transparent group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
-                      <div className="absolute top-4 left-4 bg-blue-600 bg-opacity-95 text-white px-3 py-1 rounded-full text-sm font-bold capitalize shadow-lg">
-                        {event.category}
-                      </div>
-                      
-                      {event.status && (
-                        <div className="absolute top-4 right-4 bg-green-500 bg-opacity-95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                          {event.status}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Event Content */}
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-200 min-h-[3.5rem] overflow-hidden" style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                      }}>
-                        {event.title}
-                      </h3>
-                      
-                      {/* Event Details */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-gray-600 text-sm">
-                          <Calendar className="h-4 w-4 mr-2 text-blue-500 flex-shrink-0" />
-                          <span className="font-medium">{EventService.formatEventDate(event.startDate)}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600 text-sm">
-                          <MapPin className="h-4 w-4 mr-2 text-red-500 flex-shrink-0" />
-                          <span className="font-medium truncate">{event.location?.venue || t('events.venueTBA')}</span>
-                        </div>
-                        <div className="flex items-center text-gray-600 text-sm">
-                          <Users className="h-4 w-4 mr-2 text-green-500 flex-shrink-0" />
-                          <span className="font-medium">
-                            {event.currentAttendees || 0}/{event.maxAttendees} {t('events.attendees')}
-                          </span>
-                        </div>
-                      </div>
+{/* Events Grid */}
+{!loading && !error && upcomingEvents.length > 0 && (
+  <>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {upcomingEvents.slice(0, 6).map((event) => (
+        <div 
+          key={event._id} 
+          className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 group transform hover:scale-105 border border-gray-100"
+        >
+          {/* Event Image */}
+          <div className="relative overflow-hidden h-48">
+            <img
+              src={EventService.getEventImage(event)}
+              alt={event.title}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              onError={(e) => {
+                e.target.src = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop";
+              }}
+            />
+            
+            <div className="absolute inset-0 bg-gradient-to-t from-black opacity-30 via-transparent to-transparent group-hover:opacity-100 transition-opacity duration-300"></div>
+            
+            <div className="absolute top-4 left-4 bg-blue-600 bg-opacity-95 text-white px-3 py-1 rounded-full text-sm font-bold capitalize shadow-lg">
+              {event.category}
+            </div>
+            
+            {event.status && (
+              <div className="absolute top-4 right-4 bg-green-500 bg-opacity-95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                {event.status}
+              </div>
+            )}
+          </div>
+          
+          {/* Event Content */}
+          <div className="p-6">
+            <h3
+              className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-200 min-h-[3.5rem] overflow-hidden"
+              style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+            >
+              {event.title}
+            </h3>
+            
+            {/* Event Details */}
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center text-gray-600 text-sm">
+                <Calendar className="h-4 w-4 mr-2 text-blue-500 flex-shrink-0" />
+                <span className="font-medium">{EventService.formatEventDate(event.startDate)}</span>
+              </div>
+              <div className="flex items-center text-gray-600 text-sm">
+                <MapPin className="h-4 w-4 mr-2 text-red-500 flex-shrink-0" />
+                <span className="font-medium truncate">{event.location?.venue || t('events.venueTBA')}</span>
+              </div>
+              <div className="flex items-center text-gray-600 text-sm">
+                <Users className="h-4 w-4 mr-2 text-green-500 flex-shrink-0" />
+                <span className="font-medium">
+                  {event.currentAttendees || 0}/{event.maxAttendees} {t('events.attendees')}
+                </span>
+              </div>
+            </div>
 
-                      {/* Progress Bar */}
-                      <div className="mb-6">
-                        <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div 
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
-                            style={{
-                              width: `${Math.min(((event.currentAttendees || 0) / event.maxAttendees) * 100, 100)}%`
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                      
-                      {/* Book Now Button */}
-                      <button 
-                        onClick={() => handleBookNow(event)}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      >
-                        {t('events.bookNow')}
-                      </button>
+            {/* Progress Bar */}
+            <div className="mb-6">
+              <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
+                  style={{ width: `${Math.min(((event.currentAttendees || 0) / event.maxAttendees) * 100, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            {/* Book Now Button */}
+            <button
+              onClick={() => handleBookNow(event)}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              {t('events.bookNow')}
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* View All Events Button */}
+    {upcomingEvents.length > 6 && (
+      <div className="text-center mt-12">
+        <button
+          onClick={() => navigate('/events')}
+          className="bg-gray-900 text-white px-8 py-4 rounded-xl hover:bg-gray-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          {t('events.viewAll')} ({upcomingEvents.length})
+        </button>
+      </div>
+    )}
+  </>
+)}
                     </div>
                   </div>
                 ))}

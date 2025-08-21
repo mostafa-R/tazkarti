@@ -1,10 +1,34 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import RoleSelector from '../Components/RoleSelector.jsx';
 import OrganizerSignupForm from '../Components/OrganizerSignupForm.jsx';
-import UserSignupForm from './Signup.jsx'; 
+import UserSignupForm from './Signup.jsx';
+import EmailVerification from '../Components/EmailVerification.jsx';
 
 export default function SignupPage() {
   const [role, setRole] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [userType, setUserType] = useState('');
+  const navigate = useNavigate();
+
+  const handleSignupSuccess = (email, type) => {
+    setUserEmail(email);
+    setUserType(type);
+    setShowVerification(true);
+  };
+
+  const handleVerificationSuccess = (type) => {
+    setShowVerification(false);
+    // Navigate to login page after successful verification
+    navigate('/login');
+  };
+
+  const handleBackToSignup = () => {
+    setShowVerification(false);
+    setUserEmail('');
+    setUserType('');
+  };
 
   const title = 'Create Your Account';
   const subtitle = !role
@@ -31,19 +55,33 @@ export default function SignupPage() {
 
         {/* Content */}
         <div className="p-8">
-          {!role && <RoleSelector selectedRole={role} onSelect={setRole} />}
+          {showVerification ? (
+            <EmailVerification 
+              email={userEmail}
+              userType={userType}
+              onVerificationSuccess={handleVerificationSuccess}
+              onBack={handleBackToSignup}
+            />
+          ) : (
+            <>
+              {!role && <RoleSelector selectedRole={role} onSelect={setRole} />}
 
-          {role === 'user' && (
-            <div className="space-y-6">
-              <button onClick={() => setRole('')} className="text-[#0052CC] text-sm hover:underline">
-                ← Back to Role Selection
-              </button>
-              <UserSignupForm  />
-            </div>
-          )}
+              {role === 'user' && (
+                <div className="space-y-6">
+                  <button onClick={() => setRole('')} className="text-[#0052CC] text-sm hover:underline">
+                    ← Back to Role Selection
+                  </button>
+                  <UserSignupForm onSignupSuccess={handleSignupSuccess} />
+                </div>
+              )}
 
-          {role === 'organizer' && (
-            <OrganizerSignupForm onBack={() => setRole('')} />
+              {role === 'organizer' && (
+                <OrganizerSignupForm 
+                  onBack={() => setRole('')} 
+                  onSignupSuccess={handleSignupSuccess}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
