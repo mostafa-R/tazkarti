@@ -70,7 +70,6 @@ const ticketSchema = new mongoose.Schema(
       enum: ["active", "sold_out", "sale_ended", "cancelled"],
       default: "active",
     },
-
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -79,6 +78,13 @@ const ticketSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    // ✅ الكود الجديد للتذكرة
+    ticketCode: {
+      type: String,
+      unique: true,
+      required: true,
+      default: () => Math.random().toString(36).substr(2, 9).toUpperCase(),
     },
   },
   {

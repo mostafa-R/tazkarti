@@ -70,7 +70,7 @@ const bookingSchema = new mongoose.Schema(
         type: String,
         required: true,
         trim: true,
-        match: [/^01[0-2,5]{1}[0-9]{8}$/, "Invalid Egyptian phone number"], // مثال
+        match: [/^01[0-2,5]{1}[0-9]{8}$/, "Invalid Egyptian phone number"],
       },
     },
     notes: {
@@ -102,7 +102,6 @@ const bookingSchema = new mongoose.Schema(
       default: true,
     },
 
-    
     // حقول PayMob الجديدة
     paymentOrderId: String,
     paymentKey: String,
@@ -139,4 +138,6 @@ bookingSchema.index({ bookingCode: 1 }, { unique: true });
 bookingSchema.index({ status: 1, paymentStatus: 1 });
 bookingSchema.index({ event: 1, status: 1 });
 
-export const Booking = mongoose.model("Booking", bookingSchema);
+const Booking = mongoose.model("Booking", bookingSchema);
+
+export default Booking;

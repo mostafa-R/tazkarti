@@ -1,7 +1,7 @@
 import axios from "axios";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import { Booking } from "../models/Booking.js";
+import Booking from "../models/Booking.js";
 import { Ticket } from "../models/Ticket.js";
 
 dotenv.config();
@@ -54,12 +54,9 @@ export class PayMobService {
   // get payment key
   async getPaymentKey(authToken, orderId, billingData, amount) {
     try {
-      
-
       const response = await axios.post(
         `${this.baseUrl}/acceptance/payment_keys`,
         {
-         
           auth_token: authToken,
           amount_cents: amount,
           expiration: 3600,
@@ -98,6 +95,7 @@ export class PayMobService {
   }
 }
 
+
 export const handlePayMobWebhook = async (req, res) => {
   try {
     const payMobService = new PayMobService();
@@ -114,7 +112,6 @@ export const handlePayMobWebhook = async (req, res) => {
       return res.status(400).json({ message: "Invalid order data" });
     }
 
-    // البحث عن الحجز
     const booking = await Booking.findOne({ paymentOrderId: order.id })
       .populate("ticket")
       .populate("event");
@@ -124,7 +121,6 @@ export const handlePayMobWebhook = async (req, res) => {
     }
 
     if (success === true && pending === false) {
-      // الدفع تم بنجاح
       await Booking.findByIdAndUpdate(booking._id, {
         status: "confirmed",
         paymentStatus: "completed",
@@ -133,16 +129,12 @@ export const handlePayMobWebhook = async (req, res) => {
       });
 
       console.log(`Payment successful for booking: ${booking._id}`);
-
-      // يمكنك إضافة إرسال إيميل تأكيد هنا
     } else if (success === false && pending === false) {
-      // الدفع فشل
       await Booking.findByIdAndUpdate(booking._id, {
         status: "cancelled",
         paymentStatus: "failed",
       });
 
-      // إعادة كمية التذاكر
       await Ticket.findByIdAndUpdate(booking.ticket._id, {
         $inc: { availableQuantity: booking.quantity },
       });
@@ -194,7 +186,7 @@ export const checkPaymentStatus = async (req, res) => {
 
 export const cancelExpiredBookings = async () => {
   try {
-    const expiredTime = new Date(Date.now() - 30 * 60 * 1000); // 30 دقيقة
+    const expiredTime = new Date(Date.now() - 30 * 60 * 1000);
 
     const expiredBookings = await Booking.find({
       status: "pending",
@@ -203,13 +195,11 @@ export const cancelExpiredBookings = async () => {
     });
 
     for (const booking of expiredBookings) {
-      // إلغاء الحجز
       await Booking.findByIdAndUpdate(booking._id, {
         status: "cancelled",
         paymentStatus: "expired",
       });
 
-      // إعادة كمية التذاكر
       await Ticket.findByIdAndUpdate(booking.ticket, {
         $inc: { availableQuantity: booking.quantity },
       });

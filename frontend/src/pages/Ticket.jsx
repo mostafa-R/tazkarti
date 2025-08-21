@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
-import { Calendar, MapPin, Search, Eye, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import {
+  Calendar, 
+  MapPin, 
+  Search, 
+  Eye, 
+  Download,
+  Ticket,
+  HelpCircle
+} from 'lucide-react';
 
 const MyTicketsPage = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const navigate = useNavigate();
@@ -11,15 +21,16 @@ const MyTicketsPage = () => {
     {
       id: 1,
       event: {
-        title: "Jazz Night 2024",
-        date: "March 15, 2024 at 8:00 PM",
-        location: "Blue Note Jazz Club",
+        title: t('myTickets.events.jazzNight'),
+        date: "2024-03-15T20:00:00",
+        location: t('myTickets.locations.blueNote'),
         image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=200&fit=crop"
       },
       ticket: {
-        type: "VIP",
+        type: t('myTickets.ticketTypes.vip'),
         quantity: 2,
         totalPrice: 180,
+        currency: 'EGP',
         bookingCode: "TZK-JN-001234"
       },
       status: "Upcoming"
@@ -27,15 +38,16 @@ const MyTicketsPage = () => {
     {
       id: 2,
       event: {
-        title: "Rock Festival 2024",
-        date: "April 22, 2024 at 6:00 PM",
-        location: "Central Park Arena",
+        title: t('myTickets.events.rockFestival'),
+        date: "2024-04-22T18:00:00",
+        location: t('myTickets.locations.centralPark'),
         image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=300&h=200&fit=crop"
       },
       ticket: {
-        type: "Regular",
+        type: t('myTickets.ticketTypes.regular'),
         quantity: 4,
         totalPrice: 320,
+        currency: 'EGP',
         bookingCode: "TZK-RF-005678"
       },
       status: "Upcoming"
@@ -43,15 +55,16 @@ const MyTicketsPage = () => {
     {
       id: 3,
       event: {
-        title: "Electronic Music Festival",
-        date: "May 5, 2024 at 10:00 PM",
-        location: "Warehouse District",
+        title: t('myTickets.events.electronicFestival'),
+        date: "2024-05-05T22:00:00",
+        location: t('myTickets.locations.warehouse'),
         image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=200&fit=crop"
       },
       ticket: {
-        type: "VIP",
+        type: t('myTickets.ticketTypes.vip'),
         quantity: 1,
         totalPrice: 150,
+        currency: 'EGP',
         bookingCode: "TZK-EMF-445566"
       },
       status: "Upcoming"
@@ -59,10 +72,10 @@ const MyTicketsPage = () => {
   ];
 
   const filterOptions = [
-    { label: 'All', count: 5 },
-    { label: 'Upcoming', count: 3 },
-    { label: 'Past', count: 1 },
-    { label: 'Cancelled', count: 1 }
+    { label: 'All', count: tickets.length },
+    { label: 'Upcoming', count: tickets.filter(t => t.status === 'Upcoming').length },
+    { label: 'Past', count: 0 },
+    { label: 'Cancelled', count: 0 }
   ];
 
   const filteredTickets = tickets.filter(ticket => {
@@ -83,26 +96,38 @@ const MyTicketsPage = () => {
     return statusStyles[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const formatEventDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(navigator.language, { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Tickets</h1>
-          <p className="text-gray-600">Manage and access all your event tickets</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('myTickets.title')}</h1>
+          <p className="text-gray-600">{t('myTickets.subtitle')}</p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Search events or venues..."
+                placeholder={t('myTickets.searchPlaceholder')}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -110,18 +135,18 @@ const MyTicketsPage = () => {
             </div>
 
             {/* Filter Tabs */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-gray-100 rounded-lg p-1 w-full lg:w-auto">
               {filterOptions.map((filter) => (
                 <button
                   key={filter.label}
                   onClick={() => setActiveFilter(filter.label)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                     activeFilter === filter.label
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  {filter.label} ({filter.count})
+                  {t(`myTickets.filters.${filter.label.toLowerCase()}`)} ({filter.count})
                 </button>
               ))}
             </div>
@@ -131,7 +156,10 @@ const MyTicketsPage = () => {
         {/* Tickets List */}
         <div className="space-y-6">
           {filteredTickets.map((ticketData) => (
-            <div key={ticketData.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <div 
+              key={ticketData.id} 
+              className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow border border-gray-200"
+            >
               <div className="flex flex-col md:flex-row">
                 {/* Event Image */}
                 <div className="md:w-64 h-48 md:h-auto relative">
@@ -143,7 +171,7 @@ const MyTicketsPage = () => {
                   <div className="absolute top-4 right-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(ticketData.status)}`}>
                       <span className="inline-block w-2 h-2 bg-current rounded-full mr-1"></span>
-                      {ticketData.status}
+                      {t(`myTickets.status.${ticketData.status.toLowerCase()}`)}
                     </span>
                   </div>
                 </div>
@@ -155,11 +183,11 @@ const MyTicketsPage = () => {
                       <h3 className="text-xl font-bold text-gray-900 mb-2">{ticketData.event.title}</h3>
                       <div className="space-y-1 text-gray-600">
                         <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          <span className="text-sm">{ticketData.event.date}</span>
+                          <Calendar className="h-4 w-4 mr-2 text-blue-500" />
+                          <span className="text-sm">{formatEventDate(ticketData.event.date)}</span>
                         </div>
                         <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2" />
+                          <MapPin className="h-4 w-4 mr-2 text-red-500" />
                           <span className="text-sm">{ticketData.event.location}</span>
                         </div>
                       </div>
@@ -169,19 +197,23 @@ const MyTicketsPage = () => {
                   {/* Ticket Information */}
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 text-sm">
                     <div>
-                      <span className="text-gray-500 block">Ticket Type</span>
+                      <span className="text-gray-500 block">{t('myTickets.ticketType')}</span>
                       <span className="font-medium text-gray-900">{ticketData.ticket.type}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500 block">Quantity</span>
-                      <span className="font-medium text-gray-900">{ticketData.ticket.quantity} tickets</span>
+                      <span className="text-gray-500 block">{t('myTickets.quantity')}</span>
+                      <span className="font-medium text-gray-900">
+                        {ticketData.ticket.quantity} {t('myTickets.tickets', { count: ticketData.ticket.quantity })}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-gray-500 block">Total Price</span>
-                      <span className="font-medium text-blue-600">${ticketData.ticket.totalPrice}</span>
+                      <span className="text-gray-500 block">{t('myTickets.totalPrice')}</span>
+                      <span className="font-medium text-blue-600">
+                        {ticketData.ticket.totalPrice} {ticketData.ticket.currency}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-gray-500 block">Booking Code</span>
+                      <span className="text-gray-500 block">{t('myTickets.bookingCode')}</span>
                       <span className="font-medium text-gray-900">{ticketData.ticket.bookingCode}</span>
                     </div>
                   </div>
@@ -193,11 +225,13 @@ const MyTicketsPage = () => {
                       className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      View Ticket
+                      {t('myTickets.viewTicket')}
                     </button>
-                    <button className="flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                    <button 
+                      className="flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
                       <Download className="h-4 w-4 mr-2" />
-                      Download QR
+                      {t('myTickets.downloadQR')}
                     </button>
                   </div>
                 </div>
@@ -208,21 +242,26 @@ const MyTicketsPage = () => {
 
         {/* Empty State */}
         {filteredTickets.length === 0 && (
-          <div className="text-center py-12">
-            <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No tickets found</h3>
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+            <Ticket className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {t('myTickets.noTickets.title')}
+            </h3>
             <p className="text-gray-500">
               {searchQuery 
-                ? "Try adjusting your search criteria" 
-                : "You don't have any tickets yet. Start exploring events!"}
+                ? t('myTickets.noTickets.searchMessage')
+                : t('myTickets.noTickets.defaultMessage')}
             </p>
           </div>
         )}
 
         {/* Support Section */}
-        <div className="mt-12 bg-blue-50 rounded-lg p-6 text-center">
-          <h3 className="text-lg font-bold text-blue-900 mb-2">Need Help?</h3>
-          <p className="text-blue-700 mb-4">Having trouble with your tickets? Our support team is here to help.</p>
+        <div className="mt-12 bg-blue-50 rounded-lg p-6 text-center border border-blue-100">
+          <h3 className="text-lg font-bold text-blue-900 mb-2">
+            <HelpCircle className="inline-block mr-2" />
+            {t('myTickets.needHelp.title')}
+          </h3>
+          <p className="text-blue-700 mb-4">{t('myTickets.needHelp.description')}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
               href="mailto:support@tazkarti.com" 

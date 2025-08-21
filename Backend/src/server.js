@@ -18,14 +18,22 @@ import bookingRoutes from "./routes/booking.routes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import "./utils/archiveOldUsers.js";
+import chatRoutes from "./routes/chatRoutes.js";
 
 dotenv.config();
 const app = express();
+
 // Add a root route for GET /
-app.get('/', (req, res) => {
-  res.send('API is running');
+app.get("/", (req, res) => {
+  res.send("API is running");
 });
+
 app.use(cookieParser());
+
+// لازم express.json ييجي هنا قبل أي routes
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); // لو هتستخدم form-data
+
 // Update: Explicitly set allowed origin for frontend and credentials for cookies
 app.use(
   cors({
@@ -33,9 +41,10 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(helmet());
 app.use(morgan("dev"));
-app.use(express.json());
+
 const upload = multer({ dest: "uploads/" });
 
 // init session
@@ -51,21 +60,21 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Public routes (مش محتاجة authentication)
-app.use("/auth", authRoutes);
+// هنا خلي الروتز بعد ما JSON Parser يتفعل
+app.use("/api", chatRoutes);
 
-// Public API routes (accessible without authentication)
+// Public routes
+app.use("/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 
-// Protected routes (محتاجة authentication)
+// Protected routes
 app.use(authMiddleware);
 app.use("/user", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/booking", bookingRoutes);
 
-// pay methode  url
-// app.post("/api/pay", createPayment);
 app.use(errorMiddleware);
+
 
 export const Bootstrap = async () => {
   try {

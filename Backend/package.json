@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@langchain/openai": "^0.6.9",
     "axios": "^1.11.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
@@ -24,11 +25,13 @@
     "helmet": "^8.1.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "langchain": "^0.3.30",
     "mongoose": "^8.16.1",
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.4",
+    "openai": "^5.12.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "uuid": "^11.1.0"
