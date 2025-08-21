@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { authAPI } from '../services/api';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -67,9 +67,7 @@ const LoginPage = () => {
     setIsLoading(true);
     
     try {
-      const response = await axios.post('http://localhost:5000/auth/login', loginForm, {
-        withCredentials: true
-      });
+      const response = await authAPI.login(loginForm);
 
       const { token, user } = response.data;
 
@@ -81,9 +79,15 @@ const LoginPage = () => {
       const userName = user.firstName || user.name || 'there';
       toast.success(`Welcome back, ${userName}! 🎉`);
 
-      // Navigate after a short delay to let user see the success message
+      // Role-based navigation
       setTimeout(() => {
-        navigate('/home');
+        if (user.role === 'organizer') {
+          navigate('/organizer-dashboard');
+        } else if (user.role === 'admin') {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/home');
+        }
       }, 1000);
 
     } catch (error) {

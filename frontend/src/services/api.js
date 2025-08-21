@@ -69,8 +69,17 @@ export const authAPI = {
   // Register user
   register: (userData) => api.post('/auth/register', userData),
   
+  // Register organizer
+  registerOrganizer: (organizerData) => api.post('/auth/registerOrganizer', organizerData),
+  
   // Verify email
-  verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
+  verifyEmail: (email, code) => api.post('/auth/verifyOTP', { email, code }),
+  
+  // Logout
+  logout: () => api.post('/auth/logout'),
+  
+  // Admin login
+  adminLogin: (credentials) => api.post('/auth/adminlogin', credentials),
 };
 
 

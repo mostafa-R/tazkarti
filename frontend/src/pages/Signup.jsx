@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from 'react-toastify';
-import axios from "axios";
+import { authAPI } from '../services/api';
 
-const SignUpPage = () => {
+const SignUpPage = ({ onSignupSuccess }) => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -186,31 +186,30 @@ const SignUpPage = () => {
         address,
       } = signupForm;
 
-      const response = await axios.post(
-        "http://localhost:5000/auth/register",
-        {
-          firstName,
-          lastName,
-          email,
-          password,
-          confirmPassword,
-          phone,
-          address,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await authAPI.register({
+        firstName,
+        lastName,
+        email,
+        password,
+        confirmPassword,
+        phone,
+        address,
+      });
 
       console.log("✅ Signup successful:", response.data);
       
       // Show success message with user's name
-      toast.success(`Welcome to Tazkarti, ${firstName}! 🎉 Account created successfully!`);
+      toast.success(`Welcome to Tazkarti, ${firstName}! 🎉 Please check your email for verification code.`);
       
-      // Navigate after a short delay to let user see the success message
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+      // Call success callback with user email for verification
+      if (onSignupSuccess) {
+        onSignupSuccess(email, 'user');
+      } else {
+        // Fallback navigation if no callback provided
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      }
 
     } catch (error) {
       console.error("❌ Signup failed:", error.response?.data || error.message);
@@ -259,32 +258,10 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-6">
-            <ArrowLeft className="w-6 h-6 text-blue-600 mr-2" />
-            <h1
-              className="text-3xl font-bold text-blue-600"
-              style={{ fontFamily: "Poppins, sans-serif" }}
-            >
-              Tazkarti
-            </h1>
-          </div>
-          <h2
-            className="text-2xl font-bold text-gray-900 mb-2"
-            style={{ fontFamily: "Poppins, sans-serif" }}
-          >
-            Create an account
-          </h2>
-          <p
-            className="text-gray-600"
-            style={{ fontFamily: "Inter, sans-serif" }}
-          >
-            Create an account to book your tickets.
-          </p>
-        </div>
+      
 
         {/* Signup Form */}
         <div className="bg-white rounded-lg shadow-md p-8">

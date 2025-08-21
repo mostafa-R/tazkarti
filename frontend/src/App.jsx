@@ -3,6 +3,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './Components/Navbar.jsx';
+import { AuthProvider } from './contexts/AuthContext.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 // Pages
 import HomePage from './pages/Home.jsx';
@@ -15,6 +17,8 @@ import BookingConfirmationPage from './pages/BookingConfirmation.jsx';
 import PaymentPage from './pages/Payment.jsx';
 import MyTicketsPage from './pages/Ticket.jsx';
 import TicketDetailsPage from './pages/TicketDetailsPage.jsx'; 
+import OrganizerDashboard from './pages/OrganizerDashboard.jsx';
+import EmailVerification from './Components/EmailVerification.jsx';
 
 import SignupPage from './pages/SignupPage.jsx'; 
 
@@ -23,8 +27,8 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const pathname = location.pathname;
 
-  const hideNavbarRoutes = ['/', '/login', '/signup', '/booking-confirm', '/payment'];
-  const hideNavbarPatterns = ['/event/', '/ticket/', '/my-tickets/', '/booking/']; // ✅ إضافة /booking/ للـ patterns
+  const hideNavbarRoutes = ['/', '/login', '/signup', '/booking-confirm', '/payment', '/verify-email'];
+  const hideNavbarPatterns = ['/event/', '/ticket/', '/my-tickets/', '/booking/', '/organizer-dashboard', '/admin-dashboard']; // ✅ إضافة /booking/ للـ patterns
 
   const shouldHideNavbar =
     hideNavbarRoutes.includes(pathname) ||
@@ -40,41 +44,88 @@ const Layout = ({ children }) => {
 
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          {/* صفحات بدون Navbar */}
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/booking/:id" element={<BookingPage />} /> {/* ✅ إضافة route للـ booking */}
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/booking-confirm" element={<BookingConfirmationPage />} />
+    <AuthProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            {/* Public routes - no authentication required */}
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/verify-email" element={<EmailVerification />} />
 
+            {/* Protected routes - authentication required */}
+            <Route path="/home" element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/events" element={
+              <ProtectedRoute>
+                <EventsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/event/:id" element={
+              <ProtectedRoute>
+                <EventDetailsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/booking/:id" element={
+              <ProtectedRoute>
+                <BookingPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/payment" element={
+              <ProtectedRoute>
+                <PaymentPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/booking-confirm" element={
+              <ProtectedRoute>
+                <BookingConfirmationPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-tickets" element={
+              <ProtectedRoute>
+                <MyTicketsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-tickets/:id" element={
+              <ProtectedRoute>
+                <TicketDetailsPage />
+              </ProtectedRoute>
+            } />
 
-          {/* صفحات مع Navbar */}
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/event/:id" element={<EventDetailsPage />} />
-          <Route path="/my-tickets" element={<MyTicketsPage />} />
-          <Route path="/my-tickets/:id" element={<TicketDetailsPage />} /> 
+            {/* Organizer-only routes */}
+            <Route path="/organizer-dashboard" element={
+              <ProtectedRoute requiredRole="organizer">
+                <OrganizerDashboard />
+              </ProtectedRoute>
+            } />
 
-          <Route path="/signupPage" element={<SignupPage/>} />
-        </Routes>
-      </Layout>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
-    </Router>
+            {/* Admin-only routes */}
+            <Route path="/admin-dashboard" element={
+              <ProtectedRoute requiredRole="admin">
+                <div>Admin Dashboard (To be implemented)</div>
+              </ProtectedRoute>
+            } />
+
+          </Routes>
+        </Layout>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+      </Router>
+    </AuthProvider>
   );
 }
 
