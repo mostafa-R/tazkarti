@@ -265,6 +265,8 @@ export const getNotifictions = async (req, res) => {
 export const approveEvent = async (req, res) => {
   const { approved, id } = req.body;
 
+  console.log("BODY:", req.body);
+
   try {
     const event = await Event.findByIdAndUpdate(
       id,
