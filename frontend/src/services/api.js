@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Step 1: Create an axios instance with your backend URL
 const api = axios.create({
-  baseURL: 'http://localhost:5000', // Your backend server URL
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000', // Updated to match your backend port
   withCredentials: true, // This allows cookies to be sent
 });
 
@@ -55,6 +55,20 @@ export const eventsAPI = {
       'Content-Type': 'multipart/form-data',
     },
   }),
+
+  // NEW: Organizer-specific event management
+  getMyEvents: (params = {}) => {
+    const queryParams = new URLSearchParams(params);
+    return api.get(`/api/events/organizer/my-events?${queryParams}`);
+  },
+
+  updateEvent: (eventId, eventData) => api.put(`/api/events/${eventId}`, eventData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+
+  deleteEvent: (eventId) => api.delete(`/api/events/${eventId}`),
 };
 
 // NEW: Tickets API
