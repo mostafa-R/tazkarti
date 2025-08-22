@@ -23,6 +23,9 @@ const OrganizerDashboard = () => {
     totalRevenue: 0,
     activeEvents: 0
   });
+  const [myEvents, setMyEvents] = useState([]);
+  const [tickets, setTickets] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -76,6 +79,22 @@ const OrganizerDashboard = () => {
         totalRevenue: 45000,
         activeEvents: 2
       });
+
+      // Set mock data for new features
+      setMyEvents([
+        { id: 1, name: 'AI & Machine Learning Workshop', date: 'Nov 20, 2025' },
+        { id: 2, name: 'Sports Championship', date: 'Dec 5, 2025' }
+      ]);
+
+      setTickets([
+        { id: 1234, eventName: 'Workshop' },
+        { id: 1235, eventName: 'Sports' }
+      ]);
+
+      setBookings([
+        { id: 1, customerName: 'Mariam Mahmoud', tickets: 2, eventName: 'Workshop' },
+        { id: 2, customerName: 'Ahmed Ali', tickets: 1, eventName: 'Sports' }
+      ]);
     } catch (error) {
       console.error('Error loading organizer data:', error);
     } finally {
@@ -156,12 +175,7 @@ const OrganizerDashboard = () => {
             icon={<BarChart3 className="w-6 h-6" />}
             color="purple"
           />
-          <StatCard
-            title="Active Events"
-            value={stats.activeEvents}
-            icon={<Users className="w-6 h-6" />}
-            color="orange"
-          />
+
         </div>
 
         {/* Quick Actions */}
@@ -182,11 +196,35 @@ const OrganizerDashboard = () => {
               onClick={() => navigate('/manage-events')}
               color="green"
             />
-            <ActionCard
-              title="Analytics"
-              description="View detailed reports and analytics"
-              icon={<BarChart3 className="w-8 h-8" />}
-              onClick={() => navigate('/analytics')}
+  
+          </div>
+        </div>
+
+        {/* New Feature Cards */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Dashboard Overview</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* My Events Card */}
+            <FeatureCard
+              title="My Events"
+              items={myEvents.map(event => `${event.name} - ${event.date}`)}
+              icon={<Calendar className="w-6 h-6" />}
+              color="blue"
+            />
+            
+            {/* Tickets Card */}
+            <FeatureCard
+              title="Tickets"
+              items={tickets.map(ticket => `Ticket #${ticket.id} - ${ticket.eventName}`)}
+              icon={<Ticket className="w-6 h-6" />}
+              color="green"
+            />
+            
+            {/* Bookings Card */}
+            <FeatureCard
+              title="Bookings"
+              items={bookings.map(booking => `${booking.customerName} - ${booking.tickets} Ticket${booking.tickets > 1 ? 's' : ''} for ${booking.eventName}`)}
+              icon={<Users className="w-6 h-6" />}
               color="purple"
             />
           </div>
@@ -196,13 +234,7 @@ const OrganizerDashboard = () => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Your Events</h2>
-            <button
-              onClick={() => navigate('/create-event')}
-              className="bg-[#0052CC] text-white px-4 py-2 rounded-lg hover:bg-[#003d99] transition-colors flex items-center"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Event
-            </button>
+ 
           </div>
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -321,6 +353,34 @@ const ActionCard = ({ title, description, icon, onClick, color }) => {
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
       <p className="text-gray-600 text-sm">{description}</p>
+    </div>
+  );
+};
+
+// Feature Card Component
+const FeatureCard = ({ title, items, icon, color }) => {
+  const colorClasses = {
+    blue: 'bg-blue-500',
+    green: 'bg-green-500',
+    purple: 'bg-purple-500',
+    orange: 'bg-orange-500'
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex items-center mb-4">
+        <div className={`${colorClasses[color]} text-white p-3 rounded-lg`}>
+          {icon}
+        </div>
+        <h3 className="ml-3 text-lg font-semibold text-gray-900">{title}</h3>
+      </div>
+      <div className="space-y-2">
+        {items.map((item, index) => (
+          <div key={index} className="text-sm text-gray-600 py-1 border-b border-gray-100 last:border-b-0">
+            {item}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
