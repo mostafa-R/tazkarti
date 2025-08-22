@@ -17,6 +17,7 @@ export const createEvent = async (req, res) => {
       maxAttendees,
       tags,
       trailerVideo,
+      upcoming,
     } = req.body;
 
     if (!title || !description || !startDate || !endDate || !location) {
@@ -73,7 +74,8 @@ export const createEvent = async (req, res) => {
       location: parsedLocation,
       images: imageUrls,
       trailerVideo: trailerVideoUrl,
-      upcoming,
+      upcoming: upcoming === 'true' || upcoming === true,
+      approved: false, // Events must be approved by admin before appearing on site
       status: status || "draft",
       maxAttendees: maxAttendees || 100,
       organizer: req.user._id,
@@ -109,7 +111,23 @@ export const createEvent = async (req, res) => {
 
 export const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find().populate("organizer", "name email");
+    // Only return approved events for public consumption
+    const events = await Event.find({ approved: true })
+      .populate("organizer", "name email")
+      .sort({ startDate: 1 });
+
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Admin/Organizer endpoint to see all events (including unapproved)
+export const getAllEventsAdmin = async (req, res) => {
+  try {
+    const events = await Event.find()
+      .populate("organizer", "name email")
+      .sort({ createdAt: -1 });
 
     res.status(200).json(events);
   } catch (error) {

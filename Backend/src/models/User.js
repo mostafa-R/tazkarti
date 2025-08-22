@@ -184,6 +184,7 @@ userSchema.set("toJSON", {
     delete ret.provider;
     delete ret.emailVerificationCode;
     delete ret.expireVerificationAt;
+    // Keep the role field for frontend navigation
     return ret;
   },
 });

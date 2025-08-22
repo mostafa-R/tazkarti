@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { eventsAPI } from '../services/api';
+
 import { Search, Calendar, MapPin, ChevronDown, Users, Loader2, Music, Trophy, Theater, GraduationCap, Film, MoreHorizontal } from 'lucide-react';
 import EventService from '../services/eventService';
 import { useTranslation } from "react-i18next";
+
 
 const HomePage = () => {
   const { t, i18n } = useTranslation();
@@ -53,27 +56,24 @@ const HomePage = () => {
     }
   ], [t]);
 
-  // تحسين استدعاء البيانات
+
+  // Define fetchUpcomingEvents with useCallback
   const fetchUpcomingEvents = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const result = await EventService.getUpcomingEvents();
-      
-      if (result.success) {
-        setUpcomingEvents(result.data);
-      } else {
-        setError(t('error.fetchEvents'));
-      }
+      const response = await eventsAPI.getUpcomingEvents();
+      setUpcomingEvents(response.data);
     } catch (err) {
-      setError(t('error.fetchEvents'));
+      setError('Failed to load upcoming events');
       console.error('Error fetching upcoming events:', err);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []);
 
+  // Fetch events when component mounts
   useEffect(() => {
     fetchUpcomingEvents();
   }, [fetchUpcomingEvents]);
@@ -118,7 +118,7 @@ const HomePage = () => {
   const isRTL = i18n.language === 'ar';
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isRTL ? 'font-arabic' : 'font-sans'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+  <div className={`min-h-screen bg-gray-50 ${isRTL ? 'font-arabic' : 'font-sans'}`} dir={isRTL ? 'rtl' : 'ltr'}>
       
       {/* Hero Section */}
       <div className="relative bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 overflow-hidden">
@@ -208,9 +208,9 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Upcoming Events */}
-      <div className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  {/* Upcoming Events */}
+  <div className="bg-white py-20">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               {t('events.title')}
@@ -283,30 +283,24 @@ const HomePage = () => {
                           e.target.src = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop";
                         }}
                       />
-                      
                       <div className="absolute inset-0 bg-gradient-to-t from-black opacity-30 via-transparent to-transparent group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
                       <div className="absolute top-4 left-4 bg-blue-600 bg-opacity-95 text-white px-3 py-1 rounded-full text-sm font-bold capitalize shadow-lg">
                         {event.category}
                       </div>
-                      
                       {event.status && (
                         <div className="absolute top-4 right-4 bg-green-500 bg-opacity-95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
                           {event.status}
                         </div>
                       )}
                     </div>
-                    
                     {/* Event Content */}
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-200 min-h-[3.5rem] overflow-hidden" style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                      }}>
+                      <h3
+                        className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-200 min-h-[3.5rem] overflow-hidden"
+                        style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}
+                      >
                         {event.title}
                       </h3>
-                      
                       {/* Event Details */}
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center text-gray-600 text-sm">
@@ -324,21 +318,17 @@ const HomePage = () => {
                           </span>
                         </div>
                       </div>
-
                       {/* Progress Bar */}
                       <div className="mb-6">
                         <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div 
+                          <div
                             className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
-                            style={{
-                              width: `${Math.min(((event.currentAttendees || 0) / event.maxAttendees) * 100, 100)}%`
-                            }}
+                            style={{ width: `${Math.min(((event.currentAttendees || 0) / event.maxAttendees) * 100, 100)}%` }}
                           ></div>
                         </div>
                       </div>
-                      
                       {/* Book Now Button */}
-                      <button 
+                      <button
                         onClick={() => handleBookNow(event)}
                         className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       >
@@ -348,11 +338,10 @@ const HomePage = () => {
                   </div>
                 ))}
               </div>
-
               {/* View All Events Button */}
               {upcomingEvents.length > 6 && (
                 <div className="text-center mt-12">
-                  <button 
+                  <button
                     onClick={() => navigate('/events')}
                     className="bg-gray-900 text-white px-8 py-4 rounded-xl hover:bg-gray-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                   >
@@ -364,7 +353,6 @@ const HomePage = () => {
           )}
         </div>
       </div>
-
       {/* How It Works */}
       <div className="bg-gradient-to-br from-gray-50 to-blue-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
