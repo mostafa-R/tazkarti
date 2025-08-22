@@ -2,9 +2,10 @@ import React from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import Navbar from './Components/Navbar.jsx';
+import Navbar from './components/Navbar.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import ErrorBoundary from './ErrorBoundary.jsx';
 
 // Pages
 import HomePage from './pages/Home.jsx';
@@ -18,8 +19,8 @@ import MyTicketsPage from './pages/Ticket.jsx';
 import TicketDetailsPage from './pages/TicketDetailsPage.jsx';
 import OrganizerDashboard from './pages/OrganizerDashboard.jsx';
 import CreateEventPage from './pages/CreateEvent.jsx';
-import EmailVerification from './Components/EmailVerification.jsx';
-import ChatBot from './Components/ChatWidget.jsx';
+import EmailVerification from './components/EmailVerification.jsx';
+import ChatBot from './components/ChatWidget.jsx';
 import SignupPage from './pages/SignupPage.jsx';
 
 // Layout Component
@@ -47,11 +48,11 @@ const Layout = ({ children }) => {
 
 function App() {
   return (
-
-  <AuthProvider>
-    <Router>
-      <Layout>
-        <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Layout>
+            <Routes>
           {/* Public routes - no authentication required */}
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -63,7 +64,7 @@ function App() {
 
           {/* Protected routes - authentication required */}
           <Route path="/home" element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="user">
               <HomePage />
             </ProtectedRoute>
           } />
@@ -106,25 +107,26 @@ function App() {
               <div>Admin Dashboard (To be implemented)</div>
             </ProtectedRoute>
           } />
-        </Routes>
-      </Layout>
-      {/* Toast Notifications (single instance) */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
-      {/* Floating ChatBot */}
-      <ChatBot />
-    </Router>
-  </AuthProvider>
+            </Routes>
+          </Layout>
+          {/* Toast Notifications (single instance) */}
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="colored"
+          />
+          {/* Floating ChatBot */}
+          <ChatBot />
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
