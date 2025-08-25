@@ -37,7 +37,7 @@ app.use(express.urlencoded({ extended: true })); // لو هتستخدم form-dat
 // Update: Explicitly set allowed origin for frontend and credentials for cookies
 app.use(
   cors({
-    origin: "http://localhost:5173", // Updated to match your frontend port
+    origin: ["http://localhost:4200", "http://localhost:54289"], // Updated to match your frontend port
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   })

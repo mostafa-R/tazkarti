@@ -167,24 +167,64 @@ export const getUpcomingEvents = async (req, res) => {
   }
 };
 
+// Get events by organizer (for organizer dashboard)
+export const getOrganizerEvents = async (req, res) => {
+  try {
+    const organizerId = req.user._id;
+    const { status, approved, page = 1, limit = 10 } = req.query;
+
+    // Build query filters
+    let query = { organizer: organizerId };
+    
+    if (status) {
+      query.status = status;
+    }
+    
+    if (approved !== undefined) {
+      query.approved = approved === 'true';
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+    const totalEvents = await Event.countDocuments(query);
+    const totalPages = Math.ceil(totalEvents / limit);
+
+    const events = await Event.find(query)
+      .populate("organizer", "firstName lastName email organizationName")
+      .populate("tickets")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    res.status(200).json({
+      events,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalEvents,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update event (organizer only)
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
     const organizerId = req.user._id;
-
+    
     // Find event and verify ownership
     const existingEvent = await Event.findById(id);
-
     if (!existingEvent) {
       return res.status(404).json({ message: "Event not found" });
     }
 
     if (existingEvent.organizer.toString() !== organizerId.toString()) {
-      return res
-        .status(403)
-        .json({
-          message: "Access denied. You can only update your own events.",
-        });
+      return res.status(403).json({ message: "Access denied. You can only update your own events." });
     }
 
     const {
@@ -203,12 +243,8 @@ export const updateEvent = async (req, res) => {
     } = req.body;
 
     // Handle file uploads if present
-    const imagesFiles = Array.isArray(req.files?.images)
-      ? req.files.images
-      : [];
-    const trailerFiles = Array.isArray(req.files?.trailerVideo)
-      ? req.files.trailerVideo
-      : [];
+    const imagesFiles = Array.isArray(req.files?.images) ? req.files.images : [];
+    const trailerFiles = Array.isArray(req.files?.trailerVideo) ? req.files.trailerVideo : [];
 
     let imageUrls = existingEvent.images || [];
     let trailerVideoUrl = existingEvent.trailerVideo;
@@ -261,8 +297,7 @@ export const updateEvent = async (req, res) => {
     if (status) updateData.status = status;
     if (maxAttendees) updateData.maxAttendees = maxAttendees;
     if (tags) updateData.tags = tags;
-    if (upcoming !== undefined)
-      updateData.upcoming = upcoming === "true" || upcoming === true;
+    if (upcoming !== undefined) updateData.upcoming = upcoming === 'true' || upcoming === true;
     if (imageUrls.length > 0) updateData.images = imageUrls;
     if (trailerVideoUrl) updateData.trailerVideo = trailerVideoUrl;
 
@@ -271,14 +306,15 @@ export const updateEvent = async (req, res) => {
       updateData.approved = false;
     }
 
-    const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    }).populate("organizer", "firstName lastName email organizationName");
+    const updatedEvent = await Event.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate("organizer", "firstName lastName email organizationName");
 
     res.status(200).json({
       message: "Event updated successfully",
-      event: updatedEvent,
+      event: updatedEvent
     });
   } catch (error) {
     console.error("Update Event Error:", error);
@@ -286,3 +322,44 @@ export const updateEvent = async (req, res) => {
   }
 };
 
+// Delete event (organizer only)
+export const deleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const organizerId = req.user._id;
+
+    // Find event and verify ownership
+    const event = await Event.findById(id);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    if (event.organizer.toString() !== organizerId.toString()) {
+      return res.status(403).json({ message: "Access denied. You can only delete your own events." });
+    }
+
+    // Check if event has bookings
+    const bookingsCount = await Event.aggregate([
+      { $match: { _id: event._id } },
+      { $lookup: { from: 'bookings', localField: '_id', foreignField: 'event', as: 'bookings' } },
+      { $project: { bookingsCount: { $size: '$bookings' } } }
+    ]);
+
+    if (bookingsCount.length > 0 && bookingsCount[0].bookingsCount > 0) {
+      return res.status(400).json({ 
+        message: "Cannot delete event with existing bookings. Please cancel all bookings first." 
+      });
+    }
+
+    // Delete associated tickets first
+    await Event.updateOne({ _id: id }, { $unset: { tickets: 1 } });
+    
+    // Delete the event
+    await Event.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Event deleted successfully" });
+  } catch (error) {
+    console.error("Delete Event Error:", error);
+    res.status(500).json({ message: error.message || "Server Error" });
+  }
+};

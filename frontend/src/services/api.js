@@ -1,10 +1,10 @@
 import axios from "axios";
 
-// Step 1: Create an axios instance with your backend URL
 const api = axios.create({
-  // baseURL: 'http://localhost:5000', // Your backend server URL
-  baseURL: "https://tazkaritbackend.fly.dev", // Your backend server URL
-  withCredentials: true, // This allows cookies to be sent
+  
+  // baseURL: "https://tazkaritbackend.fly.dev", 
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
+  withCredentials: true, 
 });
 
 // Step 2: Add authentication token to all requests
@@ -49,12 +49,25 @@ export const eventsAPI = {
   getUpcomingEvents: () => api.get("/api/events/upcoming"),
 
   // Create new event (for organizers)
-  createEvent: (eventData) =>
-    api.post("/api/events/create", eventData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
+  createEvent: (eventData) => api.post('/api/events/create', eventData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+
+  // NEW: Organizer-specific event management
+  getMyEvents: (params = {}) => {
+    const queryParams = new URLSearchParams(params);
+    return api.get(`/api/events/organizer/my-events?${queryParams}`);
+  },
+
+  updateEvent: (eventId, eventData) => api.put(`/api/events/${eventId}`, eventData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+
+  deleteEvent: (eventId) => api.delete(`/api/events/${eventId}`),
 };
 
 // NEW: Tickets API
