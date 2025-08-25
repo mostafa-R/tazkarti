@@ -5,6 +5,7 @@ import {
   getAllEventsAdmin,
   getEventById,
   getUpcomingEvents,
+  updateEvent,
 } from "../controllers/eventController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { roleMiddleware } from "../middleware/roleMiddleware.js";
@@ -27,5 +28,14 @@ router.get("/admin", authMiddleware, roleMiddleware(["admin", "organizer"]), get
 router.get("/upcoming", getUpcomingEvents);
 
 router.get("/:id", getEventById);
+
+router.patch(
+  "/edit/:id",
+  authMiddleware,
+  roleMiddleware(["organizer", "admin"]),
+  uploadEventMedia,
+  updateEvent
+);
+
 
 export default router;
