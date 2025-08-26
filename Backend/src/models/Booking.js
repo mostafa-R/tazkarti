@@ -105,7 +105,6 @@ const bookingSchema = new mongoose.Schema(
     // حقول PayMob الجديدة
     paymentOrderId: String,
     paymentKey: String,
-    transactionId: String,
     paymentDate: Date,
   },
   {
@@ -134,7 +133,7 @@ bookingSchema.pre("save", async function (next) {
 
 // ✅ Indexes لتحسين البحث والأداء
 bookingSchema.index({ user: 1, event: 1 });
-bookingSchema.index({ bookingCode: 1 }, { unique: true });
+// bookingCode index already created by unique: true in field definition
 bookingSchema.index({ status: 1, paymentStatus: 1 });
 bookingSchema.index({ event: 1, status: 1 });
 

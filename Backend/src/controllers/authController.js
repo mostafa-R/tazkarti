@@ -248,7 +248,7 @@ export const login = async (req, res) => {
     }
 
     const token = generateToken(user, res);
-    
+
     res.status(200).json({ user , token });
   } catch (error) {
     res.status(500).json({ error, message: error.message });
@@ -267,7 +267,7 @@ export const logingoogle = async (req, res) => {
     }
 
     res.setItem.localstorge = "isLoggedIn", true
-    
+    res.cookie("isLoggedIn", true);
     res.redirect(`${process.env.FRONT_URL}/home`);
   } catch (error) {
     res.status(500).json({ error, message: error.message });

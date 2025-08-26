@@ -1,13 +1,17 @@
 import express from "express";
-// import { bookingTicketWithPayment } from "../controllers/booking.controller.js";
 
 import {
+  bookingTicket,
+  cancelPendingBooking,
+  createBookingWithSecurePayment,
   getBookingById,
   getBookingStats,
+  getBookingStatus,
   getEventBookings,
   getOrganizerBookings,
+  getUserBookings,
   updateBookingStatus,
-} from "../controllers/bookingController.js";
+} from "../controllers/booking.controller.js";
 import {
   checkoutWebhook,
   createPaymentLink,
@@ -15,18 +19,43 @@ import {
   payWithToken,
 } from "../controllers/checkout.controller.js";
 import { authMiddleware as authenticateToken } from "../middleware/authMiddleware.js";
+import {
+  cacheOrganizerBookings,
+  paymentRateLimit,
+} from "../middleware/performanceMiddleware.js";
 import { roleMiddleware as requireRole } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-// Customer booking routes
-// router.post("/book-ticket", authenticateToken, bookingTicketWithPayment);
+// ====== Customer Booking Routes (New Secure Flow) ======
+// إنشاء حجز آمن مع الدفع
+router.post(
+  "/create-secure-booking",
+  authenticateToken,
+  createBookingWithSecurePayment
+);
+
+// إلغاء الحجز المؤقت
+router.delete(
+  "/cancel-pending/:bookingId",
+  authenticateToken,
+  cancelPendingBooking
+);
+
+// التحقق من حالة الحجز
+router.get("/status/:bookingId", authenticateToken, getBookingStatus);
+
+// الحصول على جميع حجوزات المستخدم
+router.get("/my-bookings", authenticateToken, getUserBookings);
+
+// Legacy booking route (للتوافق مع الكود القديم)
+router.post("/book-ticket", authenticateToken, bookingTicket);
 
 // 1) دفع بكارت عبر Frames Token
-router.post("/checkout/pay-with-token", payWithToken);
+router.post("/checkout/pay-with-token", paymentRateLimit, payWithToken);
 
 // 2) إنشاء Hosted Payment Link (Redirect)
-router.post("/checkout/payment-link", createPaymentLink);
+router.post("/checkout/payment-link", paymentRateLimit, createPaymentLink);
 
 // 3) الاستعلام عن دفعة
 router.get("/checkout/:paymentId", getPaymentDetails);
@@ -41,12 +70,14 @@ router.get(
   "/organizer/bookings",
   authenticateToken,
   requireRole(["organizer"]),
+  cacheOrganizerBookings, // Cache للحجوزات
   getOrganizerBookings
 );
 router.get(
   "/organizer/bookings/stats",
   authenticateToken,
   requireRole(["organizer"]),
+  cacheOrganizerBookings, // Cache للإحصائيات
   getBookingStats
 );
 router.get(
