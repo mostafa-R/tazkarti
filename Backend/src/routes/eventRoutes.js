@@ -32,7 +32,7 @@ router.get("/upcoming", getUpcomingEvents);
 // Organizer-specific routes
 router.get("/organizer/my-events", authMiddleware, roleMiddleware(["organizer"]), getOrganizerEvents);
 
-router.put(
+router.patch(
   "/:id",
   authMiddleware,
   roleMiddleware(["organizer", "admin"]),
