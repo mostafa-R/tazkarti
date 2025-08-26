@@ -49,15 +49,6 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// export const getAllOrganizers = async (req, res) => {
-//   try {
-//     const organizers = await User.find({ role: "organizer" });
-//     res.status(200).json(organizers);
-//   } catch (error) {
-//     res.status(500).json({ error, message: error.message });
-//   }
-// };
-
 export const update = async (req, res) => {
   try {
     const { id } = req.user;
@@ -137,11 +128,10 @@ export const profileImage = async (req, res) => {
       await cloudinary.uploader.destroy(publicId);
     }
 
-    // upload image to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path, {
       folder: "tazkarti/users",
     });
-    //delete temporary file image
+  
     try {
       fs.unlinkSync(req.file.path);
     } catch (unlinkErr) {

@@ -1,18 +1,17 @@
+import axios from "axios";
 
-
-import axios from 'axios';
-
-// Step 1: Create an axios instance with your backend URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000', // Updated to match your backend port
-  withCredentials: true, // This allows cookies to be sent
+  
+  // baseURL: "https://tazkaritbackend.fly.dev", 
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
+  withCredentials: true, 
 });
 
 // Step 2: Add authentication token to all requests
 api.interceptors.request.use(
   (config) => {
     // Get token from localStorage (where we store it after login)
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (token) {
       // Add token to request headers
       config.headers.Authorization = `Bearer ${token}`;
@@ -30,9 +29,9 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // If token is invalid, clear storage and redirect to login
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -41,14 +40,14 @@ api.interceptors.response.use(
 // Step 4: Create functions for different API calls
 export const eventsAPI = {
   // Get all events from backend
-  getAllEvents: () => api.get('/api/events'),
-  
+  getAllEvents: () => api.get("/api/events"),
+
   // Get single event by ID
   getEventById: (id) => api.get(`/api/events/${id}`),
-  
+
   // Get upcoming events
-  getUpcomingEvents: () => api.get('/api/events/upcoming'),
-  
+  getUpcomingEvents: () => api.get("/api/events/upcoming"),
+
   // Create new event (for organizers)
   createEvent: (eventData) => api.post('/api/events/create', eventData, {
     headers: {
@@ -75,40 +74,33 @@ export const eventsAPI = {
 export const ticketsAPI = {
   // Get all tickets for a specific event
   getTicketsForEvent: (eventId) => api.get(`/api/tickets/event/${eventId}`),
-  
+
   // Get single ticket details
   getTicketById: (ticketId) => api.get(`/api/tickets/${ticketId}`),
-  
+
   // Get all tickets (admin/organizer)
-  getAllTickets: () => api.get('/api/tickets'),
+  getAllTickets: () => api.get("/api/tickets"),
 };
 
 export const authAPI = {
   // Login user
-  login: (credentials) => api.post('/auth/login', credentials),
-  
+  login: (credentials) => api.post("/auth/login", credentials),
+
   // Register user
-  register: (userData) => api.post('/auth/register', userData),
-  
+  register: (userData) => api.post("/auth/register", userData),
+
   // Register organizer
-  registerOrganizer: (organizerData) => api.post('/auth/registerOrganizer', organizerData),
-  
+  registerOrganizer: (organizerData) =>
+    api.post("/auth/registerOrganizer", organizerData),
+
   // Verify email
-  verifyEmail: (email, code) => api.post('/auth/verifyOTP', { email, code }),
-  
+  verifyEmail: (email, code) => api.post("/auth/verifyOTP", { email, code }),
+
   // Logout
-  logout: () => api.post('/auth/logout'),
-  
+  logout: () => api.post("/auth/logout"),
+
   // Admin login
-  adminLogin: (credentials) => api.post('/auth/adminlogin', credentials),
+  adminLogin: (credentials) => api.post("/auth/adminlogin", credentials),
 };
 
-
-
-
 export default api;
-
-
-
-
-

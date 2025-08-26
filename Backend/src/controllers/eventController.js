@@ -74,7 +74,7 @@ export const createEvent = async (req, res) => {
       location: parsedLocation,
       images: imageUrls,
       trailerVideo: trailerVideoUrl,
-      upcoming: upcoming === 'true' || upcoming === true,
+      upcoming: upcoming === "true" || upcoming === true,
       approved: false, // Events must be approved by admin before appearing on site
       status: status || "draft",
       maxAttendees: maxAttendees || 100,
@@ -85,7 +85,6 @@ export const createEvent = async (req, res) => {
     await event.save();
 
     const user = req.user;
-
 
     try {
       await sendNotification({
@@ -143,7 +142,7 @@ export const getEventById = async (req, res) => {
       { path: "organizer", select: "name email" },
       { path: "tickets" },
     ]);
-    
+
     if (!event) {
       return res.status(404).json({ message: "Event not found." });
     }
@@ -152,7 +151,6 @@ export const getEventById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 export const getUpcomingEvents = async (req, res) => {
   try {

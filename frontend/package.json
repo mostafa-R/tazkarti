@@ -14,11 +14,13 @@
     "i18next": "^25.4.0",
     "i18next-browser-languagedetector": "^8.2.0",
     "lucide-react": "^0.525.0",
+    "paymob-react": "^1.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-i18next": "^15.7.1",
     "react-router-dom": "^7.7.1",
     "react-toastify": "^11.0.5",
+    "@langchain/openai": "^0.6.9",
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
