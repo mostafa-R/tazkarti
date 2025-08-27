@@ -47,7 +47,7 @@ router.get(
   getOrganizerEvents
 );
 
-router.patch(
+router.put(
   "/:id",
   authMiddleware,
   roleMiddleware(["organizer", "admin"]),
