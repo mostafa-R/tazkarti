@@ -12,6 +12,7 @@ import {
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { bookingAPI } from "../services/api";
 
 const Booking = () => {
   const { t } = useTranslation();
@@ -125,25 +126,59 @@ const Booking = () => {
     navigate(-1); // Go back to previous page
   };
 
-  const handleConfirmBooking = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+
+  const handleConfirmBooking = async () => {
     if (!validateAllFields()) {
       alert(t("booking.fixErrorsAlert"));
       return;
     }
 
-    navigate("/payment", {
-      state: {
-        eventData: eventData,
-        bookingData: {
-          selectedTicket: selectedTicketData,
-          quantity: quantity,
-          subtotal: subtotal,
-          serviceFee: serviceFee,
-          total: total,
-          customerInfo: formData,
-        },
-      },
-    });
+    setIsSubmitting(true);
+    setBookingError("");
+
+    try {
+      // إنشاء حجز مؤقت آمن في الباكاند
+      const response = await bookingAPI.createSecureBooking({
+        ticketId: selectedTicketData?._id,
+        eventId: eventData._id,
+        type: selectedTicketData?.type,
+        quantity: quantity,
+        paymentMethod: "card", // افتراضي: كارت
+      });
+
+      // التحقق من نجاح إنشاء الحجز
+      if (response.data && response.data.success) {
+        // الانتقال إلى صفحة الدفع مع معلومات الحجز
+        navigate("/payment", {
+          state: {
+            eventData: eventData,
+            bookingData: {
+              ...response.data.booking,
+              paymentDetails: response.data.paymentDetails,
+              selectedTicket: selectedTicketData,
+              quantity: quantity,
+              subtotal: subtotal,
+              serviceFee: serviceFee,
+              total: total,
+              customerInfo: formData,
+            },
+          },
+        });
+      } else {
+        setBookingError(
+          response.data?.message || t("booking.errors.genericBookingError")
+        );
+      }
+    } catch (error) {
+      console.error("حدث خطأ في عملية الحجز:", error);
+      setBookingError(
+        error.response?.data?.message || t("booking.errors.genericBookingError")
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isFormValid = () => {
@@ -442,15 +477,23 @@ const Booking = () => {
 
               <button
                 onClick={handleConfirmBooking}
-                disabled={!isFormValid()}
+                disabled={!isFormValid() || isSubmitting}
                 className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
-                  isFormValid()
+                  isFormValid() && !isSubmitting
                     ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
-                {t("booking.continueToPayment")}
+                {isSubmitting
+                  ? t("booking.processing")
+                  : t("booking.continueToPayment")}
               </button>
+
+              {bookingError && (
+                <div className="mt-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+                  {bookingError}
+                </div>
+              )}
 
               <p className="text-xs text-gray-500 text-center mt-4">
                 {t("booking.termsAgreement")}

@@ -108,7 +108,7 @@ const HomePage = () => {
   // Functions للتعامل مع الأحداث
   const handleBookNow = useCallback(
     (event) => {
-      navigate(`/booking/${event.id}`, {
+      navigate(`/event/${event.id}`, {
         state: {
           eventData: event,
         },

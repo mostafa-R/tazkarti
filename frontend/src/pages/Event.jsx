@@ -150,7 +150,7 @@ const EventsPage = () => {
 
   const handleBookNow = (event, e) => {
     e.stopPropagation();
-    navigate(`/booking/${event._id}`, { state: { event } });
+    navigate(`/event/${event._id}`, { state: { event } });
   };
 
   // Initial load

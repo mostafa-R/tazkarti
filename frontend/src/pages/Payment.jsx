@@ -8,11 +8,16 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react";
-import { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { paymentAPI } from "../services/api";
 
 const PaymentPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState("pending"); // pending, success, error
   const [cardData, setCardData] = useState({
     cardNumber: "",
     nameOnCard: "",
@@ -20,20 +25,46 @@ const PaymentPage = () => {
     cvv: "",
   });
 
-  const eventData = {
-    title: "Summer Music Festival 2025",
-    date: "July 15, 2025",
-    time: "7:00 PM",
-    location: "Central Park Amphitheater",
-  };
+  // استخدام useMemo لتجنب تغيير التبعيات في كل رندر
+  const eventData = useMemo(
+    () =>
+      location.state?.eventData || {
+        title: "Event Title",
+        date: new Date().toLocaleDateString(),
+        time: "7:00 PM",
+        location: "Venue Location",
+        images: ["https://via.placeholder.com/120"],
+      },
+    [location.state?.eventData]
+  );
+
+  const bookingData = useMemo(
+    () => location.state?.bookingData || {},
+    [location.state?.bookingData]
+  );
+
+  const paymentDetails = useMemo(
+    () => bookingData.paymentDetails || {},
+    [bookingData.paymentDetails]
+  );
 
   const orderSummary = {
-    ticketType: "VIP Premium",
-    quantity: 2,
-    pricePerTicket: 125.0,
-    serviceFee: 15.0,
-    total: 265.0,
+    ticketType: bookingData.selectedTicket?.type || "Standard Ticket",
+    quantity: bookingData.quantity || 1,
+    pricePerTicket: bookingData.selectedTicket?.price || 0,
+    serviceFee: bookingData.serviceFee || 5.0,
+    total: bookingData.total || 0,
+    currency: bookingData.selectedTicket?.currency || "EGP",
+    bookingId: bookingData.bookingId,
+    bookingCode: bookingData.bookingCode,
   };
+
+  // التحقق من وجود بيانات الدفع المطلوبة
+  useEffect(() => {
+    if (!location.state || !bookingData.paymentDetails) {
+      setMessage("⚠️ بيانات الحجز غير كاملة، يرجى العودة لصفحة الحجز");
+    }
+  }, [location.state, bookingData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -82,59 +113,109 @@ const PaymentPage = () => {
   const handlePayment = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage("");
+    setPaymentStatus("pending");
 
     try {
-      // فصل تاريخ الانتهاء (MM/YY)
+      // التحقق من بيانات الحجز
+      if (
+        !paymentDetails ||
+        !paymentDetails.amount ||
+        !paymentDetails.currency
+      ) {
+        throw new Error("بيانات الدفع غير مكتملة");
+      }
+
+      // 1️⃣ فصل تاريخ الانتهاء (MM/YY)
       const [expiryMonth, expiryYear] = cardData.expiryDate.split("/");
 
-      // 1️⃣ إنشاء توكن للكارت
+      // 2️⃣ إنشاء توكن للكارت باستخدام Checkout.com API
       const tokenRes = await axios.post(
         "https://api.sandbox.checkout.com/tokens",
         {
           type: "card",
           number: cardData.cardNumber.replace(/\s/g, ""),
           expiry_month: expiryMonth,
-          expiry_year: `20${expiryYear}`, // من YY → YYYY
+          expiry_year: `20${expiryYear}`, // تحويل YY إلى YYYY
           cvv: cardData.cvv,
           name: cardData.nameOnCard,
         },
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "pk_sbox_hp5vsh2prvoy3ez5gh2labufvys", // 🔑 الـ Public Key
+            Authorization: "pk_sbox_hp5vsh2prvoy3ez5gh2labufvys", // مفتاح API العام
           },
         }
       );
 
       const cardToken = tokenRes.data.token;
 
-      // 2️⃣ إرسال التوكن للـ Backend
-      const paymentRes = await axios.post(
-        "https://tazkaritbackend.fly.dev/api/booking/checkout/pay-with-token",
-        {
-          token: cardToken,
-          amount: orderSummary.total * 100, // أقل وحدة (cents)
-          currency: "USD",
+      // 3️⃣ إرسال التوكن للباكاند مع معلومات الدفع من الحجز المؤقت
+      const paymentRes = await paymentAPI.payWithToken({
+        token: cardToken,
+        amount: paymentDetails.amount,
+        currency: paymentDetails.currency,
+        reference: paymentDetails.reference, // رمز الحجز المرجعي
+        customer: {
+          email:
+            bookingData.customerInfo?.email || paymentDetails.customer?.email,
+          name:
+            bookingData.customerInfo?.fullName || paymentDetails.customer?.name,
+          phone:
+            bookingData.customerInfo?.phone || paymentDetails.customer?.phone,
         },
-        { withCredentials: true }
-      );
+        metadata: paymentDetails.metadata, // بيانات إضافية (bookingId, eventId, etc.)
+      });
 
       const data = paymentRes.data;
 
+      // 4️⃣ التعامل مع نتيجة الدفع
       if (data.requires_redirect) {
-        window.location.href = data.redirect_url; // 3DS redirect
+        // إعادة التوجيه إلى صفحة مصادقة 3D Secure
+        window.location.href = data.redirect_url;
+      } else if (data.approved) {
+        // الدفع نجح بدون حاجة لمصادقة 3D Secure
+        setMessage("✅ تم الدفع بنجاح!");
+        setPaymentStatus("success");
+
+        // الانتقال إلى صفحة تأكيد الحجز
+        setTimeout(() => {
+          navigate("/booking-confirmation", {
+            state: {
+              bookingData: {
+                ...bookingData,
+                paymentId: data.id,
+                paymentStatus: data.status,
+                bookingId: orderSummary.bookingId,
+                bookingCode: orderSummary.bookingCode,
+                event: eventData,
+                ticket: {
+                  type: orderSummary.ticketType,
+                  quantity: orderSummary.quantity,
+                  price: orderSummary.total,
+                  currency: orderSummary.currency,
+                },
+                customer: bookingData.customerInfo,
+              },
+            },
+          });
+        }, 1000);
       } else {
-        console.log("Payment status:", data.status);
-        setMessage(
-          data.status === "Authorized" ? "✅ تم الدفع بنجاح!" : "❌ فشل الدفع"
-        );
+        // الدفع لم ينجح
+        setMessage(`❌ فشل الدفع: ${data.response_summary || "خطأ غير معروف"}`);
+        setPaymentStatus("error");
       }
     } catch (error) {
-      console.error(error.response?.data || error.message);
-      setMessage("⚠️ حصل خطأ أثناء الدفع");
+      console.error("خطأ في عملية الدفع:", error);
+      setMessage(
+        `⚠️ حدث خطأ أثناء الدفع: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+      setPaymentStatus("error");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -250,20 +331,53 @@ const PaymentPage = () => {
                 <button
                   type="submit"
                   className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                    isFormValid()
+                    isFormValid() && !loading
                       ? "bg-blue-600 text-white hover:bg-blue-700"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  } ${
+                    paymentStatus === "success"
+                      ? "bg-green-600 hover:bg-green-700"
+                      : ""
+                  } ${
+                    paymentStatus === "error"
+                      ? "bg-red-600 hover:bg-red-700"
+                      : ""
                   }`}
                   disabled={!isFormValid() || loading}
                 >
                   <div className="flex items-center justify-center">
                     <Lock className="h-5 w-5 mr-2" />
                     {loading
-                      ? "Processing..."
-                      : `Confirm Payment - $${orderSummary.total.toFixed(2)}`}
+                      ? "جارِ المعالجة..."
+                      : `تأكيد الدفع - ${orderSummary.total.toFixed(2)} ${
+                          orderSummary.currency
+                        }`}
                   </div>
                 </button>
-                {message && <p className="mt-4">{message}</p>}
+
+                {message && (
+                  <div
+                    className={`mt-4 p-3 rounded-lg text-center ${
+                      paymentStatus === "success"
+                        ? "bg-green-100 text-green-700"
+                        : paymentStatus === "error"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {message}
+                  </div>
+                )}
+
+                {paymentStatus === "error" && (
+                  <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="w-full mt-3 py-2 px-4 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300"
+                  >
+                    العودة إلى صفحة الحجز
+                  </button>
+                )}
               </form>
             </div>
           </div>

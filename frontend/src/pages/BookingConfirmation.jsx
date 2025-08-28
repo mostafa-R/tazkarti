@@ -3,6 +3,7 @@ import {
   Calendar,
   CheckCircle,
   Download,
+  Loader,
   Mail,
   MapPin,
   Phone,
@@ -10,37 +11,106 @@ import {
   Share2,
   User,
 } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
+import { bookingAPI } from "../services/api";
 
 const BookingConfirmationPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Get booking data from navigation state or use defaults
-  const bookingDetails = location.state?.bookingData || {
-    event: {
-      title: t("confirmation.defaultEventTitle"),
-      date: new Date().toLocaleDateString(),
-      location: {
-        venue: t("confirmation.defaultVenue"),
-        city: t("confirmation.defaultCity"),
+  // الحصول على بيانات الحجز الأولية من حالة الانتقال
+  const initialBookingData = location.state?.bookingData;
+
+  // إنشاء حالة لبيانات الحجز يمكن تحديثها
+  const [bookingDetails, setBookingDetails] = useState(
+    initialBookingData || {
+      event: {
+        title: t("confirmation.defaultEventTitle"),
+        date: new Date().toLocaleDateString(),
+        location: {
+          venue: t("confirmation.defaultVenue"),
+          city: t("confirmation.defaultCity"),
+        },
+        time: "8:00 PM",
       },
-      time: "8:00 PM",
-    },
-    ticket: {
-      type: t("confirmation.defaultTicketType"),
-      quantity: 1,
-      price: 100,
-      currency: "EGP",
-    },
-    customer: {
-      name: t("confirmation.defaultCustomer"),
-      bookingCode: "TZK-" + Math.floor(100000 + Math.random() * 900000),
-    },
-  };
+      ticket: {
+        type: t("confirmation.defaultTicketType"),
+        quantity: 1,
+        price: 100,
+        currency: "EGP",
+      },
+      customer: {
+        name: t("confirmation.defaultCustomer"),
+        bookingCode: "TZK-" + Math.floor(100000 + Math.random() * 900000),
+      },
+    }
+  );
+
+  // التحقق من حالة الحجز النهائية من الباكاند
+  useEffect(() => {
+    const fetchBookingStatus = async () => {
+      if (!initialBookingData || !initialBookingData.bookingId) {
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+
+      try {
+        // استدعاء API للحصول على آخر حالة للحجز
+        const response = await bookingAPI.getBookingStatus(
+          initialBookingData.bookingId
+        );
+
+        if (response.data && response.data.success) {
+          // تحديث بيانات الحجز بالمعلومات الجديدة
+          const updatedBookingData = response.data.booking;
+
+          setBookingDetails((prev) => ({
+            ...prev,
+            status: updatedBookingData.status,
+            paymentStatus: updatedBookingData.paymentStatus,
+            qrCode: updatedBookingData.qrCode,
+            event: {
+              ...prev.event,
+              ...updatedBookingData.event,
+            },
+            ticket: {
+              ...prev.ticket,
+              ...updatedBookingData.ticket,
+            },
+            customer: {
+              name:
+                updatedBookingData.attendeeInfo?.name || prev.customer?.name,
+              email:
+                updatedBookingData.attendeeInfo?.email || prev.customer?.email,
+              phone:
+                updatedBookingData.attendeeInfo?.phone || prev.customer?.phone,
+              bookingCode:
+                updatedBookingData.bookingCode || prev.customer?.bookingCode,
+            },
+            bookingCode: updatedBookingData.bookingCode,
+            bookingDate: updatedBookingData.createdAt,
+            paymentDate: updatedBookingData.paymentDate,
+          }));
+        } else {
+          setError(t("confirmation.errors.fetchFailed"));
+        }
+      } catch (error) {
+        console.error("خطأ في جلب تفاصيل الحجز:", error);
+        setError(t("confirmation.errors.fetchFailed"));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookingStatus();
+  }, [initialBookingData, t]);
 
   const handleGoToTickets = () => {
     navigate("/my-tickets");
@@ -212,17 +282,34 @@ const BookingConfirmationPage = () => {
             {/* QR Code Section */}
             <div className="border-t border-gray-200 pt-6">
               <div className="flex flex-col items-center">
-                <div className="w-32 h-32 bg-gray-100 rounded-xl flex items-center justify-center mb-4 relative">
-                  <QrCode className="h-16 w-16 text-gray-400" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-16 h-16 border-2 border-gray-300 rounded mb-2"></div>
-                      <span className="text-xs text-gray-500">
-                        {t("confirmation.qrCode")}
-                      </span>
+                {loading ? (
+                  <div className="w-32 h-32 bg-gray-100 rounded-xl flex items-center justify-center mb-4 relative">
+                    <Loader className="h-12 w-12 text-blue-500 animate-spin" />
+                    <span className="text-xs text-gray-500 mt-2">
+                      {t("confirmation.loadingQR")}
+                    </span>
+                  </div>
+                ) : bookingDetails.qrCode ? (
+                  <div className="w-48 h-48 mb-4">
+                    <img
+                      src={bookingDetails.qrCode}
+                      alt={t("confirmation.qrCodeAlt")}
+                      className="w-full h-full rounded-xl border-2 border-blue-200 p-2"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-32 h-32 bg-gray-100 rounded-xl flex items-center justify-center mb-4 relative">
+                    <QrCode className="h-16 w-16 text-gray-400" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-16 h-16 border-2 border-gray-300 rounded mb-2"></div>
+                        <span className="text-xs text-gray-500">
+                          {t("confirmation.qrCode")}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
                 <p className="text-sm text-gray-600 text-center">
                   {t("confirmation.qrInstructions")}
                 </p>
@@ -243,11 +330,25 @@ const BookingConfirmationPage = () => {
           </div>
         </div>
 
+        {/* حالة الخطأ */}
+        {error && (
+          <div className="mb-8 p-4 bg-red-100 border border-red-300 rounded-lg text-center">
+            <p className="text-red-700">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-3 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700"
+            >
+              {t("confirmation.retry")}
+            </button>
+          </div>
+        )}
+
         {/* Navigation Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={handleGoToTickets}
             className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-8 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl"
+            disabled={loading}
           >
             <User className="h-5 w-5 mr-2" />
             {t("confirmation.goToTickets")}

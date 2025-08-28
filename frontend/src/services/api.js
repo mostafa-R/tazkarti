@@ -184,4 +184,44 @@ export const userAPI = {
   getMyBookings: () => api.get("/user/my-bookings"),
 };
 
+// Booking API
+export const bookingAPI = {
+  // إنشاء حجز آمن مؤقت
+  createSecureBooking: (bookingData) =>
+    api.post("/api/booking/create-secure-booking", bookingData),
+
+  // إلغاء حجز مؤقت
+  cancelPendingBooking: (bookingId) =>
+    api.delete(`/api/booking/cancel-pending/${bookingId}`),
+
+  // الحصول على حالة الحجز
+  getBookingStatus: (bookingId) => api.get(`/api/booking/status/${bookingId}`),
+
+  // الحصول على قائمة الحجوزات للمستخدم
+  getMyBookings: (params = {}) => {
+    const queryParams = new URLSearchParams();
+    Object.keys(params).forEach((key) => {
+      if (params[key] !== undefined && params[key] !== "") {
+        queryParams.append(key, params[key]);
+      }
+    });
+    return api.get(`/api/booking/my-bookings?${queryParams}`);
+  },
+};
+
+// Payment API
+export const paymentAPI = {
+  // الدفع باستخدام توكن البطاقة
+  payWithToken: (paymentData) =>
+    api.post("/api/booking/checkout/pay-with-token", paymentData),
+
+  // إنشاء رابط دفع
+  createPaymentLink: (paymentData) =>
+    api.post("/api/booking/checkout/payment-link", paymentData),
+
+  // الحصول على تفاصيل الدفع
+  getPaymentDetails: (paymentId) =>
+    api.get(`/api/booking/checkout/${paymentId}`),
+};
+
 export default api;
