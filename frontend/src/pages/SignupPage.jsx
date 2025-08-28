@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import RoleSelector from '../Components/RoleSelector.jsx';
 import OrganizerSignupForm from '../Components/OrganizerSignupForm.jsx';
 import UserSignupForm from './Signup.jsx';
-import EmailVerification from '../Components/EmailVerification.jsx';
+import EmailVerification from '../components/EmailVerification.jsx';
 
 export default function SignupPage() {
   const [role, setRole] = useState('');

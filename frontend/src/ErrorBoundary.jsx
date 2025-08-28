@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -6,15 +6,15 @@ class ErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
     this.setState({
       error: error,
-      errorInfo: errorInfo
+      errorInfo: errorInfo,
     });
   }
 
@@ -25,9 +25,12 @@ class ErrorBoundary extends React.Component {
           <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
             <div className="text-center">
               <div className="text-red-500 text-6xl mb-4">⚠️</div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                Something went wrong
+              </h1>
               <p className="text-gray-600 mb-6">
-                The application encountered an error. Please check the browser console for more details.
+                The application encountered an error. Please check the browser
+                console for more details.
               </p>
               <button
                 onClick={() => window.location.reload()}
@@ -43,7 +46,10 @@ class ErrorBoundary extends React.Component {
                 </summary>
                 <div className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto">
                   <pre>{this.state.error && this.state.error.toString()}</pre>
-                  <pre>{this.state.errorInfo.componentStack}</pre>
+                  <pre>
+                    {this.state.errorInfo &&
+                      this.state.errorInfo.componentStack}
+                  </pre>
                 </div>
               </details>
             )}

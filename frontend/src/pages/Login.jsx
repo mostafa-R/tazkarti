@@ -124,12 +124,14 @@ const LoginPage = () => {
       <div className="max-w-sm w-full">
         {/* Header */}
         <div className="text-center mb-6">
+        <button onClick={() => navigate('/')}>
           <div className="flex items-center justify-center mb-4">
             <ArrowLeft className="w-5 h-5 text-blue-600 mr-2" />
             <h1 className="text-2xl font-bold text-blue-600" style={{fontFamily: 'Poppins, sans-serif'}}>
               Tazkarti
             </h1>
-          </div>
+            </div>
+            </button>
           <h2 className="text-xl font-bold text-gray-900 mb-1" style={{fontFamily: 'Poppins, sans-serif'}}>
             Welcome back!
           </h2>
