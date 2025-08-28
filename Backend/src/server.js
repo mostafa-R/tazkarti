@@ -55,14 +55,25 @@ app.get("/", (req, res) =>
 app.get("/health", healthCheck);
 
 // CORS must be first before any other middleware
-app.use(
-  cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:5173",
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",")
+  : [
+      "http://localhost:5173",
       "http://localhost:3000",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:3000",
-    ],
+    ];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"), false);
+      }
+    },
     credentials: true,
     allowedHeaders: [
       "Content-Type",

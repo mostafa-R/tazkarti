@@ -25,11 +25,11 @@ import LoginPage from "./pages/Login.jsx";
 import OrganizerDashboard from "./pages/OrganizerDashboard.jsx";
 import PaymentPage from "./pages/Payment.jsx";
 
+import Footer from "./Components/footer.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import MyTicketsPage from "./pages/Ticket.jsx";
 import TicketDetailsPage from "./pages/TicketDetailsPage.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
-import Footer from "./Components/footer.jsx";
 
 // Layout Component
 const Layout = ({ children }) => {
@@ -77,14 +77,12 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/verify-email" element={<EmailVerification />} />
-              <Route path="/booking/:id" element={<BookingPage />} />
-              <Route path="/payment" element={<PaymentPage />} />
+
               <Route
                 path="/booking-confirm"
                 element={<BookingConfirmationPage />}
               />
 
-              {/* Protected routes - authentication required */}
               <Route path="/" element={<HomePage />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/events" element={<EventsPage />} />
@@ -93,6 +91,25 @@ function App() {
                 element={<Navigate to="/events" replace />}
               />
               <Route path="/event/:id" element={<EventDetailsPage />} />
+
+              
+              <Route
+                path="/booking/:id"
+                element={
+                  <ProtectedRoute>
+                    <BookingPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/payment"
+                element={
+                  <ProtectedRoute>
+                    <PaymentPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/my-tickets"
                 element={
