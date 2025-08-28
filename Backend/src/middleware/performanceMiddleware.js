@@ -27,7 +27,8 @@ export const generalRateLimit = rateLimit({
   // تخطي الـ rate limit للمستخدمين المصرح لهم
   skip: (req) => {
     // تخطي للـ admin
-    return req.user?.role === "admin";
+    const allowedRoles = ["admin", "organizer"];
+    return allowedRoles.includes(req.user?.role);
   },
 });
 
