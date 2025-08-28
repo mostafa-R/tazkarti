@@ -175,6 +175,20 @@ const Navbar = () => {
                 {t("mybooking")}
               </Link>
             )}
+
+            {/* Organizer Dashboard Link - Desktop */}
+            {isLoggedIn && user?.role === "organizer" && (
+              <Link
+                to="/organizer-dashboard"
+                className={`${
+                  isActive("/organizer-dashboard")
+                    ? "text-blue-600 font-medium border-b-2 border-blue-600 pb-1"
+                    : "text-gray-700 hover:text-blue-600"
+                } transition-all duration-200 whitespace-nowrap`}
+              >
+                {t("Dashboard") || "Dashboard"}
+              </Link>
+            )}
           </div>
 
           {/* Right Side - Language & Auth */}
@@ -489,6 +503,24 @@ const Navbar = () => {
                 >
                   <span>🎫</span>
                   <span>{t("mybooking")}</span>
+                </Link>
+              )}
+
+              {/* Organizer Dashboard Link - Mobile */}
+              {isLoggedIn && user?.role === "organizer" && (
+                <Link
+                  to="/organizer-dashboard"
+                  onClick={closeMobileMenu}
+                  className={`${
+                    isActive("/organizer-dashboard")
+                      ? "text-blue-600 font-medium bg-blue-50"
+                      : "text-gray-700"
+                  } flex items-center ${
+                    currentLanguage === "ar" ? "space-x-reverse" : "space-x-2"
+                  } px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200`}
+                >
+                  <span>📊</span>
+                  <span>{t("organizerDashboard") || "Dashboard"}</span>
                 </Link>
               )}
             </div>

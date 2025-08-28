@@ -92,7 +92,6 @@ function App() {
               />
               <Route path="/event/:id" element={<EventDetailsPage />} />
 
-              
               <Route
                 path="/booking/:id"
                 element={
@@ -129,7 +128,7 @@ function App() {
               <Route
                 path="/profile"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute >
                     <UserProfile />
                   </ProtectedRoute>
                 }
