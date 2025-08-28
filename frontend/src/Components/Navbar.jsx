@@ -7,7 +7,9 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [userName, setUserName] = useState("");
+  const [user, setUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -23,17 +25,20 @@ const Navbar = () => {
 
       if (token && userJson) {
         try {
-          const user = JSON.parse(userJson);
+          const userData = JSON.parse(userJson);
           setIsLoggedIn(true);
-          setUserName(user.firstName || "User");
+          setUserName(userData.firstName || "User");
+          setUser(userData);
         } catch (error) {
           console.error("Error parsing user data:", error);
           setIsLoggedIn(false);
           setUserName("");
+          setUser(null);
         }
       } else {
         setIsLoggedIn(false);
         setUserName("");
+        setUser(null);
       }
     };
 
@@ -76,6 +81,7 @@ const Navbar = () => {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+    setIsUserMenuOpen(false);
   };
 
   const toggleLanguageMenu = (e) => {
@@ -90,9 +96,21 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    const handleClickOutside = () => {
+    const handleClickOutside = (event) => {
+      // Check if click is outside language menu
       if (isLanguageMenuOpen) {
-        setIsLanguageMenuOpen(false);
+        const languageMenu = document.querySelector("[data-language-menu]");
+        if (languageMenu && !languageMenu.contains(event.target)) {
+          setIsLanguageMenuOpen(false);
+        }
+      }
+
+      // Check if click is outside user menu
+      if (isUserMenuOpen) {
+        const userMenu = document.querySelector("[data-user-menu]");
+        if (userMenu && !userMenu.contains(event.target)) {
+          setIsUserMenuOpen(false);
+        }
       }
     };
 
@@ -100,7 +118,7 @@ const Navbar = () => {
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [isLanguageMenuOpen]);
+  }, [isLanguageMenuOpen, isUserMenuOpen]);
 
   return (
     <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
@@ -117,7 +135,13 @@ const Navbar = () => {
           </div>
 
           {/* Navigation Links - Desktop (Center) */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div
+            className={`hidden md:flex items-center ${
+              currentLanguage === "ar"
+                ? "flex-row-reverse space-x-reverse space-x-8"
+                : "space-x-8"
+            }`}
+          >
             <Link
               to="/home"
               className={`${
@@ -138,6 +162,7 @@ const Navbar = () => {
             >
               {t("activities")}
             </Link>
+
             {isLoggedIn && (
               <Link
                 to="/my-tickets"
@@ -157,7 +182,10 @@ const Navbar = () => {
             {/* Language Selector */}
             <div className="relative">
               <button
-                onClick={toggleLanguageMenu}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleLanguageMenu(e);
+                }}
                 className={`flex items-center space-x-1 px-3 py-1 rounded-md transition-colors duration-200 ${
                   isLanguageMenuOpen ? "bg-gray-100" : "hover:bg-gray-100"
                 }`}
@@ -185,9 +213,15 @@ const Navbar = () => {
               </button>
 
               {isLanguageMenuOpen && (
-                <div className="absolute top-full mt-1 right-0 w-40 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                <div
+                  data-language-menu
+                  className="absolute top-full mt-2 right-0 w-40 bg-white rounded-lg shadow-2xl py-2 z-[9999] border border-gray-200 min-w-max transform transition-all duration-200 ease-out opacity-100 scale-100"
+                >
                   <button
-                    onClick={() => changeLanguage("en")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      changeLanguage("en");
+                    }}
                     className={`w-full text-left px-4 py-2 text-sm flex items-center justify-between ${
                       currentLanguage === "en"
                         ? "bg-blue-50 text-blue-600"
@@ -198,7 +232,10 @@ const Navbar = () => {
                     {currentLanguage === "en" && <span>✓</span>}
                   </button>
                   <button
-                    onClick={() => changeLanguage("ar")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      changeLanguage("ar");
+                    }}
                     className={`w-full text-left px-4 py-2 text-sm flex items-center justify-between ${
                       currentLanguage === "ar"
                         ? "bg-blue-50 text-blue-600"
@@ -215,35 +252,102 @@ const Navbar = () => {
             {/* Auth Section */}
             {isLoggedIn ? (
               <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-gray-600 text-sm font-medium">
-                      {userName.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="text-sm text-gray-700 font-medium max-w-[100px] truncate">
-                    {userName}
-                  </span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-700 hover:text-red-600 transition-colors duration-200 whitespace-nowrap text-sm font-medium flex items-center px-3 py-1.5 rounded-md hover:bg-red-50"
-                >
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsUserMenuOpen(!isUserMenuOpen);
+                    }}
+                    className="flex items-center space-x-2 hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  {t("logout")}
-                </button>
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                      {user?.profileImage ? (
+                        <img
+                          src={user.profileImage}
+                          alt={userName}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-gray-600 text-sm font-medium">
+                          {userName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm text-gray-700 font-medium max-w-[100px] truncate">
+                      {userName}
+                    </span>
+                    <svg
+                      className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
+                        isUserMenuOpen ? "transform rotate-180" : ""
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {isUserMenuOpen && (
+                    <div
+                      data-user-menu
+                      className="absolute top-full mt-2 right-0 w-48 bg-white rounded-lg shadow-2xl py-2 z-[9999] border border-gray-200 min-w-max transform transition-all duration-200 ease-out opacity-100 scale-100"
+                    >
+                      <Link
+                        to="/profile"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          closeMobileMenu();
+                        }}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                      >
+                        <svg
+                          className="w-4 h-4 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                        My Profile
+                      </Link>
+
+                      <hr className="my-1" />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLogout();
+                        }}
+                        className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                      >
+                        <svg
+                          className="w-4 h-4 mr-2"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
+                        </svg>
+                        {t("logout")}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <>
@@ -310,10 +414,18 @@ const Navbar = () => {
             {isLoggedIn && (
               <div className="px-4 pb-3 border-b border-gray-200">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-gray-600 font-medium">
-                      {userName.charAt(0).toUpperCase()}
-                    </span>
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                    {user?.profileImage ? (
+                      <img
+                        src={user.profileImage}
+                        alt={userName}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-gray-600 font-medium">
+                        {userName.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-700">
@@ -328,7 +440,11 @@ const Navbar = () => {
             )}
 
             {/* Navigation Links */}
-            <div className="flex flex-col space-y-2 px-4">
+            <div
+              className={`flex flex-col space-y-2 px-4 ${
+                currentLanguage === "ar" ? "items-end" : "items-start"
+              }`}
+            >
               <Link
                 to="/home"
                 onClick={closeMobileMenu}
@@ -336,7 +452,9 @@ const Navbar = () => {
                   isActive("/home")
                     ? "text-blue-600 font-medium bg-blue-50"
                     : "text-gray-700"
-                } flex items-center space-x-2 px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200`}
+                } flex items-center ${
+                  currentLanguage === "ar" ? "space-x-reverse" : "space-x-2"
+                } px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200`}
               >
                 <span>🏠</span>
                 <span>{t("home")}</span>
@@ -349,7 +467,9 @@ const Navbar = () => {
                   isActive("/events")
                     ? "text-blue-600 font-medium bg-blue-50"
                     : "text-gray-700"
-                } flex items-center space-x-2 px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200`}
+                } flex items-center ${
+                  currentLanguage === "ar" ? "space-x-reverse" : "space-x-2"
+                } px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200`}
               >
                 <span>🎭</span>
                 <span>{t("activities")}</span>
@@ -363,7 +483,9 @@ const Navbar = () => {
                     isActive("/my-tickets")
                       ? "text-blue-600 font-medium bg-blue-50"
                       : "text-gray-700"
-                  } flex items-center space-x-2 px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200`}
+                  } flex items-center ${
+                    currentLanguage === "ar" ? "space-x-reverse" : "space-x-2"
+                  } px-3 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200`}
                 >
                   <span>🎫</span>
                   <span>{t("mybooking")}</span>

@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import Footer from "../Components/footer.jsx";
 import EventService from "../services/eventService";
 
 const HomePage = () => {
@@ -81,10 +82,19 @@ const HomePage = () => {
       setError(null);
 
       const response = await eventsAPI.getUpcomingEvents();
-      setUpcomingEvents(response.data);
+
+      // Handle both old format (direct array) and new format (with pagination)
+      if (response.data.events) {
+        setUpcomingEvents(response.data.events);
+      } else if (Array.isArray(response.data)) {
+        setUpcomingEvents(response.data);
+      } else {
+        setUpcomingEvents([]);
+      }
     } catch (err) {
       setError("Failed to load upcoming events");
       console.error("Error fetching upcoming events:", err);
+      setUpcomingEvents([]);
     } finally {
       setLoading(false);
     }
@@ -236,7 +246,7 @@ const HomePage = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {categories.map((category, index) => {
+          {categories.map((category) => {
             const IconComponent = category.icon;
             return (
               <div
@@ -302,131 +312,137 @@ const HomePage = () => {
           )}
 
           {/* Empty State */}
-          {!loading && !error && upcomingEvents.length === 0 && (
-            <div className="text-center py-20 ">
-              <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-12 max-w-lg mx-auto">
-                <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {t("events.emptyTitle")}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {t("events.emptyDescription")}
-                </p>
-                <button
-                  onClick={() => navigate("/events")}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
-                >
-                  {t("events.browseAll")}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Events Grid */}
-          {!loading && !error && upcomingEvents.length > 0 && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {upcomingEvents.slice(0, 6).map((event) => (
-                  <div
-                    key={event._id}
-                    className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 group transform hover:scale-105 border border-gray-100 cursor-pointer"
-                    onClick={() => handleEventClick(event)}
-                  >
-                    {/* Event Image */}
-                    <div className="relative overflow-hidden h-48">
-                      <img
-                        src={EventService.getEventImage(event)}
-                        alt={event.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        onError={(e) => {
-                          e.target.src =
-                            "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop";
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black opacity-30 via-transparent to-transparent group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="absolute top-4 left-4 bg-blue-600 bg-opacity-95 text-white px-3 py-1 rounded-full text-sm font-bold capitalize shadow-lg">
-                        {event.category}
-                      </div>
-                      {event.status && (
-                        <div className="absolute top-4 right-4 bg-green-500 bg-opacity-95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                          {event.status}
-                        </div>
-                      )}
-                    </div>
-                    {/* Event Content */}
-                    <div className="p-6">
-                      <h3
-                        className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-200 min-h-[3.5rem] overflow-hidden"
-                        style={{
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                        }}
-                      >
-                        {event.title}
-                      </h3>
-                      {/* Event Details */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-gray-600 text-sm">
-                          <Calendar className="h-4 w-4 mr-2 text-blue-500 flex-shrink-0" />
-                          <span className="font-medium">
-                            {EventService.formatEventDate(event.startDate)}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-gray-600 text-sm">
-                          <MapPin className="h-4 w-4 mr-2 text-red-500 flex-shrink-0" />
-                          <span className="font-medium truncate">
-                            {event.location?.venue || t("events.venueTBA")}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-gray-600 text-sm">
-                          <Users className="h-4 w-4 mr-2 text-green-500 flex-shrink-0" />
-                          <span className="font-medium">
-                            {event.currentAttendees || 0}/{event.maxAttendees}{" "}
-                            {t("events.attendees")}
-                          </span>
-                        </div>
-                      </div>
-                      {/* Progress Bar */}
-                      <div className="mb-6">
-                        <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
-                            style={{
-                              width: `${Math.min(
-                                ((event.currentAttendees || 0) /
-                                  event.maxAttendees) *
-                                  100,
-                                100
-                              )}%`,
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                      {/* Book Now Button */}
-                      <button
-                        onClick={() => handleBookNow(event)}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      >
-                        {t("events.bookNow")}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* View All Events Button */}
-              {upcomingEvents.length > 6 && (
-                <div className="text-center mt-12">
+          {!loading &&
+            !error &&
+            Array.isArray(upcomingEvents) &&
+            upcomingEvents.length === 0 && (
+              <div className="text-center py-20 ">
+                <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-12 max-w-lg mx-auto">
+                  <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    {t("events.emptyTitle")}
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {t("events.emptyDescription")}
+                  </p>
                   <button
                     onClick={() => navigate("/events")}
-                    className="bg-gray-900 text-white px-8 py-4 rounded-xl hover:bg-gray-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
                   >
-                    {t("events.viewAll")} ({upcomingEvents.length})
+                    {t("events.browseAll")}
                   </button>
                 </div>
-              )}
-            </>
-          )}
+              </div>
+            )}
+
+          {/* Events Grid */}
+          {!loading &&
+            !error &&
+            Array.isArray(upcomingEvents) &&
+            upcomingEvents.length > 0 && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {upcomingEvents.slice(0, 6).map((event) => (
+                    <div
+                      key={event._id}
+                      className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 group transform hover:scale-105 border border-gray-100 cursor-pointer"
+                      onClick={() => handleEventClick(event)}
+                    >
+                      {/* Event Image */}
+                      <div className="relative overflow-hidden h-48">
+                        <img
+                          src={EventService.getEventImage(event)}
+                          alt={event.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black opacity-30 via-transparent to-transparent group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute top-4 left-4 bg-blue-600 bg-opacity-95 text-white px-3 py-1 rounded-full text-sm font-bold capitalize shadow-lg">
+                          {event.category}
+                        </div>
+                        {event.status && (
+                          <div className="absolute top-4 right-4 bg-green-500 bg-opacity-95 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                            {event.status}
+                          </div>
+                        )}
+                      </div>
+                      {/* Event Content */}
+                      <div className="p-6">
+                        <h3
+                          className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-200 min-h-[3.5rem] overflow-hidden"
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                          }}
+                        >
+                          {event.title}
+                        </h3>
+                        {/* Event Details */}
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center text-gray-600 text-sm">
+                            <Calendar className="h-4 w-4 mr-2 text-blue-500 flex-shrink-0" />
+                            <span className="font-medium">
+                              {EventService.formatEventDate(event.startDate)}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-gray-600 text-sm">
+                            <MapPin className="h-4 w-4 mr-2 text-red-500 flex-shrink-0" />
+                            <span className="font-medium truncate">
+                              {event.location?.venue || t("events.venueTBA")}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-gray-600 text-sm">
+                            <Users className="h-4 w-4 mr-2 text-green-500 flex-shrink-0" />
+                            <span className="font-medium">
+                              {event.currentAttendees || 0}/{event.maxAttendees}{" "}
+                              {t("events.attendees")}
+                            </span>
+                          </div>
+                        </div>
+                        {/* Progress Bar */}
+                        <div className="mb-6">
+                          <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-1000 ease-out"
+                              style={{
+                                width: `${Math.min(
+                                  ((event.currentAttendees || 0) /
+                                    event.maxAttendees) *
+                                    100,
+                                  100
+                                )}%`,
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                        {/* Book Now Button */}
+                        <button
+                          onClick={() => handleBookNow(event)}
+                          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        >
+                          {t("events.bookNow")}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* View All Events Button */}
+                {Array.isArray(upcomingEvents) && upcomingEvents.length > 6 && (
+                  <div className="text-center mt-12">
+                    <button
+                      onClick={() => navigate("/events")}
+                      className="bg-gray-900 text-white px-8 py-4 rounded-xl hover:bg-gray-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    >
+                      {t("events.viewAll")} ({upcomingEvents.length})
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
         </div>
       </div>
       {/* How It Works */}
@@ -499,44 +515,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            {/* Brand Section */}
-            <div className="flex items-center justify-center space-x-3 mb-6">
-              <div className="p-2 bg-blue-600 rounded-xl">
-                <Calendar className="h-8 w-8 text-white" />
-              </div>
-              <span className="text-3xl font-bold">{t("footer.brand")}</span>
-            </div>
-
-            <p className="text-gray-400 mb-8 leading-relaxed max-w-2xl mx-auto">
-              {t("footer.description")}
-            </p>
-
-            {/* Social Media Links */}
-            <div className="flex justify-center space-x-4 mb-8">
-              <div className="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-all duration-300 transform hover:scale-110">
-                <span className="text-sm font-bold">f</span>
-              </div>
-              <div className="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center cursor-pointer hover:bg-blue-400 transition-all duration-300 transform hover:scale-110">
-                <span className="text-sm font-bold">t</span>
-              </div>
-              <div className="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center cursor-pointer hover:bg-pink-600 transition-all duration-300 transform hover:scale-110">
-                <span className="text-xs font-bold">ig</span>
-              </div>
-            </div>
-
-            {/* Footer Bottom */}
-            <div className="border-t border-gray-700 pt-8">
-              <p className="text-gray-400 text-sm">
-                {t("footer.copyright", { year: new Date().getFullYear() })}
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+  
     </div>
   );
 };

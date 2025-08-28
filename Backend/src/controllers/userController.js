@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import fs from "fs";
 import { Event } from "../models/Event.js";
 import Notification from "../models/Notification.js";
@@ -131,7 +132,7 @@ export const profileImage = async (req, res) => {
     const result = await cloudinary.uploader.upload(req.file.path, {
       folder: "tazkarti/users",
     });
-  
+
     try {
       fs.unlinkSync(req.file.path);
     } catch (unlinkErr) {
@@ -243,7 +244,7 @@ export const restoreUser = async (req, res) => {
 export const getNotifictions = async (req, res) => {
   try {
     const notifications = await Notification.find({}).sort({ createdAt: -1 });
-  
+
     res.status(200).json(notifications);
   } catch (error) {
     console.error("Get Notifications Error:", error);
@@ -267,8 +268,6 @@ export const approveEvent = async (req, res) => {
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
-
-  
 
     const eventTitle = event.title;
 

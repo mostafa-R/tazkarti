@@ -5,6 +5,7 @@
   "login": "Login",
   "register": "Register",
   "logout": "Logout",
+  "signin": "Sign In",
   "language": "Language",
   "hero": {
     "title": "Book Tickets for Any Event You Love",
@@ -70,7 +71,7 @@
     },
     "copyright": "© {{year}} Tazkarti. All rights reserved."
   },
-  
+
   "eventsPage": {
     "title": "Discover Events",
     "subtitle": "Find and book tickets for amazing events near you",
@@ -153,10 +154,8 @@
     "features": "Features",
     "noTicketMessage": "No ticket selected. Please go back and select a ticket.",
     "quantity": "Quantity",
-    "ticket": {
-      "one": "ticket",
-      "other": "tickets"
-    },
+    "ticketText": "ticket",
+    "ticketsText": "tickets",
     "quantityNote": "Quantity was selected on the previous page",
     "yourInformation": "Your Information",
     "fullName": "Full Name",
@@ -173,7 +172,7 @@
     "continueToPayment": "Continue to Payment",
     "termsAgreement": "By confirming, you agree to our Terms of Service and Privacy Policy"
   },
-  
+
   "confirmation": {
     "defaultEventTitle": "Default Event",
     "defaultVenue": "Default Venue",
@@ -195,10 +194,8 @@
     "ticketInfo": "Ticket Information",
     "ticketType": "Ticket Type",
     "quantity": "Quantity",
-    "tickets": {
-      "one": "ticket",
-      "other": "tickets"
-    },
+    "ticketText": "ticket",
+    "ticketsText": "tickets",
     "totalPrice": "Total Price",
     "bookingDetails": "Booking Details",
     "customer": "Customer",
@@ -218,7 +215,7 @@
     ],
     "needHelp": "Need help? Contact our support team at"
   },
-  
+
   "myTickets": {
     "title": "My Tickets",
     "subtitle": "Manage and access all your event tickets",
@@ -250,10 +247,8 @@
     },
     "ticketType": "Ticket Type",
     "quantity": "Quantity",
-    "tickets": {
-      "one": "ticket",
-      "other": "tickets"
-    },
+    "ticketText": "ticket",
+    "ticketsText": "tickets",
     "totalPrice": "Total Price",
     "bookingCode": "Booking Code",
     "viewTicket": "View Ticket",
@@ -267,11 +262,113 @@
       "title": "Need Help?",
       "description": "Having trouble with your tickets? Our support team is here to help."
     }
+  },
+  "search": {
+    "title": "Search Events",
+    "backToHome": "Back to Home",
+    "filters": "Filters",
+    "searchKeyword": "Search Events",
+    "searchPlaceholder": "Enter event name or keyword...",
+    "category": "Category",
+    "allCategories": "All Categories",
+    "categories": {
+      "technology": "Technology",
+      "business": "Business",
+      "entertainment": "Entertainment",
+      "sports": "Sports",
+      "education": "Education",
+      "health": "Health"
+    },
+    "location": "Location",
+    "locationPlaceholder": "Enter city or venue...",
+    "dateRange": "Date Range",
+    "searchButton": "Search Events",
+    "clearFilters": "Clear All Filters",
+    "resultsCount": "{{count}} events found",
+    "page": "Page",
+    "of": "of",
+    "searching": "Searching events...",
+    "noResults": "No events found",
+    "noResultsDesc": "Try adjusting your search criteria or filters",
+    "previous": "Previous",
+    "next": "Next",
+    "error": "Failed to search events. Please try again."
+  },
+  "welcomeBack": "Welcome back!",
+  "profile": {
+    "title": "My Profile",
+    "backToHome": "Back to Home",
+    "loading": "Loading profile...",
+    "profilePicture": "Profile Picture",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "bookings": "My Bookings"
+    },
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "currentAddress": "Current Address",
+    "address": {
+      "address": "Address",
+      "country": "Country",
+      "city": "City",
+      "street": "Street",
+      "zip": "ZIP Code",
+      "helpText": "Please provide your complete address information. All fields are optional but recommended for better service.",
+      "countryPlaceholder": "Enter country",
+      "cityPlaceholder": "Enter city",
+      "streetPlaceholder": "Enter street address",
+      "zipPlaceholder": "Enter ZIP code"
+    },
+    "bio": "Bio",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastNamePlaceholder": "Enter your last name",
+    "phonePlaceholder": "Enter your phone number (e.g., 01234567890)",
+    "addressPlaceholder": "Enter your address",
+    "bioPlaceholder": "Tell us a bit about yourself...",
+    "emailReadOnly": "Email address cannot be changed",
+    "security": {
+      "changePassword": "Change Password",
+      "passwordDesc": "Update your password to keep your account secure",
+      "changePasswordButton": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "updatePassword": "Update Password"
+    },
+    "bookings": {
+      "title": "Your Bookings",
+      "description": "View and manage all your ticket bookings and event history",
+      "viewTickets": "View My Tickets"
+    },
+    "errors": {
+      "loadProfile": "Failed to load profile",
+      "updateFailed": "Failed to update profile",
+      "imageUploadFailed": "Failed to upload image",
+      "invalidImageType": "Please select a valid image file (JPEG, PNG, or GIF)",
+      "imageTooLarge": "Image size must be less than 5MB",
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "phoneInvalid": "Please enter a valid Egyptian phone number",
+      "cityRequired": "City is required when street is provided",
+      "countryRequired": "Country is required when city is provided",
+      "oldPasswordRequired": "Current password is required",
+      "newPasswordRequired": "New password is required",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "passwordMismatch": "Passwords do not match",
+      "fixErrors": "Please fix the errors in the form"
+    },
+    "success": {
+      "updated": "Profile updated successfully",
+      "imageUploaded": "Profile image updated successfully"
+    }
   }
-
-
-
-
-
 }
-

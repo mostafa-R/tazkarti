@@ -5,6 +5,7 @@
   "login": "تسجيل الدخول",
   "register": "تسجيل",
   "logout": "تسجيل الخروج",
+  "signin": "تسجيل الدخول",
   "language": "اللغة",
 
   "hero": {
@@ -71,7 +72,7 @@
     },
     "copyright": "© {{year}} تذكرتي. جميع الحقوق محفوظة."
   },
-  
+
   "eventsPage": {
     "title": "اكتشف الفعاليات",
     "subtitle": "ابحث واحجز تذاكر لأروع الفعاليات بالقرب منك",
@@ -131,7 +132,7 @@
       "cairoFestival": "مدينة القاهرة للمهرجانات"
     }
   },
-  
+
   "booking": {
     "defaultEventTitle": "فعالية افتراضية",
     "noTicketSelected": "لم يتم اختيار تذكرة",
@@ -175,7 +176,7 @@
     "continueToPayment": "تأكيد الدفع",
     "termsAgreement": "بالموافقة، أنت توافق على شروط الخدمة وسياسة الخصوصية الخاصة بنا"
   },
-  
+
   "confirmation": {
     "defaultEventTitle": "فعالية افتراضية",
     "defaultVenue": "مكان افتراضي",
@@ -197,10 +198,8 @@
     "ticketInfo": "معلومات التذكرة",
     "ticketType": "نوع التذكرة",
     "quantity": "الكمية",
-    "tickets": {
-      "one": "تذكرة",
-      "other": "تذاكر"
-    },
+    "ticketText": "تذكرة",
+    "ticketsText": "تذاكر",
     "totalPrice": "السعر الإجمالي",
     "bookingDetails": "تفاصيل الحجز",
     "customer": "العميل",
@@ -236,7 +235,7 @@
       "past": "سابقة",
       "cancelled": "ملغاة"
     },
-    
+
     "locations": {
       "blueNote": "نادي بلو نوت للجاز",
       "centralPark": "ساحة سنترال بارك",
@@ -248,10 +247,8 @@
     },
     "ticketType": "نوع التذكرة",
     "quantity": "الكمية",
-    "tickets": {
-      "one": "تذكرة",
-      "other": "تذاكر"
-    },
+    "ticketText": "تذكرة",
+    "ticketsText": "تذاكر",
     "totalPrice": "السعر الإجمالي",
     "bookingCode": "رمز الحجز",
     "viewTicket": "عرض التذكرة",
@@ -265,7 +262,113 @@
       "title": "بحاجة إلى مساعدة؟",
       "description": "تواجه مشكلة مع تذاكرك؟ فريق الدعم لدينا هنا لمساعدتك."
     }
+  },
+  "search": {
+    "title": "البحث عن الأحداث",
+    "backToHome": "العودة للرئيسية",
+    "filters": "المرشحات",
+    "searchKeyword": "البحث في الأحداث",
+    "searchPlaceholder": "أدخل اسم الحدث أو كلمة مفتاحية...",
+    "category": "الفئة",
+    "allCategories": "جميع الفئات",
+    "categories": {
+      "technology": "التكنولوجيا",
+      "business": "الأعمال",
+      "entertainment": "الترفيه",
+      "sports": "الرياضة",
+      "education": "التعليم",
+      "health": "الصحة"
+    },
+    "location": "الموقع",
+    "locationPlaceholder": "أدخل المدينة أو المكان...",
+    "dateRange": "نطاق التاريخ",
+    "searchButton": "البحث في الأحداث",
+    "clearFilters": "مسح جميع المرشحات",
+    "resultsCount": "تم العثور على {{count}} حدث",
+    "page": "صفحة",
+    "of": "من",
+    "searching": "جاري البحث في الأحداث...",
+    "noResults": "لم يتم العثور على أحداث",
+    "noResultsDesc": "جرب تعديل معايير البحث أو المرشحات",
+    "previous": "السابق",
+    "next": "التالي",
+    "error": "فشل في البحث عن الأحداث. حاول مرة أخرى."
+  },
+  "welcomeBack": "مرحباً بعودتك!",
+  "profile": {
+    "title": "ملفي الشخصي",
+    "backToHome": "العودة للرئيسية",
+    "loading": "جاري تحميل الملف الشخصي...",
+    "profilePicture": "صورة الملف الشخصي",
+    "saving": "جاري الحفظ...",
+    "saveChanges": "حفظ التغييرات",
+    "cancel": "إلغاء",
+    "tabs": {
+      "profile": "الملف الشخصي",
+      "security": "الأمان",
+      "bookings": "حجوزاتي"
+    },
+    "firstName": "الاسم الأول",
+    "lastName": "الاسم الأخير",
+    "email": "البريد الإلكتروني",
+    "phone": "رقم الهاتف",
+    "currentAddress": "العنوان الحالي",
+    "address": {
+      "address": "العنوان",
+      "country": "البلد",
+      "city": "المدينة",
+      "street": "الشارع",
+      "zip": "الرمز البريدي",
+      "helpText": "يرجى تقديم معلومات العنوان الكاملة. جميع الحقول اختيارية ولكن موصى بها لخدمة أفضل.",
+      "countryPlaceholder": "أدخل البلد",
+      "cityPlaceholder": "أدخل المدينة",
+      "streetPlaceholder": "أدخل عنوان الشارع",
+      "zipPlaceholder": "أدخل الرمز البريدي"
+    },
+    "bio": "نبذة شخصية",
+    "firstNamePlaceholder": "أدخل اسمك الأول",
+    "lastNamePlaceholder": "أدخل اسمك الأخير",
+    "phonePlaceholder": "أدخل رقم هاتفك (مثال: 01234567890)",
+    "addressPlaceholder": "أدخل عنوانك",
+    "bioPlaceholder": "أخبرنا قليلاً عن نفسك...",
+    "emailReadOnly": "لا يمكن تغيير البريد الإلكتروني",
+    "security": {
+      "changePassword": "تغيير كلمة المرور",
+      "passwordDesc": "قم بتحديث كلمة المرور للحفاظ على أمان حسابك",
+      "changePasswordButton": "تغيير كلمة المرور",
+      "currentPassword": "كلمة المرور الحالية",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور الجديدة",
+      "currentPasswordPlaceholder": "أدخل كلمة المرور الحالية",
+      "newPasswordPlaceholder": "أدخل كلمة المرور الجديدة",
+      "confirmPasswordPlaceholder": "أكد كلمة المرور الجديدة",
+      "updatePassword": "تحديث كلمة المرور"
+    },
+    "bookings": {
+      "title": "حجوزاتك",
+      "description": "عرض وإدارة جميع حجوزات التذاكر وتاريخ الأحداث",
+      "viewTickets": "عرض تذاكري"
+    },
+    "errors": {
+      "loadProfile": "فشل في تحميل الملف الشخصي",
+      "updateFailed": "فشل في تحديث الملف الشخصي",
+      "imageUploadFailed": "فشل في رفع الصورة",
+      "invalidImageType": "الرجاء اختيار ملف صورة صالح (JPEG أو PNG أو GIF)",
+      "imageTooLarge": "يجب أن يكون حجم الصورة أقل من 5 ميجابايت",
+      "firstNameRequired": "الاسم الأول مطلوب",
+      "lastNameRequired": "الاسم الأخير مطلوب",
+      "phoneInvalid": "الرجاء إدخال رقم هاتف مصري صالح",
+      "cityRequired": "المدينة مطلوبة عند توفير الشارع",
+      "countryRequired": "البلد مطلوب عند توفير المدينة",
+      "oldPasswordRequired": "كلمة المرور الحالية مطلوبة",
+      "newPasswordRequired": "كلمة المرور الجديدة مطلوبة",
+      "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+      "passwordMismatch": "كلمات المرور غير متطابقة",
+      "fixErrors": "الرجاء إصلاح الأخطاء في النموذج"
+    },
+    "success": {
+      "updated": "تم تحديث الملف الشخصي بنجاح",
+      "imageUploaded": "تم تحديث صورة الملف الشخصي بنجاح"
+    }
   }
-
-
 }
