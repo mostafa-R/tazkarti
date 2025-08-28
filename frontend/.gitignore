@@ -16,8 +16,8 @@ dist-ssr/
 build/
 
 # Local env files
-.env
-.env.*.local
+# .env
+# .env.*.local
 
 # Vite cache
 .vite/

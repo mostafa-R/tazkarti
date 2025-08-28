@@ -8,7 +8,7 @@ const POSSIBLE_BASE_URLS = [
 ].filter(Boolean);
 
 const api = axios.create({
-  // baseURL: "https://tazkaritbackend.fly.dev",
+  // استخدام متغير البيئة من ملف .env
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
   withCredentials: true,
   headers: {
@@ -75,8 +75,9 @@ export const eventsAPI = {
       return await api.get(`/api/events?${queryParams}`);
     } catch (error) {
       console.warn("Axios failed, trying fetch:", error.message);
-      // Fallback to native fetch
-      const url = `http://localhost:5000/api/events?${queryParams}`;
+      // استخدام نفس متغير البيئة كإحتياطي
+      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const url = `${baseUrl}/api/events?${queryParams}`;
       const token = localStorage.getItem("authToken");
 
       const response = await fetch(url, {

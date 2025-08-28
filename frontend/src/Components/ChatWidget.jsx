@@ -7,6 +7,8 @@ export default function ChatWidget() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
+  const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -16,7 +18,7 @@ export default function ChatWidget() {
 
     try {
       // استخدم fetch بدلاً من axios
-      const response = await fetch("http://localhost:5000/api/chat", {
+      const response = await fetch(`${baseURL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -129,9 +129,14 @@ const PaymentPage = () => {
       // 1️⃣ فصل تاريخ الانتهاء (MM/YY)
       const [expiryMonth, expiryYear] = cardData.expiryDate.split("/");
 
+      // عنوان API للتطوير وللإنتاج
+      const CKO_API_URL = "https://api.sandbox.checkout.com";
+      // مفتاح API العام
+      const CKO_PUBLIC_KEY = "pk_sbox_hp5vsh2prvoy3ez5gh2labufvys";
+
       // 2️⃣ إنشاء توكن للكارت باستخدام Checkout.com API
       const tokenRes = await axios.post(
-        "https://api.sandbox.checkout.com/tokens",
+        `${CKO_API_URL}/tokens`,
         {
           type: "card",
           number: cardData.cardNumber.replace(/\s/g, ""),
@@ -143,7 +148,7 @@ const PaymentPage = () => {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "pk_sbox_hp5vsh2prvoy3ez5gh2labufvys", // مفتاح API العام
+            Authorization: CKO_PUBLIC_KEY,
           },
         }
       );

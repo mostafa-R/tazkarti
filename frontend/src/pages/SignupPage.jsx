@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import RoleSelector from '../Components/RoleSelector.jsx';
-import OrganizerSignupForm from '../Components/OrganizerSignupForm.jsx';
-import UserSignupForm from './Signup.jsx';
-import EmailVerification from '../components/EmailVerification.jsx';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import EmailVerification from "../Components/EmailVerification.jsx";
+import OrganizerSignupForm from "../Components/OrganizerSignupForm.jsx";
+import RoleSelector from "../Components/RoleSelector.jsx";
+import UserSignupForm from "./Signup.jsx";
 
 export default function SignupPage() {
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState("");
   const [showVerification, setShowVerification] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
-  const [userType, setUserType] = useState('');
+  const [userEmail, setUserEmail] = useState("");
+  const [userType, setUserType] = useState("");
   const navigate = useNavigate();
 
   const handleSignupSuccess = (email, type) => {
@@ -18,24 +18,24 @@ export default function SignupPage() {
     setShowVerification(true);
   };
 
-  const handleVerificationSuccess = (type) => {
+  const handleVerificationSuccess = () => {
     setShowVerification(false);
     // Navigate to login page after successful verification
-    navigate('/login');
+    navigate("/login");
   };
 
   const handleBackToSignup = () => {
     setShowVerification(false);
-    setUserEmail('');
-    setUserType('');
+    setUserEmail("");
+    setUserType("");
   };
 
-  const title = 'Create Your Account';
+  // Title for the page (displayed in header)
   const subtitle = !role
-    ? 'Join as a User or Organizer to start your journey'
-    : role === 'user'
-      ? 'Create an account to book your tickets'
-      : 'Create your organizer account to start hosting events';
+    ? "Join as a User or Organizer to start your journey"
+    : role === "user"
+    ? "Create an account to book your tickets"
+    : "Create your organizer account to start hosting events";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-100 flex items-center justify-center p-4">
@@ -45,7 +45,7 @@ export default function SignupPage() {
           <div className="flex items-center justify-center gap-3 mb-3">
             <div className="bg-white text-[#0052CC] p-3 rounded-xl">
               <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V6a2 2 0 0 0-2-2Zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V10h14v9Zm0-11H5V6h14v2Z"/>
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v13a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V6a2 2 0 0 0-2-2Zm0 15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V10h14v9Zm0-11H5V6h14v2Z" />
               </svg>
             </div>
             <h1 className="text-3xl font-bold">Tazkarti</h1>
@@ -56,7 +56,7 @@ export default function SignupPage() {
         {/* Content */}
         <div className="p-8">
           {showVerification ? (
-            <EmailVerification 
+            <EmailVerification
               email={userEmail}
               userType={userType}
               onVerificationSuccess={handleVerificationSuccess}
@@ -66,18 +66,21 @@ export default function SignupPage() {
             <>
               {!role && <RoleSelector selectedRole={role} onSelect={setRole} />}
 
-              {role === 'user' && (
+              {role === "user" && (
                 <div className="space-y-6">
-                  <button onClick={() => setRole('')} className="text-[#0052CC] text-sm hover:underline">
+                  <button
+                    onClick={() => setRole("")}
+                    className="text-[#0052CC] text-sm hover:underline"
+                  >
                     ← Back to Role Selection
                   </button>
                   <UserSignupForm onSignupSuccess={handleSignupSuccess} />
                 </div>
               )}
 
-              {role === 'organizer' && (
-                <OrganizerSignupForm 
-                  onBack={() => setRole('')} 
+              {role === "organizer" && (
+                <OrganizerSignupForm
+                  onBack={() => setRole("")}
                   onSignupSuccess={handleSignupSuccess}
                 />
               )}
