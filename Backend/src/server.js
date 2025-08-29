@@ -7,7 +7,10 @@ import helmet from "helmet";
 import morgan from "morgan";
 import multer from "multer";
 import passport from "passport";
-import redocExpress from "redoc-express";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+const redocExpress = require("redoc-express");
 import connectDB from "./config/database.js";
 import "./config/passport.js";
 import { specs } from "./config/swagger.js";
@@ -38,8 +41,12 @@ const app = express();
 // 📚 Documentation
 app.get(
   "/docs",
-  redocExpress({ title: "🎫 Tazkarti API", specUrl: "/api-spec.json" })
+  redocExpress({
+    title: "API Docs",
+    specUrl: "/swagger.json",
+  })
 );
+
 app.get("/api-spec.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(specs);

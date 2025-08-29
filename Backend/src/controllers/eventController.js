@@ -276,14 +276,17 @@ export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
     const organizerId = req.user._id;
-
-    // Find event and verify ownership
+    // Find event and verify existence
     const existingEvent = await Event.findById(id);
     if (!existingEvent) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    if (existingEvent.organizer.toString() !== organizerId.toString()) {
+    // Check ownership only if the user is an organizer (not admin)
+    if (
+      req.user.role === "organizer" &&
+      existingEvent.organizer.toString() !== organizerId.toString()
+    ) {
       return res.status(403).json({
         message: "Access denied. You can only update your own events.",
       });
@@ -305,6 +308,7 @@ export const updateEvent = async (req, res) => {
     } = req.body;
 
     console.log(req.body);
+
     // Handle file uploads if present
     const imagesFiles = Array.isArray(req.files?.images)
       ? req.files.images
@@ -358,7 +362,7 @@ export const updateEvent = async (req, res) => {
     if (description) updateData.description = description;
     if (category) updateData.category = category;
 
-    // Handle date validation manually to avoid Mongoose validation issues
+    // Handle date validation manually
     let startDateObj = existingEvent.startDate;
     let endDateObj = existingEvent.endDate;
 
@@ -403,15 +407,11 @@ export const updateEvent = async (req, res) => {
     if (imageUrls.length > 0) updateData.images = imageUrls;
     if (trailerVideoUrl) updateData.trailerVideo = trailerVideoUrl;
 
-    // Reset approval status if significant changes are made
-    if (title || description || startDate || endDate || location) {
-      updateData.approved = false;
-    }
-
-    // Use context option to bypass Mongoose validator issues with dates
+  
+    // Update event
     const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
       new: true,
-      runValidators: false, // Disable automatic validators since we're doing manual validation
+      runValidators: false,
     }).populate("organizer", "firstName lastName email organizationName");
 
     res.status(200).json({
