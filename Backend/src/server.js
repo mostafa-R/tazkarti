@@ -62,11 +62,15 @@ const allowedOrigins = process.env.FRONTEND_URL
       "http://localhost:3000",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:3000",
+      "http://localhost:4200",
+      "http://127.0.0.1:4200",
     ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
+        console.log("🔎 Incoming request origin:", origin);
+
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
