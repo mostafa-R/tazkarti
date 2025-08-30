@@ -254,7 +254,7 @@ export const getNotifictions = async (req, res) => {
 
 //approved events
 export const approveEvent = async (req, res) => {
-  const { approved, id } = req.body;
+const { approved, id } = req.body;
 
   console.log("BODY:", req.body);
 
@@ -294,6 +294,7 @@ export const approveEvent = async (req, res) => {
       event,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error updating user approval status" });
+    console.error("Approve Event Error:", error);
+    res.status(500).json({ error: error.message });
   }
 };

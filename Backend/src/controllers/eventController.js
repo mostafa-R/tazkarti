@@ -407,7 +407,7 @@ export const updateEvent = async (req, res) => {
     if (imageUrls.length > 0) updateData.images = imageUrls;
     if (trailerVideoUrl) updateData.trailerVideo = trailerVideoUrl;
 
-  
+
     // Update event
     const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -428,21 +428,25 @@ export const updateEvent = async (req, res) => {
 export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const organizerId = req.user._id;
+    const user = req.user; // المفروض middleware يحط user في req
 
-    // Find event and verify ownership
     const event = await Event.findById(id);
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    if (event.organizer.toString() !== organizerId.toString()) {
+    // السماح للـ admin أو الـ organizer بمسح الحدث
+    if (
+      user.role !== "admin" &&
+      event.organizer.toString() !== user._id.toString()
+    ) {
       return res.status(403).json({
-        message: "Access denied. You can only delete your own events.",
+        message:
+          "Access denied. Only admin or event owner can delete this event.",
       });
     }
 
-    // Check if event has bookings
+    // تحقق من وجود bookings
     const bookingsCount = await Event.aggregate([
       { $match: { _id: event._id } },
       {
@@ -463,10 +467,10 @@ export const deleteEvent = async (req, res) => {
       });
     }
 
-    // Delete associated tickets first
+    // حذف التذاكر أولاً
     await Event.updateOne({ _id: id }, { $unset: { tickets: 1 } });
 
-    // Delete the event
+    // حذف الحدث
     await Event.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Event deleted successfully" });
@@ -475,3 +479,4 @@ export const deleteEvent = async (req, res) => {
     res.status(500).json({ message: error.message || "Server Error" });
   }
 };
+
