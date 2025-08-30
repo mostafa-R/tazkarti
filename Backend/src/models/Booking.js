@@ -40,8 +40,8 @@ const bookingSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["credit_card", "paypal", "bank_transfer", "cash", "wallet"],
-      default: "credit_card",
+      enum: ["credit_card", "paypal", "bank_transfer", "cash", "wallet", "card"],
+      default: "card",
     },
     transactionId: {
       type: String,

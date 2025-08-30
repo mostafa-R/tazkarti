@@ -254,7 +254,7 @@ export const getNotifictions = async (req, res) => {
 
 //approved events
 export const approveEvent = async (req, res) => {
-const { approved, id } = req.body;
+  const { approved, id } = req.body;
 
   console.log("BODY:", req.body);
 
@@ -288,6 +288,10 @@ const { approved, id } = req.body;
         sendRejectEmail(eventTitle)
       );
     }
+
+    await Notification.findOneAndDelete({
+      "data.eventId": event._id,
+    });
 
     res.status(200).json({
       message: `Event approval updated to ${approved}`,

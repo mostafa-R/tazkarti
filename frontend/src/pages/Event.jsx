@@ -12,6 +12,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import EventCard from "../Components/EventCard.jsx";
 import { eventsAPI } from "../services/api.js";
 
 const EventsPage = () => {
@@ -403,87 +404,22 @@ const EventsPage = () => {
                       : "grid-cols-1"
                   }`}
                 >
-                  {events.map((event) => (
-                    <div
-                      key={event._id}
-                      onClick={() => handleEventClick(event)}
-                      className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group transform hover:-translate-y-1 cursor-pointer ${
-                        viewMode === "list" ? "flex" : ""
-                      }`}
-                    >
-                      <div
-                        className={`relative ${
-                          viewMode === "list" ? "w-48 flex-shrink-0" : ""
-                        }`}
-                      >
-                        <img
-                          src={
-                            event.images?.[0] ||
-                            "https://via.placeholder.com/400x300?text=No+Image"
-                          }
-                          alt={event.title}
-                          className={`object-cover group-hover:scale-105 transition-transform duration-300 ${
-                            viewMode === "list"
-                              ? "w-full h-full"
-                              : "w-full h-48"
-                          }`}
-                        />
-
-                        {/* <div className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                          ${event.price }
-                        </div> */}
-                        
-                        <div className="absolute top-4 left-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium shadow-sm ${getCategoryBadgeColor(
-                              event.category
-                            )}`}
-                          >
-                            {event.category}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div
-                        className={`p-6 ${viewMode === "list" ? "flex-1" : ""}`}
-                      >
-                        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                          {event.title}
-                        </h3>
-
-                        <p className="text-gray-600 text-sm mb-3">
-                          {event.description}
-                        </p>
-
-                        <div className="flex items-center text-gray-600 mb-2">
-                          <Calendar className="h-4 w-4 mr-2 text-blue-500" />
-                          <span className="text-sm">
-                            {formatDate(event.startDate)} {t("at")} {event.time}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center text-gray-600 mb-4">
-                          <MapPin className="h-4 w-4 mr-2 text-red-500" />
-                          <span className="text-sm">
-                            {typeof event.location === "string"
-                              ? event.location
-                              : `${event.location?.venue || "TBD"}, ${
-                                  event.location?.city || "TBD"
-                                }`}
-                          </span>
-                        </div>
-
-                        <button
-                          onClick={(e) => handleBookNow(event, e)}
-                          className={`bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl ${
-                            viewMode === "list" ? "" : "w-full"
-                          }`}
-                        >
-                          {t("eventsPage.bookNow")} →
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                  {Array.isArray(events) && events.length > 0 ? (
+                    events.map((event) => (
+                      <EventCard
+                        event={event}
+                        key={event._id}
+                        handleEventClick={handleEventClick}
+                        viewMode={viewMode}
+                        formatDate={formatDate}
+                        handleBookNow={handleBookNow}
+                        getCategoryBadgeColor={getCategoryBadgeColor}
+                        t={t}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-gray-600">{t("eventsPage.noEvents")}</p>
+                  )}
                 </div>
 
                 {/* Pagination (from SearchPage) */}
