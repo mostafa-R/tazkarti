@@ -117,42 +117,6 @@ export const eventService = {
     return response.data;
   },
 
-  updateEvent: async (eventId, eventData) => {
-    const formData = new FormData();
-    
-    Object.keys(eventData).forEach(key => {
-      if (key !== 'images' && key !== 'trailerVideo') {
-        if (typeof eventData[key] === 'object') {
-          formData.append(key, JSON.stringify(eventData[key]));
-        } else {
-          formData.append(key, eventData[key]);
-        }
-      }
-    });
-
-    if (eventData.images && eventData.images.length > 0) {
-      eventData.images.forEach(image => {
-        formData.append('images', image);
-      });
-    }
-
-    if (eventData.trailerVideo) {
-      formData.append('trailerVideo', eventData.trailerVideo);
-    }
-
-    const response = await organizerAPI.put(`/api/events/${eventId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  deleteEvent: async (eventId) => {
-    const response = await organizerAPI.delete(`/api/events/${eventId}`);
-    return response.data;
-  },
-
   getEventById: async (eventId) => {
     const response = await organizerAPI.get(`/api/events/${eventId}`);
     return response.data;
@@ -168,16 +132,6 @@ export const ticketService = {
 
   getEventTickets: async (eventId) => {
     const response = await organizerAPI.get(`/api/tickets/event/${eventId}`);
-    return response.data;
-  },
-
-  updateTicket: async (ticketId, ticketData) => {
-    const response = await organizerAPI.put(`/api/tickets/${ticketId}`, ticketData);
-    return response.data;
-  },
-
-  deleteTicket: async (ticketId) => {
-    const response = await organizerAPI.delete(`/api/tickets/${ticketId}`);
     return response.data;
   },
 
@@ -224,11 +178,6 @@ export const bookingService = {
     });
 
     const response = await organizerAPI.get(`/api/booking/organizer/events/${eventId}/bookings?${queryParams}`);
-    return response.data;
-  },
-
-  updateBookingStatus: async (bookingId, status) => {
-    const response = await organizerAPI.put(`/api/booking/organizer/bookings/${bookingId}/status`, { status });
     return response.data;
   },
 

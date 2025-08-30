@@ -4,40 +4,136 @@ import { Event } from "../models/Event.js";
 import { Ticket } from "../models/Ticket.js";
 
 export const createTicket = asyncHandler(async (req, res) => {
-  const {
-    eventId,
-    type,
-    price,
-    quantity,
-    availableQuantity,
-    description,
-    features,
-    saleStartDate,
-    saleEndDate,
-    status,
-  } = req.body;
+  try {
+    // Log everything for debugging
+    console.log('=== TICKET CREATION DEBUG ===');
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('User:', req.user ? { id: req.user._id, role: req.user.role } : 'No user');
 
-  const ticket = await Ticket.create({
-    event: eventId,
-    type,
-    price,
-    quantity,
-    availableQuantity,
-    description,
-    features,
-    status: status || "active",
-    saleStartDate,
-    saleEndDate,
-    createdBy: req.user._id,
-  });
+    // Check authentication
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
 
-  await Event.findByIdAndUpdate(
-    eventId,
-    { $push: { tickets: ticket._id } },
-    { new: true }
-  );
+    const { eventId, type, price, quantity, description, features } = req.body;
 
-  res.status(201).json(ticket);
+    // Basic validation
+    if (!eventId || !type || price === undefined || quantity === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: eventId, type, price, quantity"
+      });
+    }
+
+    // Validate event exists
+    const event = await Event.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found"
+      });
+    }
+
+    // Check event ownership
+    if (event.organizer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only add tickets to your own events"
+      });
+    }
+
+    // Validate ticket type
+    const validTypes = ["Standard", "VIP", "Premium", "Early Bird", "Student"];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid ticket type. Must be one of: ${validTypes.join(', ')}`
+      });
+    }
+
+    // Create ticket with all required fields
+    const ticketData = {
+      event: eventId,
+      type: type,
+      price: parseFloat(price),
+      quantity: parseInt(quantity),
+      availableQuantity: parseInt(quantity),
+      createdBy: req.user._id,
+      description: description || '',
+      features: Array.isArray(features) ? features : [],
+      ticketCode: Math.random().toString(36).substr(2, 9).toUpperCase(),
+      currency: "EGP",
+      saleStartDate: new Date(),
+      saleEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+      status: "active"
+    };
+
+    console.log('Creating ticket with data:', ticketData);
+
+    // Validate the ticket data before creating
+    const ticketInstance = new Ticket(ticketData);
+    const validationError = ticketInstance.validateSync();
+    
+    if (validationError) {
+      console.error('=== VALIDATION ERROR BEFORE CREATE ===');
+      console.error('Validation errors:', validationError.errors);
+      const validationMessages = Object.values(validationError.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validationMessages
+      });
+    }
+
+    console.log('Validation passed, creating ticket...');
+    const ticket = await Ticket.create(ticketData);
+    console.log('Ticket created successfully:', ticket._id);
+
+    // Update event
+    await Event.findByIdAndUpdate(
+      eventId,
+      { $push: { tickets: ticket._id } }
+    );
+
+    res.status(201).json({
+      success: true,
+      ticket
+    });
+
+  } catch (error) {
+    console.error('=== TICKET CREATION ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    
+    if (error.name === 'ValidationError') {
+      console.error('Validation errors:', error.errors);
+      const validationMessages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validationMessages
+      });
+    }
+
+    if (error.code === 11000) {
+      console.error('Duplicate key error:', error.keyValue);
+      return res.status(400).json({
+        success: false,
+        message: "Duplicate ticket code. Please try again."
+      });
+    }
+
+    console.error('Full error:', error);
+    
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+    });
+  }
 });
 
 export const getTickets = asyncHandler(async (req, res) => {
@@ -246,10 +342,18 @@ export const verifyTicket = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Ticket verification error:", error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    if (error.errors) {
+      console.error('Validation errors:', error.errors);
+    }
+    console.error('Full error object:', JSON.stringify(error, null, 2));
+    
     return res.status(500).json({
       success: false,
       message: "حدث خطأ في التحقق من التذكرة",
       error: error.message,
+      validationErrors: error.errors || null
     });
   }
 });
@@ -338,10 +442,18 @@ export const checkInTicket = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Check-in error:", error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    if (error.errors) {
+      console.error('Validation errors:', error.errors);
+    }
+    console.error('Full error object:', JSON.stringify(error, null, 2));
+    
     return res.status(500).json({
       success: false,
       message: "حدث خطأ في تسجيل الدخول",
       error: error.message,
+      validationErrors: error.errors || null
     });
   }
 });
@@ -449,10 +561,18 @@ export const getTicketStats = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error("Get ticket stats error:", error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    if (error.errors) {
+      console.error('Validation errors:', error.errors);
+    }
+    console.error('Full error object:', JSON.stringify(error, null, 2));
+    
     return res.status(500).json({
       success: false,
       message: "حدث خطأ في جلب الإحصائيات",
       error: error.message,
+      validationErrors: error.errors || null
     });
   }
 });

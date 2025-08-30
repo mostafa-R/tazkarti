@@ -10,8 +10,8 @@ const ticketSchema = new mongoose.Schema(
     type: {
       type: String,
       required: [true, "Ticket type is required"],
-      enum: ["standard", "vip"],
-      default: "standard",
+      enum: ["Standard", "VIP", "Premium", "Early Bird", "Student"],
+      default: "Standard",
     },
     price: {
       type: Number,
@@ -57,10 +57,9 @@ const ticketSchema = new mongoose.Schema(
     },
     saleEndDate: {
       type: Date,
-      required: [true, "Sale end date is required"],
       validate: {
         validator: function (value) {
-          return value > this.saleStartDate;
+          return value === undefined || value > this.saleStartDate;
         },
         message: "Sale end date must be after sale start date",
       },
@@ -107,7 +106,7 @@ ticketSchema.pre("save", function (next) {
 
   if (this.availableQuantity <= 0) {
     this.status = "sold_out";
-  } else if (now > this.saleEndDate) {
+  } else if (this.saleEndDate && now > this.saleEndDate) {
     this.status = "sale_ended";
   } else if (now >= this.saleStartDate && this.availableQuantity > 0) {
     this.status = "active";
