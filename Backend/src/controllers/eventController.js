@@ -227,7 +227,7 @@ export const getUpcomingEvents = async (req, res) => {
   }
 };
 
-// Get events by organizer (for organizer dashboard)
+// Get events by organizer (for organizer dashboard) - ✅ ALLOWED
 export const getOrganizerEvents = async (req, res) => {
   try {
     const organizerId = req.user._id;
@@ -271,24 +271,24 @@ export const getOrganizerEvents = async (req, res) => {
   }
 };
 
-// Update event (organizer only)
+// ❌ REMOVED: updateEvent function - Organizers can no longer update events
+// This functionality is now restricted to admin only
+
+// Update event (ADMIN ONLY - organizers cannot update events anymore)
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const organizerId = req.user._id;
+    
     // Find event and verify existence
     const existingEvent = await Event.findById(id);
     if (!existingEvent) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    // Check ownership only if the user is an organizer (not admin)
-    if (
-      req.user.role === "organizer" &&
-      existingEvent.organizer.toString() !== organizerId.toString()
-    ) {
+    // ❌ RESTRICTION: Only admin can update events now
+    if (req.user.role !== "admin") {
       return res.status(403).json({
-        message: "Access denied. You can only update your own events.",
+        message: "Access denied. Only admin can update events.",
       });
     }
 
@@ -407,7 +407,6 @@ export const updateEvent = async (req, res) => {
     if (imageUrls.length > 0) updateData.images = imageUrls;
     if (trailerVideoUrl) updateData.trailerVideo = trailerVideoUrl;
 
-
     // Update event
     const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -424,25 +423,22 @@ export const updateEvent = async (req, res) => {
   }
 };
 
-// Delete event (organizer only)
+// ❌ REMOVED: deleteEvent function for organizers - Now ADMIN ONLY
+// Delete event (ADMIN ONLY - organizers cannot delete events anymore)
 export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = req.user; // المفروض middleware يحط user في req
+    const user = req.user;
 
     const event = await Event.findById(id);
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    // السماح للـ admin أو الـ organizer بمسح الحدث
-    if (
-      user.role !== "admin" &&
-      event.organizer.toString() !== user._id.toString()
-    ) {
+    // ❌ RESTRICTION: Only admin can delete events now
+    if (user.role !== "admin") {
       return res.status(403).json({
-        message:
-          "Access denied. Only admin or event owner can delete this event.",
+        message: "Access denied. Only admin can delete events.",
       });
     }
 
@@ -479,4 +475,3 @@ export const deleteEvent = async (req, res) => {
     res.status(500).json({ message: error.message || "Server Error" });
   }
 };
-

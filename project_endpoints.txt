@@ -373,3 +373,28 @@ with the admin dashboard and frontend applications.
 
 Base URL: http://localhost:5000 (development)
 API Prefix: All routes are prefixed as defined in server.js routing
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
