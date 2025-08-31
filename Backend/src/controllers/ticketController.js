@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Event } from "../models/Event.js";
 import { Ticket } from "../models/Ticket.js";
 
+// ✅ ALLOWED: Organizers can CREATE ticket types for their events
 export const createTicket = asyncHandler(async (req, res) => {
   const {
     eventId,
@@ -48,6 +49,7 @@ export const getTickets = asyncHandler(async (req, res) => {
   res.json(tickets);
 });
 
+// ✅ ALLOWED: Organizers can VIEW specific ticket details
 export const getTicketById = asyncHandler(async (req, res) => {
   const ticket = await Ticket.findById(req.params.id)
     .populate("event", "title date")
@@ -61,7 +63,7 @@ export const getTicketById = asyncHandler(async (req, res) => {
   res.json(ticket);
 });
 
-// NEW: Get tickets for a specific event
+// ✅ ALLOWED: Organizers can VIEW tickets for specific events
 export const getTicketsByEvent = asyncHandler(async (req, res) => {
   const { eventId } = req.params;
 
@@ -83,7 +85,8 @@ export const getTicketsByEvent = asyncHandler(async (req, res) => {
   res.json(tickets);
 });
 
-//  Organizer
+// ❌ REMOVED: updateTicket function for organizers - Now ADMIN ONLY
+// Update ticket (ADMIN ONLY - organizers cannot update tickets anymore)
 export const updateTicket = asyncHandler(async (req, res) => {
   const {
     type,
@@ -102,6 +105,12 @@ export const updateTicket = asyncHandler(async (req, res) => {
     throw new Error("Ticket not found");
   }
 
+  // ❌ RESTRICTION: Only admin can update tickets now
+  if (req.user.role !== "admin") {
+    res.status(403);
+    throw new Error("Access denied. Only admin can update tickets.");
+  }
+
   // Optional updates
   if (type) ticket.type = type;
   if (price) ticket.price = price;
@@ -117,12 +126,19 @@ export const updateTicket = asyncHandler(async (req, res) => {
   res.json(ticket);
 });
 
-//  Organizer
+// ❌ REMOVED: deleteTicket function for organizers - Now ADMIN ONLY
+// Delete ticket (ADMIN ONLY - organizers cannot delete tickets anymore)
 export const deleteTicket = asyncHandler(async (req, res) => {
   const ticket = await Ticket.findById(req.params.id);
   if (!ticket) {
     res.status(404);
     throw new Error("Ticket not found");
+  }
+
+  // ❌ RESTRICTION: Only admin can delete tickets now
+  if (req.user.role !== "admin") {
+    res.status(403);
+    throw new Error("Access denied. Only admin can delete tickets.");
   }
 
   await ticket.deleteOne();
