@@ -19,6 +19,7 @@ import { uploadEventMedia } from "../middleware/uploads/eventUpload.js";
 
 const router = express.Router();
 
+// ✅ ALLOWED: Organizers can CREATE events
 router.post(
   "/create",
   authMiddleware, // ← تأكد إنه مسجل دخول
@@ -28,6 +29,7 @@ router.post(
   createEvent
 );
 
+// Public routes (unchanged - for users)
 router.get("/", cachePublicEvents, getAllEvents); // مع cache للأحداث العامة
 
 router.get(
@@ -39,7 +41,7 @@ router.get(
 
 router.get("/upcoming", cachePublicEvents, getUpcomingEvents); // مع cache
 
-// Organizer-specific routes
+// ✅ ALLOWED: Organizers can VIEW their own events
 router.get(
   "/organizer/my-events",
   authMiddleware,
@@ -47,27 +49,31 @@ router.get(
   getOrganizerEvents
 );
 
+// ❌ RESTRICTED: UPDATE routes - ADMIN ONLY now (organizers blocked)
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware(["organizer", "admin"]),
+  roleMiddleware(["admin"]), // ❌ Removed "organizer" - ADMIN ONLY
   uploadEventMedia,
   updateEvent
 );
 
+// ❌ RESTRICTED: DELETE routes - ADMIN ONLY now (organizers blocked)
 router.delete(
   "/:id",
   authMiddleware,
-  roleMiddleware(["organizer", "admin"]),
+  roleMiddleware(["admin"]), // ❌ Removed "organizer" - ADMIN ONLY
   deleteEvent
 );
 
+// ✅ ALLOWED: Anyone can VIEW specific event details (public route)
 router.get("/:id", getEventById);
 
+// ❌ RESTRICTED: PATCH/EDIT route - ADMIN ONLY now (organizers blocked)
 router.patch(
   "/edit/:id",
   authMiddleware,
-  roleMiddleware(["organizer", "admin"]),
+  roleMiddleware(["admin"]), // ❌ Removed "organizer" - ADMIN ONLY
   uploadEventMedia,
   updateEvent
 );
