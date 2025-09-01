@@ -12,6 +12,7 @@ import {
   Search
 } from 'lucide-react';
 import organizerAPI from '../services/organizerAPI';
+import OrganizerNavbar from '../Components/OrganizerNavbar';
 
 const ManageTickets = () => {
   const [events, setEvents] = useState([]);
@@ -151,31 +152,8 @@ const ManageTickets = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center">
-              <button
-                onClick={() => navigate('/organizer-dashboard')}
-                className="mr-4 p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <h1 className="text-2xl font-bold text-[#0052CC]">Manage Tickets</h1>
-            </div>
-            {selectedEvent && (
-              <button
-                onClick={() => setShowAddTicketForm(true)}
-                className="bg-[#0052CC] text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Ticket
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* Organizer Navbar */}
+      <OrganizerNavbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Error Message */}

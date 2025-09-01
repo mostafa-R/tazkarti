@@ -15,7 +15,6 @@ import ErrorBoundary from "./ErrorBoundary.jsx";
 // Pages
 import ChatBot from "./Components/ChatWidget.jsx";
 import EmailVerification from "./Components/EmailVerification.jsx";
-import EnhancedBookingManagement from "./Components/EnhancedBookingManagement.jsx";
 import BookingPage from "./pages/Booking.jsx";
 import BookingConfirmationPage from "./pages/BookingConfirmation.jsx";
 import CreateEventPage from "./pages/CreateEvent.jsx";
@@ -26,6 +25,7 @@ import LoginPage from "./pages/Login.jsx";
 import ManageTickets from "./pages/ManageTickets.jsx";
 import OrganizerDashboard from "./pages/OrganizerDashboard.jsx";
 import PaymentPage from "./pages/Payment.jsx";
+import ViewBookingsPage from "./pages/ViewBookings.jsx";
 
 import Footer from "./Components/footer.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
@@ -54,6 +54,8 @@ const Layout = ({ children }) => {
     "/admin-dashboard",
     "/create-event",
     "/manage-tickets",
+    "/view-bookings",
+    "/enhanced-booking-management",
   ]; // إضافة /booking/ للـ patterns
 
   const shouldHideNavbar =
@@ -166,7 +168,7 @@ function App() {
                 path="/view-bookings"
                 element={
                   <ProtectedRoute requiredRole="organizer">
-                    <EnhancedBookingManagement />
+                    <ViewBookingsPage />
                   </ProtectedRoute>
                 }
               />
@@ -174,7 +176,7 @@ function App() {
                 path="/enhanced-booking-management"
                 element={
                   <ProtectedRoute requiredRole="organizer">
-                    <EnhancedBookingManagement />
+                    <ViewBookingsPage />
                   </ProtectedRoute>
                 }
               />
