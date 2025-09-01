@@ -1,18 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
-  Download, 
   Eye, 
-  Calendar, 
   Users, 
-  DollarSign, 
-  TrendingUp,
   ChevronDown,
   ChevronUp,
   RefreshCw,
-  FileText,
-  BarChart3,
   Clock,
   CheckCircle,
   XCircle,
@@ -22,23 +16,16 @@ import { bookingService, eventService } from '../services/organizerAPI';
 
 const EnhancedBookingManagement = () => {
   const [bookings, setBookings] = useState([]);
-  const [analytics, setAnalytics] = useState(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [showAnalytics, setShowAnalytics] = useState(false);
 
-  // Filter states
+  // Filter states (simplified)
   const [filters, setFilters] = useState({
     search: '',
-    status: '',
     paymentStatus: '',
     eventId: '',
-    dateFrom: '',
-    dateTo: '',
-    sortBy: 'createdAt',
     sortOrder: 'desc'
   });
 
@@ -59,11 +46,30 @@ const EnhancedBookingManagement = () => {
   const loadBookings = async () => {
     try {
       setLoading(true);
-      const response = await bookingService.getDetailedBookings({
-        ...filters,
-        page: pagination.currentPage,
-        limit: pagination.limit
-      });
+      console.log('Loading bookings with filters:', filters);
+      
+      // Try the enhanced endpoint first
+      let response;
+      try {
+        response = await bookingService.getDetailedBookings({
+          ...filters,
+          page: pagination.currentPage,
+          limit: pagination.limit
+        });
+        console.log('Enhanced bookings response:', response);
+      } catch (enhancedError) {
+        console.warn('Enhanced bookings failed, falling back to basic bookings:', enhancedError);
+        
+        // Fallback to the existing endpoint that works in dashboard
+        response = await bookingService.getMyBookings({
+          page: pagination.currentPage,
+          limit: pagination.limit,
+          search: filters.search,
+          paymentStatus: filters.paymentStatus,
+          eventId: filters.eventId
+        });
+        console.log('Basic bookings response:', response);
+      }
 
       setBookings(response.bookings || []);
       setPagination(prev => ({
@@ -71,8 +77,11 @@ const EnhancedBookingManagement = () => {
         totalPages: response.pagination?.totalPages || 1,
         totalBookings: response.pagination?.totalBookings || 0
       }));
+      
+      console.log('Bookings loaded:', response.bookings?.length || 0);
     } catch (error) {
       console.error('Error loading bookings:', error);
+      setBookings([]);
     } finally {
       setLoading(false);
     }
@@ -87,36 +96,9 @@ const EnhancedBookingManagement = () => {
     }
   };
 
-  const loadAnalytics = async () => {
-    try {
-      setAnalyticsLoading(true);
-      const response = await bookingService.getAdvancedAnalytics({
-        eventId: filters.eventId,
-        period: '30d'
-      });
-      setAnalytics(response.analytics);
-    } catch (error) {
-      console.error('Error loading analytics:', error);
-    } finally {
-      setAnalyticsLoading(false);
-    }
-  };
-
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
     setPagination(prev => ({ ...prev, currentPage: 1 }));
-  };
-
-  const handleExport = async (format = 'csv') => {
-    try {
-      await bookingService.exportBookings({
-        ...filters,
-        format,
-        fields: 'all'
-      });
-    } catch (error) {
-      console.error('Export error:', error);
-    }
   };
 
   const getStatusBadge = (status) => {
@@ -181,23 +163,9 @@ const EnhancedBookingManagement = () => {
           <div className="flex justify-between items-center mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Booking Management</h1>
-              <p className="text-gray-600 mt-1">Comprehensive booking analytics and management</p>
+              <p className="text-gray-600 mt-1">Comprehensive booking management</p>
             </div>
             <div className="flex space-x-3">
-              <button
-                onClick={() => setShowAnalytics(!showAnalytics)}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Analytics
-              </button>
-              <button
-                onClick={() => handleExport('csv')}
-                className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export CSV
-              </button>
               <button
                 onClick={loadBookings}
                 className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -207,63 +175,6 @@ const EnhancedBookingManagement = () => {
               </button>
             </div>
           </div>
-
-          {/* Analytics Panel */}
-          {showAnalytics && (
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Analytics Overview</h2>
-                <button
-                  onClick={loadAnalytics}
-                  className="text-blue-600 hover:text-blue-700"
-                  disabled={analyticsLoading}
-                >
-                  {analyticsLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Refresh'}
-                </button>
-              </div>
-              
-              {analytics && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="flex items-center">
-                      <Users className="w-8 h-8 text-blue-600" />
-                      <div className="ml-3">
-                        <p className="text-sm text-gray-600">Total Bookings</p>
-                        <p className="text-2xl font-bold text-gray-900">{analytics.overview.totalBookings}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="flex items-center">
-                      <DollarSign className="w-8 h-8 text-green-600" />
-                      <div className="ml-3">
-                        <p className="text-sm text-gray-600">Total Revenue</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(analytics.overview.totalRevenue)}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="flex items-center">
-                      <TrendingUp className="w-8 h-8 text-purple-600" />
-                      <div className="ml-3">
-                        <p className="text-sm text-gray-600">Conversion Rate</p>
-                        <p className="text-2xl font-bold text-gray-900">{analytics.overview.conversionRate}%</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <div className="flex items-center">
-                      <FileText className="w-8 h-8 text-orange-600" />
-                      <div className="ml-3">
-                        <p className="text-sm text-gray-600">Avg Order Value</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(analytics.overview.averageOrderValue)}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* Filters */}
           <div className="bg-white rounded-xl shadow-sm p-4">
@@ -293,17 +204,6 @@ const EnhancedBookingManagement = () => {
             {showFilters && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t">
                 <select
-                  value={filters.status}
-                  onChange={(e) => handleFilterChange('status', e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-
-                <select
                   value={filters.paymentStatus}
                   onChange={(e) => handleFilterChange('paymentStatus', e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
@@ -327,14 +227,12 @@ const EnhancedBookingManagement = () => {
                 </select>
 
                 <select
-                  value={filters.sortBy}
-                  onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                  value={filters.sortOrder}
+                  onChange={(e) => handleFilterChange('sortOrder', e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="createdAt">Sort by Date</option>
-                  <option value="totalPrice">Sort by Amount</option>
-                  <option value="quantity">Sort by Quantity</option>
-                  <option value="attendeeInfo.name">Sort by Name</option>
+                  <option value="desc">Sort by Date (Newest)</option>
+                  <option value="asc">Sort by Date (Oldest)</option>
                 </select>
               </div>
             )}

@@ -153,7 +153,7 @@ export const ticketService = {
   // ❌ REMOVED: deleteTicket - Organizers can no longer delete tickets
 };
 
-// Booking Management Services (enhanced)
+// Booking Management Services (simplified)
 export const bookingService = {
   getMyBookings: async (params = {}) => {
     const { page = 1, limit = 10, status, paymentStatus, search } = params;
@@ -184,7 +184,7 @@ export const bookingService = {
       sortBy = 'createdAt',
       sortOrder = 'desc'
     } = params;
-    
+
     const queryParams = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
@@ -203,96 +203,27 @@ export const bookingService = {
     return response.data;
   },
 
-  // ✅ NEW: Advanced booking analytics
-  getAdvancedAnalytics: async (params = {}) => {
-    const { eventId, period = '30d', timezone = 'UTC' } = params;
-    const queryParams = new URLSearchParams({
-      ...(eventId && { eventId }),
-      period,
-      timezone
-    });
-
-    const response = await organizerAPI.get(`/api/booking/organizer/bookings/analytics?${queryParams}`);
+  // ✅ ALLOWED: View specific booking details
+  getBookingById: async (bookingId) => {
+    const response = await organizerAPI.get(`/api/booking/${bookingId}`);
     return response.data;
   },
 
-  // ✅ NEW: Export bookings functionality
-  exportBookings: async (params = {}) => {
-    const { 
-      format = 'csv', 
-      status, 
-      paymentStatus, 
-      eventId,
-      dateFrom,
-      dateTo,
-      fields = 'all'
-    } = params;
-    
-    const queryParams = new URLSearchParams({
-      format,
-      ...(status && { status }),
-      ...(paymentStatus && { paymentStatus }),
-      ...(eventId && { eventId }),
-      ...(dateFrom && { dateFrom }),
-      ...(dateTo && { dateTo }),
-      fields
-    });
-
-    const response = await organizerAPI.get(`/api/booking/organizer/bookings/export?${queryParams}`, {
-      responseType: format === 'json' ? 'json' : 'blob'
-    });
-
-    if (format === 'json') {
-      return response.data;
-    }
-
-    // Handle file download for CSV
-    const blob = new Blob([response.data], { 
-      type: format === 'csv' ? 'text/csv' : 'application/json' 
-    });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `bookings-${Date.now()}.${format}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    
-    return { success: true, message: 'Export completed' };
-  },
-
-  getBookingStats: async (params = {}) => {
-    const { eventId, startDate, endDate } = params;
-    const queryParams = new URLSearchParams({
-      ...(eventId && { eventId }),
-      ...(startDate && { startDate }),
-      ...(endDate && { endDate })
-    });
-
-    const response = await organizerAPI.get(`/api/booking/organizer/bookings/stats?${queryParams}`);
+  // ✅ ALLOWED: Get booking statistics for dashboard
+  getBookingStats: async () => {
+    const response = await organizerAPI.get('/api/booking/organizer/stats');
     return response.data;
   },
 
+  // ✅ ALLOWED: Get bookings for specific event
   getEventBookings: async (eventId, params = {}) => {
-    const { page = 1, limit = 10, status } = params;
+    const { page = 1, limit = 10 } = params;
     const queryParams = new URLSearchParams({
       page: page.toString(),
-      limit: limit.toString(),
-      ...(status && { status })
+      limit: limit.toString()
     });
 
-    const response = await organizerAPI.get(`/api/booking/organizer/events/${eventId}/bookings?${queryParams}`);
-    return response.data;
-  },
-
-  updateBookingStatus: async (bookingId, status) => {
-    const response = await organizerAPI.put(`/api/booking/organizer/bookings/${bookingId}/status`, { status });
-    return response.data;
-  },
-
-  getBookingById: async (bookingId) => {
-    const response = await organizerAPI.get(`/api/booking/organizer/bookings/${bookingId}`);
+    const response = await organizerAPI.get(`/api/booking/event/${eventId}?${queryParams}`);
     return response.data;
   }
 };

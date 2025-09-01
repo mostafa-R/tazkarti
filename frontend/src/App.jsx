@@ -15,6 +15,7 @@ import ErrorBoundary from "./ErrorBoundary.jsx";
 // Pages
 import ChatBot from "./Components/ChatWidget.jsx";
 import EmailVerification from "./Components/EmailVerification.jsx";
+import EnhancedBookingManagement from "./Components/EnhancedBookingManagement.jsx";
 import BookingPage from "./pages/Booking.jsx";
 import BookingConfirmationPage from "./pages/BookingConfirmation.jsx";
 import CreateEventPage from "./pages/CreateEvent.jsx";
@@ -158,6 +159,22 @@ function App() {
                 element={
                   <ProtectedRoute requiredRole="organizer">
                     <ManageTickets />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/view-bookings"
+                element={
+                  <ProtectedRoute requiredRole="organizer">
+                    <EnhancedBookingManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/enhanced-booking-management"
+                element={
+                  <ProtectedRoute requiredRole="organizer">
+                    <EnhancedBookingManagement />
                   </ProtectedRoute>
                 }
               />

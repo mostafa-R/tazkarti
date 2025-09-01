@@ -12,8 +12,6 @@ import {
   getUserBookings,
   updateBookingStatus,
   getDetailedBookings,
-  getAdvancedBookingAnalytics,
-  exportBookings,
 } from "../controllers/booking.controller.js";
 import {
   checkoutWebhook,
@@ -102,24 +100,12 @@ router.get(
   getEventBookings
 );
 
-// Enhanced booking management routes
+// Enhanced booking management routes (simplified)
 router.get(
   "/organizer/bookings/detailed",
   authenticateToken,
   requireRole(["organizer"]),
   getDetailedBookings
-);
-router.get(
-  "/organizer/bookings/analytics",
-  authenticateToken,
-  requireRole(["organizer"]),
-  getAdvancedBookingAnalytics
-);
-router.get(
-  "/organizer/bookings/export",
-  authenticateToken,
-  requireRole(["organizer"]),
-  exportBookings
 );
 
 // إعداد Cron Job لإلغاء الحجوزات المنتهية الصلاحية
