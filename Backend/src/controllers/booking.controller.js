@@ -612,14 +612,236 @@ export const updateBookingStatus = async (req, res) => {
 };
 
 /**
- * الحصول على إحصائيات الحجوزات للمنظم
+ * get booking for a specific event
+ */
+export const getEventBookings = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const organizerId = req.user._id;
+    const { page = 1, limit = 10, status } = req.query;
+
+    // sure that the event belongs to the organizer
+    const event = await Event.findOne({ _id: eventId, organizer: organizerId });
+    if (!event) {
+      return res
+        .status(404)
+        .json({ message: "Event not found or access denied" });
+    }
+
+    // building query
+    let query = { event: eventId };
+    if (status) {
+      query.status = status;
+    }
+
+    // calculating pagination
+    const skip = (page - 1) * limit;
+    const totalBookings = await Booking.countDocuments(query);
+    const totalPages = Math.ceil(totalBookings / limit);
+
+    // getting bookings
+
+    const bookings = await Booking.find(query)
+      .populate("user", "userName email phone")
+      .populate("ticket", "type price currency")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    res.status(200).json({
+      event: {
+        id: event._id,
+        title: event.title,
+        startDate: event.startDate,
+        endDate: event.endDate,
+      },
+      bookings,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalBookings,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    });
+  } catch (error) {
+    console.error("Get event bookings error:", error);
+    res.status(500).json({
+      message: "Failed to fetch event bookings",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * get detailed bookings with advanced information
+ */
+export const getDetailedBookings = async (req, res) => {
+  try {
+    const organizerId = req.user._id;
+    const { 
+      page = 1, 
+      limit = 10, 
+      paymentStatus, 
+      search, 
+      eventId,
+      sortOrder = 'desc'
+    } = req.query;
+
+    // finding organizer events
+    const organizerEvents = await Event.find({ organizer: organizerId }).select("_id title");
+    const eventIds = organizerEvents.map(event => event._id);
+
+    if (eventIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        bookings: [],
+        pagination: { currentPage: 1, totalPages: 0, totalBookings: 0, hasNext: false, hasPrev: false },
+        summary: { totalRevenue: 0, totalTickets: 0, averageOrderValue: 0 }
+      });
+    }
+
+    // building query for simplified search
+    let query = { event: { $in: eventIds } };
+
+    // simplified filters
+    if (paymentStatus) query.paymentStatus = paymentStatus;
+    if (eventId) query.event = eventId;
+
+    // text search
+    if (search) {
+      query.$or = [
+        { bookingCode: { $regex: search, $options: 'i' } },
+        { 'attendeeInfo.name': { $regex: search, $options: 'i' } },
+        { 'attendeeInfo.email': { $regex: search, $options: 'i' } },
+        { 'attendeeInfo.phone': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // pagination and sorting
+    const skip = (page - 1) * limit;
+    const sort = { createdAt: sortOrder === 'asc' ? 1 : -1 };
+
+    // executing the query with detailed data
+    const [bookings, totalBookings] = await Promise.all([
+      Booking.find(query)
+        .populate({
+          path: 'event',
+          select: 'title startDate endDate location category images maxAttendees',
+          populate: {
+            path: 'organizer',
+            select: 'firstName lastName email'
+          }
+        })
+        .populate({
+          path: 'user',
+          select: 'userName email phone createdAt lastLogin profileImage',
+          populate: {
+            path: 'ticketsBooked',
+            select: 'createdAt totalPrice',
+            options: { limit: 5 }
+          }
+        })
+        .populate({
+          path: 'ticket',
+          select: 'type price currency description features availableQuantity quantity'
+        })
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit)),
+
+      Booking.countDocuments(query)
+    ]);
+
+    // calculating statistics
+    const summary = await Booking.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: { $cond: [{ $eq: ['$paymentStatus', 'completed'] }, '$totalPrice', 0] } },
+          totalTickets: { $sum: '$quantity' },
+          completedBookings: { $sum: { $cond: [{ $eq: ['$paymentStatus', 'completed'] }, 1, 0] } },
+          averageOrderValue: { $avg: '$totalPrice' }
+        }
+      }
+    ]);
+
+    // enriching bookings with additional information
+    const enrichedBookings = await Promise.all(bookings.map(async (booking) => {
+      // calculating user booking count
+      const userBookingCount = await Booking.countDocuments({
+        user: booking.user._id,
+        paymentStatus: 'completed'
+      });
+
+      // calculating event occupancy rate
+      const eventBookings = await Booking.aggregate([
+        { $match: { event: booking.event._id, paymentStatus: 'completed' } },
+        { $group: { _id: null, totalTickets: { $sum: '$quantity' } } }
+      ]);
+
+      const occupancyRate = eventBookings.length > 0 
+        ? ((eventBookings[0].totalTickets / booking.event.maxAttendees) * 100).toFixed(1)
+        : 0;
+
+      return {
+        ...booking.toObject(),
+        userStats: {
+          totalBookings: userBookingCount,
+          isReturningCustomer: userBookingCount > 1,
+          customerSince: booking.user.createdAt,
+          lastLogin: booking.user.lastLogin
+        },
+        eventStats: {
+          occupancyRate: parseFloat(occupancyRate),
+          remainingCapacity: booking.event.maxAttendees - (eventBookings.length > 0 ? eventBookings[0].totalTickets : 0)
+        },
+        ticketStats: {
+          availabilityPercentage: ((booking.ticket.availableQuantity / booking.ticket.quantity) * 100).toFixed(1)
+        }
+      };
+    }));
+
+    const totalPages = Math.ceil(totalBookings / limit);
+
+    res.status(200).json({
+      success: true,
+      bookings: enrichedBookings,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        totalBookings,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      },
+      summary: summary.length > 0 ? {
+        totalRevenue: summary[0].totalRevenue || 0,
+        totalTickets: summary[0].totalTickets || 0,
+        completedBookings: summary[0].completedBookings || 0,
+        averageOrderValue: summary[0].averageOrderValue || 0
+      } : { totalRevenue: 0, totalTickets: 0, completedBookings: 0, averageOrderValue: 0 }
+    });
+
+  } catch (error) {
+    console.error('Get detailed bookings error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch detailed bookings',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * get booking statistics for organizer dashboard
  */
 export const getBookingStats = async (req, res) => {
   try {
     const organizerId = req.user._id;
     const { eventId, startDate, endDate } = req.query;
 
-    // العثور على أحداث المنظم
+    // find events for the organizer
     let eventQuery = { organizer: organizerId };
     if (eventId) {
       eventQuery._id = eventId;
@@ -639,7 +861,7 @@ export const getBookingStats = async (req, res) => {
       });
     }
 
-    // بناء فلتر التاريخ
+    // building date filter
     let dateFilter = {};
     if (startDate || endDate) {
       dateFilter.createdAt = {};
@@ -647,7 +869,7 @@ export const getBookingStats = async (req, res) => {
       if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
     }
 
-    // الحصول على إحصائيات الحجوزات
+    // get booking query 
     const bookingQuery = { event: { $in: eventIds }, ...dateFilter };
 
     const [
@@ -687,67 +909,6 @@ export const getBookingStats = async (req, res) => {
     console.error("Get booking stats error:", error);
     res.status(500).json({
       message: "Failed to fetch booking statistics",
-      error: error.message,
-    });
-  }
-};
-
-/**
- * الحصول على حجوزات حدث معين
- */
-export const getEventBookings = async (req, res) => {
-  try {
-    const { eventId } = req.params;
-    const organizerId = req.user._id;
-    const { page = 1, limit = 10, status } = req.query;
-
-    // التأكد من أن الحدث يخص المنظم
-    const event = await Event.findOne({ _id: eventId, organizer: organizerId });
-    if (!event) {
-      return res
-        .status(404)
-        .json({ message: "Event not found or access denied" });
-    }
-
-    // بناء الاستعلام
-    let query = { event: eventId };
-    if (status) {
-      query.status = status;
-    }
-
-    // حساب الترقيم
-    const skip = (page - 1) * limit;
-    const totalBookings = await Booking.countDocuments(query);
-    const totalPages = Math.ceil(totalBookings / limit);
-
-    // الحصول على الحجوزات
-    const bookings = await Booking.find(query)
-      .populate("user", "userName email phone")
-      .populate("ticket", "type price currency")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit));
-
-    res.status(200).json({
-      event: {
-        id: event._id,
-        title: event.title,
-        startDate: event.startDate,
-        endDate: event.endDate,
-      },
-      bookings,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages,
-        totalBookings,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
-      },
-    });
-  } catch (error) {
-    console.error("Get event bookings error:", error);
-    res.status(500).json({
-      message: "Failed to fetch event bookings",
       error: error.message,
     });
   }

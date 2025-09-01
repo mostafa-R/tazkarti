@@ -38,7 +38,7 @@ organizerAPI.interceptors.response.use(
   }
 );
 
-// Authentication Services
+// Authentication Services (unchanged)
 export const authService = {
   registerOrganizer: async (organizerData) => {
     const response = await organizerAPI.post('/auth/registerOrganizer', organizerData);
@@ -69,8 +69,9 @@ export const authService = {
   }
 };
 
-// Event Management Services
+// Event Management Services - RESTRICTED
 export const eventService = {
+  // ✅ ALLOWED: Create events
   createEvent: async (eventData) => {
     const formData = new FormData();
     
@@ -104,6 +105,7 @@ export const eventService = {
     return response.data;
   },
 
+  // ✅ ALLOWED: View own events
   getMyEvents: async (params = {}) => {
     const { page = 1, limit = 10, status, approved } = params;
     const queryParams = new URLSearchParams({
@@ -117,77 +119,41 @@ export const eventService = {
     return response.data;
   },
 
-  updateEvent: async (eventId, eventData) => {
-    const formData = new FormData();
-    
-    Object.keys(eventData).forEach(key => {
-      if (key !== 'images' && key !== 'trailerVideo') {
-        if (typeof eventData[key] === 'object') {
-          formData.append(key, JSON.stringify(eventData[key]));
-        } else {
-          formData.append(key, eventData[key]);
-        }
-      }
-    });
-
-    if (eventData.images && eventData.images.length > 0) {
-      eventData.images.forEach(image => {
-        formData.append('images', image);
-      });
-    }
-
-    if (eventData.trailerVideo) {
-      formData.append('trailerVideo', eventData.trailerVideo);
-    }
-
-    const response = await organizerAPI.put(`/api/events/${eventId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  deleteEvent: async (eventId) => {
-    const response = await organizerAPI.delete(`/api/events/${eventId}`);
-    return response.data;
-  },
-
+  // ✅ ALLOWED: View specific event details
   getEventById: async (eventId) => {
     const response = await organizerAPI.get(`/api/events/${eventId}`);
     return response.data;
   }
+
+  // ❌ REMOVED: updateEvent - Organizers can no longer update events
+  // ❌ REMOVED: deleteEvent - Organizers can no longer delete events
 };
 
-// Ticket Management Services
+// Ticket Management Services - RESTRICTED
 export const ticketService = {
+  // ✅ ALLOWED: Create tickets
   createTicket: async (ticketData) => {
     const response = await organizerAPI.post('/api/tickets', ticketData);
     return response.data;
   },
 
+  // ✅ ALLOWED: View tickets for specific events
   getEventTickets: async (eventId) => {
     const response = await organizerAPI.get(`/api/tickets/event/${eventId}`);
     return response.data;
   },
 
-  updateTicket: async (ticketId, ticketData) => {
-    const response = await organizerAPI.put(`/api/tickets/${ticketId}`, ticketData);
-    return response.data;
-  },
-
-  deleteTicket: async (ticketId) => {
-    const response = await organizerAPI.delete(`/api/tickets/${ticketId}`);
-    return response.data;
-  },
-
+  // ✅ ALLOWED: View specific ticket details
   getTicketById: async (ticketId) => {
     const response = await organizerAPI.get(`/api/tickets/${ticketId}`);
     return response.data;
   }
+
+  // ❌ REMOVED: updateTicket - Organizers can no longer update tickets
+  // ❌ REMOVED: deleteTicket - Organizers can no longer delete tickets
 };
 
-// Booking Management Services
+// Booking Management Services (simplified)
 export const bookingService = {
   getMyBookings: async (params = {}) => {
     const { page = 1, limit = 10, status, paymentStatus, search } = params;
@@ -203,42 +169,66 @@ export const bookingService = {
     return response.data;
   },
 
-  getBookingStats: async (params = {}) => {
-    const { eventId, startDate, endDate } = params;
-    const queryParams = new URLSearchParams({
-      ...(eventId && { eventId }),
-      ...(startDate && { startDate }),
-      ...(endDate && { endDate })
-    });
+  // ✅ NEW: Enhanced detailed bookings with comprehensive information
+  getDetailedBookings: async (params = {}) => {
+    const { 
+      page = 1, 
+      limit = 10, 
+      status, 
+      paymentStatus, 
+      search, 
+      eventId,
+      ticketType,
+      dateFrom,
+      dateTo,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = params;
 
-    const response = await organizerAPI.get(`/api/booking/organizer/bookings/stats?${queryParams}`);
-    return response.data;
-  },
-
-  getEventBookings: async (eventId, params = {}) => {
-    const { page = 1, limit = 10, status } = params;
     const queryParams = new URLSearchParams({
       page: page.toString(),
       limit: limit.toString(),
-      ...(status && { status })
+      ...(status && { status }),
+      ...(paymentStatus && { paymentStatus }),
+      ...(search && { search }),
+      ...(eventId && { eventId }),
+      ...(ticketType && { ticketType }),
+      ...(dateFrom && { dateFrom }),
+      ...(dateTo && { dateTo }),
+      sortBy,
+      sortOrder
     });
 
-    const response = await organizerAPI.get(`/api/booking/organizer/events/${eventId}/bookings?${queryParams}`);
+    const response = await organizerAPI.get(`/api/booking/organizer/bookings/detailed?${queryParams}`);
     return response.data;
   },
 
-  updateBookingStatus: async (bookingId, status) => {
-    const response = await organizerAPI.put(`/api/booking/organizer/bookings/${bookingId}/status`, { status });
-    return response.data;
-  },
-
+  // ✅ ALLOWED: View specific booking details
   getBookingById: async (bookingId) => {
-    const response = await organizerAPI.get(`/api/booking/organizer/bookings/${bookingId}`);
+    const response = await organizerAPI.get(`/api/booking/${bookingId}`);
+    return response.data;
+  },
+
+  // ✅ ALLOWED: Get booking statistics for dashboard
+  getBookingStats: async () => {
+    const response = await organizerAPI.get('/api/booking/organizer/stats');
+    return response.data;
+  },
+
+  // ✅ ALLOWED: Get bookings for specific event
+  getEventBookings: async (eventId, params = {}) => {
+    const { page = 1, limit = 10 } = params;
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString()
+    });
+
+    const response = await organizerAPI.get(`/api/booking/event/${eventId}?${queryParams}`);
     return response.data;
   }
 };
 
-// Dashboard Services
+// Dashboard Services (unchanged)
 export const dashboardService = {
   getDashboardData: async () => {
     try {
@@ -260,7 +250,7 @@ export const dashboardService = {
   }
 };
 
-// Utility functions
+// Utility functions (unchanged)
 export const utils = {
   isOrganizer: () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');

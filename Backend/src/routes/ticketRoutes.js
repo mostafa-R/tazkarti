@@ -14,20 +14,25 @@ import { roleMiddleware } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
 
-// ====== Public Routes ======
+// ====== Public Routes (unchanged) ======
 router.get("/", getTickets);
-router.get("/event/:eventId", getTicketsByEvent); // Get tickets for specific event
-router.get("/:id", getTicketById);
+router.get("/event/:eventId", getTicketsByEvent); // ✅ Get tickets for specific event
+router.get("/:id", getTicketById); // ✅ Get specific ticket details
 
-// ====== Ticket Verification Routes (Public) ======
+// ====== Ticket Verification Routes (Public - unchanged) ======
 router.get("/verify", verifyTicket); // التحقق من صحة التذكرة عبر QR Code
 
 // ====== Organizer Routes ======
-router.post("/", roleMiddleware(["organizer"]), createTicket);
-router.put("/:id", roleMiddleware(["organizer"]), updateTicket);
-router.delete("/:id", roleMiddleware(["organizer"]), deleteTicket);
+// ✅ ALLOWED: Organizers can CREATE tickets
+router.post("/", roleMiddleware(["organizer", "admin"]), createTicket);
 
-// ====== Organizer Check-in & Stats Routes ======
+// ❌ RESTRICTED: UPDATE tickets - ADMIN ONLY now (organizers blocked)
+router.put("/:id", roleMiddleware(["admin"]), updateTicket); // ❌ Removed "organizer" - ADMIN ONLY
+
+// ❌ RESTRICTED: DELETE tickets - ADMIN ONLY now (organizers blocked)
+router.delete("/:id", roleMiddleware(["admin"]), deleteTicket); // ❌ Removed "organizer" - ADMIN ONLY
+
+// ====== Organizer Check-in & Stats Routes (unchanged) ======
 router.post("/check-in", roleMiddleware(["organizer"]), checkInTicket); // تسجيل دخول التذكرة
 router.get("/stats/:eventId", roleMiddleware(["organizer"]), getTicketStats); // إحصائيات التذاكر للحدث
 
