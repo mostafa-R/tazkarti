@@ -274,9 +274,6 @@ const EnhancedBookingManagement = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -323,22 +320,10 @@ const EnhancedBookingManagement = () => {
                         {formatCurrency(booking.totalPrice)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="space-y-1">
-                          {getStatusBadge(booking.status)}
-                          {getPaymentStatusBadge(booking.paymentStatus)}
-                        </div>
+                        {getPaymentStatusBadge(booking.paymentStatus)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(booking.createdAt)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => setSelectedBooking(booking)}
-                          className="text-blue-600 hover:text-blue-900 flex items-center"
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -400,7 +385,6 @@ const EnhancedBookingManagement = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Status</label>
                       <div className="flex space-x-2">
-                        {getStatusBadge(selectedBooking.status)}
                         {getPaymentStatusBadge(selectedBooking.paymentStatus)}
                       </div>
                     </div>
