@@ -153,7 +153,7 @@ export const ticketService = {
   // ❌ REMOVED: deleteTicket - Organizers can no longer delete tickets
 };
 
-// Booking Management Services (unchanged - these remain available to organizers)
+// Booking Management Services (enhanced)
 export const bookingService = {
   getMyBookings: async (params = {}) => {
     const { page = 1, limit = 10, status, paymentStatus, search } = params;
@@ -167,6 +167,99 @@ export const bookingService = {
 
     const response = await organizerAPI.get(`/api/booking/organizer/bookings?${queryParams}`);
     return response.data;
+  },
+
+  // ✅ NEW: Enhanced detailed bookings with comprehensive information
+  getDetailedBookings: async (params = {}) => {
+    const { 
+      page = 1, 
+      limit = 10, 
+      status, 
+      paymentStatus, 
+      search, 
+      eventId,
+      ticketType,
+      dateFrom,
+      dateTo,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = params;
+    
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(status && { status }),
+      ...(paymentStatus && { paymentStatus }),
+      ...(search && { search }),
+      ...(eventId && { eventId }),
+      ...(ticketType && { ticketType }),
+      ...(dateFrom && { dateFrom }),
+      ...(dateTo && { dateTo }),
+      sortBy,
+      sortOrder
+    });
+
+    const response = await organizerAPI.get(`/api/booking/organizer/bookings/detailed?${queryParams}`);
+    return response.data;
+  },
+
+  // ✅ NEW: Advanced booking analytics
+  getAdvancedAnalytics: async (params = {}) => {
+    const { eventId, period = '30d', timezone = 'UTC' } = params;
+    const queryParams = new URLSearchParams({
+      ...(eventId && { eventId }),
+      period,
+      timezone
+    });
+
+    const response = await organizerAPI.get(`/api/booking/organizer/bookings/analytics?${queryParams}`);
+    return response.data;
+  },
+
+  // ✅ NEW: Export bookings functionality
+  exportBookings: async (params = {}) => {
+    const { 
+      format = 'csv', 
+      status, 
+      paymentStatus, 
+      eventId,
+      dateFrom,
+      dateTo,
+      fields = 'all'
+    } = params;
+    
+    const queryParams = new URLSearchParams({
+      format,
+      ...(status && { status }),
+      ...(paymentStatus && { paymentStatus }),
+      ...(eventId && { eventId }),
+      ...(dateFrom && { dateFrom }),
+      ...(dateTo && { dateTo }),
+      fields
+    });
+
+    const response = await organizerAPI.get(`/api/booking/organizer/bookings/export?${queryParams}`, {
+      responseType: format === 'json' ? 'json' : 'blob'
+    });
+
+    if (format === 'json') {
+      return response.data;
+    }
+
+    // Handle file download for CSV
+    const blob = new Blob([response.data], { 
+      type: format === 'csv' ? 'text/csv' : 'application/json' 
+    });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `bookings-${Date.now()}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    return { success: true, message: 'Export completed' };
   },
 
   getBookingStats: async (params = {}) => {
