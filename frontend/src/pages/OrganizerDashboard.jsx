@@ -6,14 +6,13 @@ import {
   Users, 
   BarChart3, 
   Plus, 
-  Settings, 
   LogOut,
   Eye,
-  Edit,
-  Trash2
+  Settings
 } from 'lucide-react';
-import { authAPI, eventsAPI } from '../services/api';
+import { authAPI } from '../services/api';
 import organizerAPI from '../services/organizerAPI';
+import OrganizerNavbar from '../Components/OrganizerNavbar';
 
 const OrganizerDashboard = () => {
   const [user, setUser] = useState(null);
@@ -56,9 +55,9 @@ const OrganizerDashboard = () => {
       
       // Fetch real data from API
       const [eventsResponse, bookingStatsResponse, bookingsResponse] = await Promise.all([
-        organizerAPI.events.getMyEvents({ limit: 10 }),
-        organizerAPI.bookings.getBookingStats(),
-        organizerAPI.bookings.getMyBookings({ limit: 5 })
+        organizerAPI.events.getMyEvents({ limit: 20 }),
+        organizerAPI.bookings.getBookingStats().catch(() => ({ totalBookings: 0, totalRevenue: 0 })),
+        organizerAPI.bookings.getMyBookings({ limit: 10 }).catch(() => ({ bookings: [] }))
       ]);
 
       const myEventsData = eventsResponse.events || [];
@@ -70,31 +69,36 @@ const OrganizerDashboard = () => {
         id: event._id,
         name: event.title,
         date: event.startDate,
-        location: typeof event.location === 'object' ? event.location.address || event.location.city : event.location,
+        location: typeof event.location === 'object' ? 
+          (event.location.venue || event.location.city || event.location.address) : 
+          event.location,
         ticketsSold: 0, // Will be calculated from bookings
         totalTickets: event.maxAttendees || 0,
         status: event.approved ? 'active' : 'pending'
       })));
 
       // Set dashboard overview data
-      setMyEvents(myEventsData.slice(0, 3).map(event => ({
+      setMyEvents(myEventsData.slice(0, 5).map(event => ({
         id: event._id,
         name: event.title,
         date: organizerAPI.utils.formatDate(event.startDate)
       })));
 
-      // Get tickets for recent events
+      // Get tickets for events
       if (myEventsData.length > 0) {
         try {
-          const ticketsPromises = myEventsData.slice(0, 2).map(event => 
+          const ticketsPromises = myEventsData.slice(0, 3).map(event => 
             organizerAPI.tickets.getEventTickets(event._id).catch(() => [])
           );
           const ticketsResults = await Promise.all(ticketsPromises);
           const allTickets = ticketsResults.flat();
           
-          setTickets(allTickets.slice(0, 5).map(ticket => ({
+          setTickets(allTickets.slice(0, 8).map(ticket => ({
             id: ticket._id,
-            eventName: ticket.type || 'Standard'
+            eventName: ticket.type || 'Standard',
+            price: ticket.price || 0,
+            quantity: ticket.quantity || 0,
+            available: ticket.availableQuantity || 0
           })));
         } catch (ticketError) {
           console.warn('Could not load tickets:', ticketError);
@@ -103,18 +107,28 @@ const OrganizerDashboard = () => {
       }
 
       // Set bookings data
-      setBookings(bookingsData.map(booking => ({
+      setBookings(bookingsData.slice(0, 8).map(booking => ({
         id: booking._id,
         customerName: booking.user?.userName || booking.attendeeInfo?.name || 'Unknown',
         tickets: booking.quantity || 1,
-        eventName: booking.event?.title || 'Unknown Event'
+        eventName: booking.event?.title || 'Unknown Event',
+        totalPrice: booking.totalPrice || 0,
+        status: booking.status || 'pending'
       })));
 
-      // Set statistics
+      // Calculate proper statistics
+      const totalTicketsSold = bookingsData.reduce((sum, booking) => 
+        sum + (booking.quantity || 0), 0
+      );
+      
+      const totalRevenue = bookingsData
+        .filter(booking => booking.paymentStatus === 'completed')
+        .reduce((sum, booking) => sum + (booking.totalPrice || 0), 0);
+
       setStats({
-        totalEvents: statsData.totalBookings ? myEventsData.length : 0,
-        totalTicketsSold: statsData.totalBookings || 0,
-        totalRevenue: statsData.totalRevenue || 0,
+        totalEvents: myEventsData.length,
+        totalTicketsSold: totalTicketsSold,
+        totalRevenue: totalRevenue,
         activeEvents: myEventsData.filter(event => event.approved).length
       });
 
@@ -135,21 +149,6 @@ const OrganizerDashboard = () => {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleDeleteEvent = async (eventId) => {
-    if (!window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      await organizerAPI.events.deleteEvent(eventId);
-      // Refresh the data after successful deletion
-      loadOrganizerData();
-    } catch (error) {
-      console.error('Delete event error:', error);
-      setError('Failed to delete event. Please try again.');
     }
   };
 
@@ -181,34 +180,13 @@ const OrganizerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-[#0052CC]">Tazkarti</h1>
-              <span className="ml-4 text-gray-500">Organizer Dashboard</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Welcome, {user?.firstName} {user?.lastName}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="flex items-center text-gray-600 hover:text-red-600 transition-colors"
-              >
-                <LogOut className="w-4 h-4 mr-1" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Organizer Navbar */}
+      <OrganizerNavbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
             <p>{error}</p>
             <button 
               onClick={loadOrganizerData}
@@ -218,86 +196,103 @@ const OrganizerDashboard = () => {
             </button>
           </div>
         )}
+
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
           <StatCard
             title="Total Events"
             value={stats.totalEvents}
-            icon={<Calendar className="w-6 h-6" />}
+            icon={<Calendar className="w-5 h-5 lg:w-6 lg:h-6" />}
             color="blue"
           />
           <StatCard
             title="Tickets Sold"
             value={stats.totalTicketsSold}
-            icon={<Ticket className="w-6 h-6" />}
+            icon={<Ticket className="w-5 h-5 lg:w-6 lg:h-6" />}
             color="green"
           />
           <StatCard
             title="Total Revenue"
             value={`EGP ${stats.totalRevenue.toLocaleString()}`}
-            icon={<BarChart3 className="w-6 h-6" />}
+            icon={<BarChart3 className="w-5 h-5 lg:w-6 lg:h-6" />}
             color="purple"
           />
-
+          <StatCard
+            title="Active Events"
+            value={stats.activeEvents}
+            icon={<Users className="w-5 h-5 lg:w-6 lg:h-6" />}
+            color="orange"
+          />
         </div>
 
-        {/* Quick Actions */}
+        {/* Core Features - Simplified to 3 main actions */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Core Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
             <ActionCard
               title="Create New Event"
-              description="Set up a new event and start selling tickets"
-              icon={<Plus className="w-8 h-8" />}
+              description="Set up a new event for your audience"
+              icon={<Plus className="w-6 h-6 lg:w-8 lg:h-8" />}
               onClick={() => navigate('/create-event')}
               color="blue"
             />
             <ActionCard
-              title="Manage Events"
-              description="View and edit your existing events"
-              icon={<Settings className="w-8 h-8" />}
-              onClick={() => navigate('/manage-events')}
+              title="Manage Tickets"
+              description="Add and view ticket types for your events"
+              icon={<Ticket className="w-6 h-6 lg:w-8 lg:h-8" />}
+              onClick={() => navigate('/manage-tickets')}
               color="green"
             />
-  
+            <ActionCard
+              title="View Bookings"
+              description="Monitor bookings and customer details"
+              icon={<Users className="w-6 h-6 lg:w-8 lg:h-8" />}
+              onClick={() => navigate('/view-bookings')}
+              color="purple"
+            />
           </div>
         </div>
 
-        {/* New Feature Cards */}
+        {/* Dashboard Overview - 3 Core Features */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Dashboard Overview</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* My Events Card */}
             <FeatureCard
               title="My Events"
               items={myEvents.length > 0 ? myEvents.map(event => `${event.name} - ${event.date}`) : ['No events yet']}
               icon={<Calendar className="w-6 h-6" />}
               color="blue"
+              actionText="Create Event"
+              onAction={() => navigate('/create-event')}
             />
             
             {/* Tickets Card */}
             <FeatureCard
               title="Tickets"
-              items={tickets.length > 0 ? tickets.map(ticket => `${ticket.eventName} Ticket`) : ['No tickets yet']}
+              items={tickets.length > 0 ? tickets.map(ticket => `${ticket.eventName} - EGP ${ticket.price} (${ticket.available}/${ticket.quantity})`) : ['No tickets yet']}
               icon={<Ticket className="w-6 h-6" />}
               color="green"
+              actionText="Manage Tickets"
+              onAction={() => navigate('/manage-tickets')}
             />
             
             {/* Bookings Card */}
             <FeatureCard
-              title="Bookings"
-              items={bookings.length > 0 ? bookings.map(booking => `${booking.customerName} - ${booking.tickets} Ticket${booking.tickets > 1 ? 's' : ''} for ${booking.eventName}`) : ['No bookings yet']}
+              title="Recent Bookings"
+              items={bookings.length > 0 ? bookings.map(booking => `${booking.customerName} - ${booking.tickets} ticket${booking.tickets > 1 ? 's' : ''} (EGP ${booking.totalPrice})`) : ['No bookings yet']}
               icon={<Users className="w-6 h-6" />}
               color="purple"
+              actionText="View All"
+              onAction={() => navigate('/view-bookings')}
             />
           </div>
         </div>
 
-        {/* Recent Events */}
+        {/* Events Table - Simplified (View Only) */}
         <div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Your Events</h2>
- 
           </div>
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -305,22 +300,19 @@ const OrganizerDashboard = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Event
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                       Location
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Tickets Sold
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -328,19 +320,19 @@ const OrganizerDashboard = () => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {events.length > 0 ? events.map((event) => (
                     <tr key={event.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 lg:px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">{event.name}</div>
+                        <div className="text-xs text-gray-500 sm:hidden">
+                          {new Date(event.date).toLocaleDateString()}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
                         {new Date(event.date).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                         {event.location}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {event.ticketsSold} / {event.totalTickets}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           event.status === 'active' 
                             ? 'bg-green-100 text-green-800' 
@@ -351,35 +343,28 @@ const OrganizerDashboard = () => {
                           {event.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           <button 
                             onClick={() => navigate(`/events/${event.id}`)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-600 hover:text-blue-900 p-1"
                             title="View Event"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button 
-                            onClick={() => navigate(`/events/${event.id}/edit`)}
-                            className="text-green-600 hover:text-green-900"
-                            title="Edit Event"
+                            onClick={() => navigate(`/events/${event.id}/tickets`)}
+                            className="text-green-600 hover:text-green-900 p-1"
+                            title="Manage Tickets"
                           >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteEvent(event.id)}
-                            className="text-red-600 hover:text-red-900"
-                            title="Delete Event"
-                          >
-                            <Trash2 className="w-4 h-4" />
+                            <Settings className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
                         <div className="flex flex-col items-center">
                           <Calendar className="w-12 h-12 text-gray-300 mb-4" />
                           <p className="text-lg font-medium text-gray-900 mb-2">No events yet</p>
@@ -414,14 +399,14 @@ const StatCard = ({ title, value, icon, color }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-4 lg:p-6">
       <div className="flex items-center">
-        <div className={`${colorClasses[color]} text-white p-3 rounded-lg`}>
+        <div className={`${colorClasses[color]} text-white p-2 lg:p-3 rounded-lg`}>
           {icon}
         </div>
-        <div className="ml-4">
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
+        <div className="ml-3 lg:ml-4 min-w-0 flex-1">
+          <p className="text-xs lg:text-sm font-medium text-gray-600 truncate">{title}</p>
+          <p className="text-lg lg:text-2xl font-semibold text-gray-900 truncate">{value}</p>
         </div>
       </div>
     </div>
@@ -439,19 +424,19 @@ const ActionCard = ({ title, description, icon, onClick, color }) => {
   return (
     <div 
       onClick={onClick}
-      className="bg-white rounded-lg shadow p-6 cursor-pointer hover:shadow-md transition-shadow"
+      className="bg-white rounded-lg shadow p-4 lg:p-6 cursor-pointer hover:shadow-md transition-shadow"
     >
-      <div className={`${colorClasses[color]} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
+      <div className={`${colorClasses[color]} w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center mb-3 lg:mb-4`}>
         {icon}
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+      <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-2">{title}</h3>
       <p className="text-gray-600 text-sm">{description}</p>
     </div>
   );
 };
 
 // Feature Card Component
-const FeatureCard = ({ title, items, icon, color }) => {
+const FeatureCard = ({ title, items, icon, color, actionText, onAction }) => {
   const colorClasses = {
     blue: 'bg-blue-500',
     green: 'bg-green-500',
@@ -460,19 +445,34 @@ const FeatureCard = ({ title, items, icon, color }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center mb-4">
-        <div className={`${colorClasses[color]} text-white p-3 rounded-lg`}>
-          {icon}
+    <div className="bg-white rounded-lg shadow p-4 lg:p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <div className={`${colorClasses[color]} text-white p-2 lg:p-3 rounded-lg`}>
+            {icon}
+          </div>
+          <h3 className="ml-3 text-base lg:text-lg font-semibold text-gray-900">{title}</h3>
         </div>
-        <h3 className="ml-3 text-lg font-semibold text-gray-900">{title}</h3>
+        {actionText && (
+          <button
+            onClick={onAction}
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          >
+            {actionText}
+          </button>
+        )}
       </div>
-      <div className="space-y-2">
-        {items.map((item, index) => (
+      <div className="space-y-2 max-h-40 overflow-y-auto">
+        {items.slice(0, 5).map((item, index) => (
           <div key={index} className="text-sm text-gray-600 py-1 border-b border-gray-100 last:border-b-0">
             {item}
           </div>
         ))}
+        {items.length > 5 && (
+          <div className="text-xs text-gray-400 pt-2">
+            +{items.length - 5} more...
+          </div>
+        )}
       </div>
     </div>
   );
