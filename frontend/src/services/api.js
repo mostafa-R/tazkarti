@@ -223,6 +223,22 @@ export const paymentAPI = {
   // الحصول على تفاصيل الدفع
   getPaymentDetails: (paymentId) =>
     api.get(`/api/booking/checkout/${paymentId}`),
+    
+  // التحقق من حالة الدفع
+  verifyPaymentStatus: (reference) =>
+    api.get(`/api/booking/verify/${reference}`),
+    
+  // إعادة محاولة الدفع
+  retryPayment: (bookingId, paymentData) =>
+    api.post(`/api/booking/retry/${bookingId}`, paymentData),
+    
+  // إلغاء الدفع
+  cancelPayment: (bookingId) =>
+    api.post(`/api/booking/cancel/${bookingId}`),
+    
+  // فحص صحة خدمة الدفع
+  healthCheck: () =>
+    api.get('/api/booking/health'),
 };
 
 export default api;

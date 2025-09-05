@@ -1,28 +1,32 @@
 import express from "express";
 
 import {
-  bookingTicket,
-  cancelPendingBooking,
-  createBookingWithSecurePayment,
-  getBookingById,
-  getBookingStats,
-  getBookingStatus,
-  getEventBookings,
-  getOrganizerBookings,
-  getUserBookings,
-  updateBookingStatus,
-  getDetailedBookings,
+    bookingTicket,
+    cancelPendingBooking,
+    createBookingWithSecurePayment,
+    getBookingById,
+    getBookingStats,
+    getBookingStatus,
+    getDetailedBookings,
+    getEventBookings,
+    getOrganizerBookings,
+    getUserBookings,
+    updateBookingStatus,
 } from "../controllers/booking.controller.js";
 import {
-  checkoutWebhook,
-  createPaymentLink,
-  getPaymentDetails,
-  payWithToken,
+    cancelPayment,
+    checkoutHealthCheck,
+    checkoutWebhook,
+    createPaymentLink,
+    getPaymentDetails,
+    payWithToken,
+    retryPayment,
+    verifyPaymentStatus,
 } from "../controllers/checkout.controller.js";
 import { authMiddleware as authenticateToken } from "../middleware/authMiddleware.js";
 import {
-  cacheOrganizerBookings,
-  paymentRateLimit,
+    cacheOrganizerBookings,
+    paymentRateLimit,
 } from "../middleware/performanceMiddleware.js";
 import { roleMiddleware as requireRole } from "../middleware/roleMiddleware.js";
 
@@ -63,6 +67,14 @@ router.get("/checkout/:paymentId", getPaymentDetails);
 
 // 4) Webhook (لازم raw body في server.js)
 router.post("/checkout/webhook", checkoutWebhook);
+
+// Payment status
+router.get('/verify/:reference', authenticateToken, verifyPaymentStatus);
+router.post('/retry/:bookingId', authenticateToken, paymentRateLimit, retryPayment);
+router.post('/cancel/:bookingId', authenticateToken, cancelPayment);
+
+// Health check
+router.get('/health',checkoutHealthCheck);
 
 // router.get("/payment-status/:bookingId", authenticateToken, checkPaymentStatus);
 

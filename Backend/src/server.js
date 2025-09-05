@@ -4,13 +4,10 @@ import dotenv from "dotenv";
 import express from "express";
 import session from "express-session";
 import helmet from "helmet";
+import { createRequire } from "module";
 import morgan from "morgan";
 import multer from "multer";
 import passport from "passport";
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-
-const redocExpress = require("redoc-express");
 import connectDB from "./config/database.js";
 import "./config/passport.js";
 import { specs } from "./config/swagger.js";
@@ -24,6 +21,9 @@ import {
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import sessionService from "./services/sessionService.js";
+const require = createRequire(import.meta.url);
+
+const redocExpress = require("redoc-express");
 // دول ضفتهم عشان التذاكر والايفنت
 import { authMiddleware } from "./middleware/authMiddleware.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
@@ -37,6 +37,9 @@ import { startCleanupJobs } from "./utils/cleanupExpiredBookings.js";
 
 dotenv.config();
 const app = express();
+
+// Configure Express to trust the proxy (important for rate limiting behind proxies)
+app.set('trust proxy', 1);
 
 // 📚 Documentation
 app.get(
@@ -157,6 +160,9 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
 app.use(errorMiddleware);
+
+
+
 
 export const Bootstrap = async () => {
   try {
