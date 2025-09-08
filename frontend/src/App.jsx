@@ -25,6 +25,7 @@ import LoginPage from "./pages/Login.jsx";
 import ManageTickets from "./pages/ManageTickets.jsx";
 import OrganizerDashboard from "./pages/OrganizerDashboard.jsx";
 import PaymentPage from "./pages/Payment.jsx";
+import TicketView from "./pages/TicketView.jsx";
 import ViewBookingsPage from "./pages/ViewBookings.jsx";
 
 import Footer from "./Components/footer.jsx";
@@ -84,13 +85,14 @@ function App() {
               <Route path="/verify-email" element={<EmailVerification />} />
 
               <Route
-                path="/booking-confirm"
+                path="/booking-confirmation"
                 element={<BookingConfirmationPage />}
               />
 
               <Route path="/" element={<HomePage />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/events" element={<EventsPage />} />
+              <Route path="/ticket" element={<TicketView />} />
               <Route
                 path="/search"
                 element={<Navigate to="/events" replace />}
@@ -133,7 +135,7 @@ function App() {
               <Route
                 path="/profile"
                 element={
-                  <ProtectedRoute >
+                  <ProtectedRoute>
                     <UserProfile />
                   </ProtectedRoute>
                 }

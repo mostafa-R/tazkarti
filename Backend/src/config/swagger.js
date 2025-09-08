@@ -1,6 +1,5 @@
 import swaggerJSDoc from "swagger-jsdoc";
 
-// تعريف معلومات API الأساسية
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -121,7 +120,6 @@ Authorization: Bearer <your_jwt_token>
         },
       },
       schemas: {
-        // User Schemas
         User: {
           type: "object",
           required: ["userName", "email", "password"],

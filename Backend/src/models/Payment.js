@@ -29,14 +29,8 @@ const paymentSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: [
-        "card",
-        "wallet",
-        "bank_transfer",
-        "fawry",
-        "kiosk",
-        "mobile_wallet",
-      ],
+      enum: ["card", "wallet", "bank_transfer", "cash"],
+      default: "card",
     },
 
     // المبلغ والعملة
@@ -86,9 +80,7 @@ const paymentSchema = new mongoose.Schema(
 
     // بيانات البطاقة (مخفية/مشفرة)
     cardData: {
-      maskedPan: String, // البطاقة المقنعة مثل 4**** **** **** 1234
-      brand: String, // فيزا، ماستركارد، إلخ
-      type: String, // debit, credit
+      type: mongoose.Schema.Types.Mixed, // يمكن أن تكون كائن أو نص
     },
 
     // معلومات إضافية
@@ -128,27 +120,23 @@ const paymentSchema = new mongoose.Schema(
     },
 
     // التوقيتات المهمة
-    authorizedAt: {
-      type: Date,
-    },
+    authorizedAt: Date,
+    capturedAt: Date,
+    failedAt: Date,
+    expiredAt: Date,
 
-    capturedAt: {
-      type: Date,
-    },
-
-    failedAt: {
-      type: Date,
-    },
-
-    expiredAt: {
-      type: Date,
-    },
-
-    // معرف مرجعي للنظام الداخلي
-    reference: {
-      type: String,
-      unique: true,
-    },
+  // معرف مرجعي للنظام الداخلي
+  reference: {
+    type: String,
+    unique: true,
+    default: function() {
+      const timestamp = Date.now().toString().slice(-8);
+      const random = Math.floor(Math.random() * 10000)
+        .toString()
+        .padStart(4, "0");
+      return `PAY-${timestamp}-${random}`;
+    }
+  },
 
     // بيانات النظام
     ipAddress: String,
@@ -159,10 +147,7 @@ const paymentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
-    webhookReceivedAt: {
-      type: Date,
-    },
+    webhookReceivedAt: Date,
 
     isActive: {
       type: Boolean,
@@ -191,17 +176,12 @@ paymentSchema.virtual("canRefund").get(function () {
   return this.status === "captured" && this.refundAmount < this.amount;
 });
 
-// توليد رقم مرجعي فريد
-paymentSchema.pre("save", function (next) {
-  if (!this.reference) {
-    const timestamp = Date.now().toString().slice(-8);
-    const random = Math.floor(Math.random() * 10000)
-      .toString()
-      .padStart(4, "0");
-    this.reference = `PAY-${timestamp}-${random}`;
-  }
-  next();
+// Virtual للتحقق من إمكانية إعادة المحاولة
+paymentSchema.virtual("canRetry").get(function () {
+  return ["failed", "cancelled", "expired"].includes(this.status);
 });
+
+// تم نقل توليد رقم مرجعي فريد إلى خاصية default في تعريف الحقل
 
 // تحديث التوقيتات عند تغيير الحالة
 paymentSchema.pre("save", function (next) {
@@ -249,10 +229,10 @@ paymentSchema.pre("save", function (next) {
 // فهارس للبحث والأداء
 paymentSchema.index({ booking: 1 });
 paymentSchema.index({ user: 1 });
-// paymentId and reference indexes already created by unique: true in field definitions
 paymentSchema.index({ status: 1 });
 paymentSchema.index({ createdAt: -1 });
-paymentSchema.index({ "events.event": 1, "events.timestamp": -1 });
+paymentSchema.index({ paymentId: 1 });
+paymentSchema.index({ reference: 1 });
 
 const Payment = mongoose.model("Payment", paymentSchema);
 

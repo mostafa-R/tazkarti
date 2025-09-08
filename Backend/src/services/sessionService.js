@@ -7,7 +7,7 @@ class SessionService {
   constructor() {
     this.SESSION_PREFIX = "session:";
     this.ACTIVE_USERS_KEY = "active_users";
-    this.SESSION_EXPIRY = 30 * 60; // 30 دقيقة
+    this.SESSION_EXPIRY = 60 * 60; 
   }
 
   /**

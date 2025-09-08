@@ -1,104 +1,135 @@
 import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
 import Booking from "../models/Booking.js";
 import { Event } from "../models/Event.js";
 import Payment from "../models/Payment.js";
 import { Ticket } from "../models/Ticket.js";
 import User from "../models/User.js";
+import logger from "../utils/logger.js";
 
+const validateBookingData = (data) => {
+  const errors = [];
+  if (!data.ticketId) errors.push("معرف التذكرة مطلوب");
+  if (!data.eventId) errors.push("معرف الحدث مطلوب");
+  if (!data.quantity || data.quantity <= 0)
+    errors.push("الكمية يجب أن تكون أكبر من صفر");
+  return errors;
+};
+
+const validateEvent = async (eventId, session) => {
+  const event = await Event.findById(eventId).session(session);
+  if (!event) throw new Error("الحدث غير موجود");
+  if (new Date(event.endDate) < new Date())
+    throw new Error("الحدث منتهى ولا يمكن الحجز");
+  return event;
+};
+
+const validateTicket = async (ticketId, eventId, type, quantity, session) => {
+  const ticket = await Ticket.findOne({
+    _id: ticketId,
+    event: eventId,
+    ...(type && { type }),
+    status: "active",
+    isActive: true,
+  }).session(session);
+
+  if (!ticket) throw new Error("التذكرة غير موجودة أو غير نشطة");
+  if (ticket.availableQuantity < quantity) {
+    throw new Error(
+      `الكمية المتاحة غير كافية. المتاح: ${ticket.availableQuantity}، المطلوب: ${quantity}`
+    );
+  }
+  return ticket;
+};
+
+const createAttendeeInfo = (user) => ({
+  name: user.userName || `${user.firstName} ${user.lastName}`,
+  email: user.email,
+  phone: user.phone,
+});
+
+/**
+ * @deprecated
+ */
 export const bookingTicket = async (req, res) => {
   const { ticketId, eventId, type, quantity } = req.body;
-
   const userId = req.user._id;
 
-  const attendeeInfo = {
-    name: req.user.userName,
-    email: req.user.email,
-    phone: req.user.phone,
-  };
-
-  const bookingCode = uuidv4();
+  const validationErrors = validateBookingData({ ticketId, eventId, quantity });
+  if (validationErrors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "بيانات غير صحيحة",
+      errors: validationErrors,
+    });
+  }
 
   const session = await mongoose.startSession();
-  session.startTransaction();
 
   try {
-    const event = await Event.findById(eventId).session(session);
-    if (!event) {
-      throw new Error("Event not found");
-    }
+    await session.withTransaction(async () => {
+      await validateEvent(eventId, session);
 
-    if (new Date(event.endDate) < new Date()) {
-      throw new Error("Event is ended");
-    }
-
-    const ticket = await Ticket.findOne({
-      _id: ticketId,
-      event: eventId,
-      type,
-      status: "active",
-      isActive: true,
-    }).session(session);
-
-    if (!ticket || ticket.availableQuantity < quantity) {
-      throw new Error("Tickets not available");
-    }
-
-    const totalPrice = ticket.price * quantity;
-
-    const [booking] = await Booking.create(
-      [
+      const updatedTicket = await Ticket.findOneAndUpdate(
         {
-          user: userId,
+          _id: ticketId,
           event: eventId,
-          ticket: ticket._id,
-          quantity,
-          totalPrice,
-          status: "pending",
-          paymentStatus: "pending",
-          attendeeInfo: attendeeInfo,
-          bookingCode,
+          ...(type && { type }),
+          status: "active",
+          isActive: true,
+          availableQuantity: { $gte: quantity },
         },
-      ],
-      { session }
-    );
+        { $inc: { availableQuantity: -quantity } },
+        { new: true, session }
+      );
 
-    ticket.availableQuantity -= quantity;
-    await ticket.save({ session });
+      if (!updatedTicket) {
+        throw new Error("التذاكر غير متاحة أو الكمية غير كافية");
+      }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $push: { ticketsBooked: booking._id } },
-      { session, new: true }
-    );
+      const totalPrice = updatedTicket.price * quantity;
+      const attendeeInfo = createAttendeeInfo(req.user);
 
-    if (!updatedUser) {
-      throw new Error("User update failed");
-    }
+      const [booking] = await Booking.create(
+        [
+          {
+            user: userId,
+            event: eventId,
+            ticket: updatedTicket._id,
+            quantity,
+            totalPrice,
+            status: "confirmed",
+            paymentStatus: "completed",
+            attendeeInfo,
+          },
+        ],
+        { session }
+      );
 
-    await session.commitTransaction();
-    session.endSession();
+      await User.findByIdAndUpdate(
+        userId,
+        { $push: { ticketsBooked: booking._id } },
+        { session }
+      );
 
-    return res.status(201).json({
-      message: "Booking confirmed",
-      bookingId: booking._id,
-      totalPrice,
+      logger.info(`Booking created successfully: ${booking._id}`);
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "تم تأكيد الحجز بنجاح",
     });
   } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("Booking error:", error);
-    return res.status(500).json({
-      message: "Booking failed",
+    logger.error("Booking error:", error);
+    res.status(500).json({
+      success: false,
+      message: "فشل في إنشاء الحجز",
       error: error.message,
     });
+  } finally {
+    await session.endSession();
   }
 };
 
-/**
- * إنشاء حجز جديد مع الدفع الآمن
- * هذه الدالة تُنشئ حجز مؤقت ولا تخصم التذاكر حتى تأكيد الدفع عبر webhook
- */
 export const createBookingWithSecurePayment = async (req, res) => {
   const {
     ticketId,
@@ -109,132 +140,117 @@ export const createBookingWithSecurePayment = async (req, res) => {
   } = req.body;
   const userId = req.user._id;
 
+  const validationErrors = validateBookingData({ ticketId, eventId, quantity });
+  if (validationErrors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "البيانات المطلوبة مفقودة أو غير صحيحة",
+      errors: validationErrors,
+    });
+  }
+
   const session = await mongoose.startSession();
-  session.startTransaction();
 
   try {
-    // ✅ التحقق من الحدث
-    const event = await Event.findById(eventId).session(session);
-    if (!event) {
-      throw new Error("الحدث غير موجود");
-    }
+    await session.withTransaction(async () => {
+      const event = await validateEvent(eventId, session);
 
-    if (new Date(event.endDate) < new Date()) {
-      throw new Error("الحدث منتهى");
-    }
+      const ticket = await validateTicket(
+        ticketId,
+        eventId,
+        type,
+        quantity,
+        session
+      );
 
-    // ✅ التحقق من التذكرة والكمية المتاحة
-    const ticket = await Ticket.findOne({
-      _id: ticketId,
-      event: eventId,
-      type,
-      status: "active",
-      isActive: true,
-    }).session(session);
+      const totalPrice = ticket.price * quantity;
+      const attendeeInfo = createAttendeeInfo(req.user);
 
-    if (!ticket) {
-      throw new Error("التذكرة غير متاحة");
-    }
-
-    if (ticket.availableQuantity < quantity) {
-      throw new Error(`عدد التذاكر المتاحة: ${ticket.availableQuantity} فقط`);
-    }
-
-    // ✅ حساب السعر الإجمالي
-    const totalPrice = ticket.price * quantity;
-
-    // ✅ معلومات المستخدم
-    const attendeeInfo = {
-      name: req.user.userName,
-      email: req.user.email,
-      phone: req.user.phone,
-    };
-
-    // ✅ إنشاء الحجز بحالة pending (بدون خصم التذاكر بعد)
-    const [booking] = await Booking.create(
-      [
-        {
-          user: userId,
-          event: eventId,
-          ticket: ticket._id,
-          quantity,
-          totalPrice,
-          status: "pending", // ⚠️ مهم: الحجز مُعلَّق حتى تأكيد الدفع
-          paymentStatus: "pending",
-          paymentMethod,
-          attendeeInfo,
-        },
-      ],
-      { session }
-    );
-
-    // ✅ حجز التذاكر مؤقتاً (خصم مؤقت يمكن إرجاعه)
-    ticket.availableQuantity -= quantity;
-    await ticket.save({ session });
-
-    // ✅ تحديث قائمة حجوزات المستخدم
-    await User.findByIdAndUpdate(
-      userId,
-      { $push: { ticketsBooked: booking._id } },
-      { session }
-    );
-
-    await session.commitTransaction();
-    session.endSession();
-
-    // ✅ إرجاع معلومات الحجز للفرونت مع تعليمات الدفع
-    return res.status(201).json({
-      success: true,
-      message: "تم إنشاء الحجز بنجاح، يرجى إتمام عملية الدفع",
-      booking: {
-        bookingId: booking._id,
-        bookingCode: booking.bookingCode,
+      const booking = new Booking({
+        user: userId,
+        event: eventId,
+        ticket: ticket._id,
+        quantity,
         totalPrice,
-        currency: ticket.currency,
-        status: "pending_payment",
-      },
-      paymentDetails: {
-        reference: booking.bookingCode, // سنستخدم bookingCode كمرجع للدفع
-        amount: totalPrice * 100, // تحويل إلى قروش/سنت
-        currency: ticket.currency,
-        description: `تذكرة ${event.title} - ${ticket.type}`,
-        customer: {
-          email: attendeeInfo.email,
-          name: attendeeInfo.name,
-          phone: attendeeInfo.phone,
+        status: "pending",
+        paymentStatus: "pending",
+        paymentMethod,
+        attendeeInfo,
+      });
+
+      await booking.save({ session });
+
+      await User.findByIdAndUpdate(
+        userId,
+        { $push: { ticketsBooked: booking._id } },
+        { session }
+      );
+
+      logger.info(`Secure booking created: ${booking._id}`);
+
+      const responseData = {
+        success: true,
+        message: "تم إنشاء الحجز بنجاح، يرجى إتمام عملية الدفع",
+        booking: {
+          bookingId: booking._id,
+          bookingCode: booking.bookingCode,
+          totalPrice,
+          currency: ticket.currency || "EGP",
+          status: "pending_payment",
+          expiresAt: new Date(Date.now() + 15 * 60 * 1000),
         },
-        metadata: {
-          bookingId: booking._id.toString(),
-          eventId: eventId.toString(),
-          ticketId: ticketId.toString(),
-          userId: userId.toString(),
-          quantity,
+        paymentDetails: {
+          reference: booking.bookingCode,
+          amount: totalPrice * 100,
+          currency: ticket.currency || "EGP",
+          description: `تذكرة ${event.title} - ${ticket.type}`,
+          customer: {
+            email: attendeeInfo.email,
+            name: attendeeInfo.name,
+            phone: attendeeInfo.phone,
+          },
+          metadata: {
+            bookingId: booking._id.toString(),
+            eventId: eventId.toString(),
+            ticketId: ticketId.toString(),
+            userId: userId.toString(),
+            quantity,
+          },
         },
-      },
-      instructions: [
-        "تم حجز التذاكر مؤقتاً لمدة 15 دقيقة",
-        "يرجى إتمام عملية الدفع لتأكيد الحجز",
-        "في حالة عدم الدفع خلال 15 دقيقة، سيتم إلغاء الحجز تلقائياً",
-      ],
+        instructions: [
+          "تم إنشاء الحجز مؤقتاً لمدة 15 دقيقة",
+          "يرجى إتمام عملية الدفع لتأكيد الحجز وخصم التذاكر",
+          "في حالة عدم الدفع خلال 15 دقيقة، سيتم إلغاء الحجز تلقائياً",
+          "سيتم خصم التذاكر من المخزون عند تأكيد الدفع فقط",
+        ],
+      };
+
+      res.status(201).json(responseData);
     });
   } catch (error) {
-    if (session.inTransaction()) {
-      await session.abortTransaction();
-    }
-    session.endSession();
+    logger.error("Secure booking creation error:", error);
 
-    console.error("Secure booking creation error:", error);
-    return res.status(500).json({
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "خطأ في إنشاء الحجز، يرجى المحاولة مرة أخرى",
+        error: "كود الحجز مكرر",
+      });
+    }
+
+    res.status(500).json({
       success: false,
       message: "فشل في إنشاء الحجز",
-      error: error.message,
+      error:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "خطأ داخلي في الخادم",
     });
+  } finally {
+    await session.endSession();
   }
 };
 
-/**
- * إلغاء الحجز المؤقت (في حالة فشل الدفع أو انتهاء المهلة)
- */
 export const cancelPendingBooking = async (req, res) => {
   const { bookingId } = req.params;
   const userId = req.user._id;
@@ -243,7 +259,6 @@ export const cancelPendingBooking = async (req, res) => {
   session.startTransaction();
 
   try {
-    // العثور على الحجز
     const booking = await Booking.findOne({
       _id: bookingId,
       user: userId,
@@ -260,19 +275,16 @@ export const cancelPendingBooking = async (req, res) => {
       });
     }
 
-    // إلغاء الحجز
     booking.status = "cancelled";
     booking.paymentStatus = "cancelled";
     await booking.save({ session });
 
-    // إعادة التذاكر إلى المخزون
     await Ticket.findByIdAndUpdate(
       booking.ticket._id,
       { $inc: { availableQuantity: booking.quantity } },
       { session }
     );
 
-    // إزالة الحجز من قائمة حجوزات المستخدم
     await User.findByIdAndUpdate(
       userId,
       { $pull: { ticketsBooked: booking._id } },
@@ -301,9 +313,6 @@ export const cancelPendingBooking = async (req, res) => {
   }
 };
 
-/**
- * التحقق من حالة الحجز
- */
 export const getBookingStatus = async (req, res) => {
   try {
     const { bookingId } = req.params;
@@ -318,13 +327,62 @@ export const getBookingStatus = async (req, res) => {
       .populate("user", "userName email");
 
     if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: "الحجز غير موجود",
+      const bookingByCode = await Booking.findOne({
+        bookingCode: bookingId,
+      })
+        .populate("event", "title startDate endDate location")
+        .populate("ticket", "type price currency")
+        .populate("user", "userName email");
+
+      if (!bookingByCode) {
+        return res.status(404).json({
+          success: false,
+          message: "الحجز غير موجود",
+        });
+      }
+
+      if (
+        bookingByCode.user &&
+        bookingByCode.user._id.toString() !== userId.toString()
+      ) {
+        if (req.user.role !== "admin" && req.user.role !== "organizer") {
+          return res.status(403).json({
+            success: false,
+            message: "غير مصرح لك بالوصول إلى هذا الحجز",
+          });
+        }
+      }
+
+      const payment = await Payment.findOne({ booking: bookingByCode._id });
+
+      return res.status(200).json({
+        success: true,
+        booking: {
+          id: bookingByCode._id,
+          bookingCode: bookingByCode.bookingCode,
+          status: bookingByCode.status,
+          paymentStatus: bookingByCode.paymentStatus,
+          totalPrice: bookingByCode.totalPrice,
+          quantity: bookingByCode.quantity,
+          createdAt: bookingByCode.createdAt,
+          qrCode: bookingByCode.qrCode,
+          event: bookingByCode.event,
+          ticket: bookingByCode.ticket,
+          attendeeInfo: bookingByCode.attendeeInfo,
+        },
+        payment: payment
+          ? {
+              status: payment.status,
+              paymentMethod: payment.paymentMethod,
+              transactionId: payment.transactionId,
+              paidAt: payment.capturedAt,
+              amount: payment.amount,
+              currency: payment.currency,
+            }
+          : null,
       });
     }
 
-    // البحث عن معلومات الدفعة إن وجدت
     const payment = await Payment.findOne({ booking: booking._id });
 
     return res.status(200).json({
@@ -363,9 +421,6 @@ export const getBookingStatus = async (req, res) => {
   }
 };
 
-/**
- * الحصول على جميع حجوزات المستخدم
- */
 export const getUserBookings = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -378,20 +433,16 @@ export const getUserBookings = async (req, res) => {
       sortOrder = "desc",
     } = req.query;
 
-    // بناء الاستعلام
     let query = { user: userId };
 
     if (status) query.status = status;
     if (paymentStatus) query.paymentStatus = paymentStatus;
 
-    // الترقيم
     const skip = (page - 1) * limit;
 
-    // الترتيب
     const sort = {};
     sort[sortBy] = sortOrder === "asc" ? 1 : -1;
 
-    // تنفيذ الاستعلام
     const [bookings, totalCount] = await Promise.all([
       Booking.find(query)
         .populate("event", "title startDate endDate location images category")
@@ -426,19 +477,11 @@ export const getUserBookings = async (req, res) => {
   }
 };
 
-// ====================================================
-// دوال إدارة الحجوزات للمنظمين
-// ====================================================
-
-/**
- * الحصول على جميع حجوزات أحداث المنظم
- */
 export const getOrganizerBookings = async (req, res) => {
   try {
     const organizerId = req.user._id;
     const { page = 1, limit = 10, status, paymentStatus, search } = req.query;
 
-    // العثور على جميع الأحداث التي أنشأها هذا المنظم
     const organizerEvents = await Event.find({ organizer: organizerId }).select(
       "_id"
     );
@@ -457,7 +500,6 @@ export const getOrganizerBookings = async (req, res) => {
       });
     }
 
-    // بناء استعلام البحث
     let query = { event: { $in: eventIds } };
 
     if (status) {
@@ -476,12 +518,10 @@ export const getOrganizerBookings = async (req, res) => {
       ];
     }
 
-    // حساب الترقيم
     const skip = (page - 1) * limit;
     const totalBookings = await Booking.countDocuments(query);
     const totalPages = Math.ceil(totalBookings / limit);
 
-    // الحصول على الحجوزات مع البيانات المرتبطة
     const bookings = await Booking.find(query)
       .populate({
         path: "event",
@@ -518,9 +558,6 @@ export const getOrganizerBookings = async (req, res) => {
   }
 };
 
-/**
- * الحصول على تفاصيل حجز بالمعرف
- */
 export const getBookingById = async (req, res) => {
   try {
     const { bookingId } = req.params;
@@ -545,7 +582,6 @@ export const getBookingById = async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // التأكد من أن الحجز يخص حدث للمنظم
     if (booking.event.organizer.toString() !== organizerId.toString()) {
       return res.status(403).json({ message: "Access denied" });
     }
@@ -560,16 +596,12 @@ export const getBookingById = async (req, res) => {
   }
 };
 
-/**
- * تحديث حالة الحجز
- */
 export const updateBookingStatus = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const { status } = req.body;
     const organizerId = req.user._id;
 
-    // التحقق من صحة الحالة
     const validStatuses = ["pending", "confirmed", "cancelled"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
@@ -583,15 +615,12 @@ export const updateBookingStatus = async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // التأكد من أن الحجز يخص حدث للمنظم
     if (booking.event.organizer.toString() !== organizerId.toString()) {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    // تحديث حالة الحجز
     booking.status = status;
 
-    // إذا تم الإلغاء، قم بتحديث حالة الدفع أيضاً
     if (status === "cancelled") {
       booking.paymentStatus = "failed";
     }
@@ -611,16 +640,12 @@ export const updateBookingStatus = async (req, res) => {
   }
 };
 
-/**
- * get booking for a specific event
- */
 export const getEventBookings = async (req, res) => {
   try {
     const { eventId } = req.params;
     const organizerId = req.user._id;
     const { page = 1, limit = 10, status } = req.query;
 
-    // sure that the event belongs to the organizer
     const event = await Event.findOne({ _id: eventId, organizer: organizerId });
     if (!event) {
       return res
@@ -628,18 +653,14 @@ export const getEventBookings = async (req, res) => {
         .json({ message: "Event not found or access denied" });
     }
 
-    // building query
     let query = { event: eventId };
     if (status) {
       query.status = status;
     }
 
-    // calculating pagination
     const skip = (page - 1) * limit;
     const totalBookings = await Booking.countDocuments(query);
     const totalPages = Math.ceil(totalBookings / limit);
-
-    // getting bookings
 
     const bookings = await Booking.find(query)
       .populate("user", "userName email phone")
@@ -673,185 +694,20 @@ export const getEventBookings = async (req, res) => {
   }
 };
 
-/**
- * get detailed bookings with advanced information
- */
-export const getDetailedBookings = async (req, res) => {
-  try {
-    const organizerId = req.user._id;
-    const { 
-      page = 1, 
-      limit = 10, 
-      paymentStatus, 
-      search, 
-      eventId,
-      sortOrder = 'desc'
-    } = req.query;
-
-    // finding organizer events
-    const organizerEvents = await Event.find({ organizer: organizerId }).select("_id title");
-    const eventIds = organizerEvents.map(event => event._id);
-
-    if (eventIds.length === 0) {
-      return res.status(200).json({
-        success: true,
-        bookings: [],
-        pagination: { currentPage: 1, totalPages: 0, totalBookings: 0, hasNext: false, hasPrev: false },
-        summary: { totalRevenue: 0, totalTickets: 0, averageOrderValue: 0 }
-      });
-    }
-
-    // building query for simplified search
-    let query = { event: { $in: eventIds } };
-
-    // simplified filters
-    if (paymentStatus) query.paymentStatus = paymentStatus;
-    if (eventId) query.event = eventId;
-
-    // text search
-    if (search) {
-      query.$or = [
-        { bookingCode: { $regex: search, $options: 'i' } },
-        { 'attendeeInfo.name': { $regex: search, $options: 'i' } },
-        { 'attendeeInfo.email': { $regex: search, $options: 'i' } },
-        { 'attendeeInfo.phone': { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    // pagination and sorting
-    const skip = (page - 1) * limit;
-    const sort = { createdAt: sortOrder === 'asc' ? 1 : -1 };
-
-    // executing the query with detailed data
-    const [bookings, totalBookings] = await Promise.all([
-      Booking.find(query)
-        .populate({
-          path: 'event',
-          select: 'title startDate endDate location category images maxAttendees',
-          populate: {
-            path: 'organizer',
-            select: 'firstName lastName email'
-          }
-        })
-        .populate({
-          path: 'user',
-          select: 'userName email phone createdAt lastLogin profileImage',
-          populate: {
-            path: 'ticketsBooked',
-            select: 'createdAt totalPrice',
-            options: { limit: 5 }
-          }
-        })
-        .populate({
-          path: 'ticket',
-          select: 'type price currency description features availableQuantity quantity'
-        })
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(limit)),
-
-      Booking.countDocuments(query)
-    ]);
-
-    // calculating statistics
-    const summary = await Booking.aggregate([
-      { $match: query },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: { $sum: { $cond: [{ $eq: ['$paymentStatus', 'completed'] }, '$totalPrice', 0] } },
-          totalTickets: { $sum: '$quantity' },
-          completedBookings: { $sum: { $cond: [{ $eq: ['$paymentStatus', 'completed'] }, 1, 0] } },
-          averageOrderValue: { $avg: '$totalPrice' }
-        }
-      }
-    ]);
-
-    // enriching bookings with additional information
-    const enrichedBookings = await Promise.all(bookings.map(async (booking) => {
-      // calculating user booking count
-      const userBookingCount = await Booking.countDocuments({
-        user: booking.user._id,
-        paymentStatus: 'completed'
-      });
-
-      // calculating event occupancy rate
-      const eventBookings = await Booking.aggregate([
-        { $match: { event: booking.event._id, paymentStatus: 'completed' } },
-        { $group: { _id: null, totalTickets: { $sum: '$quantity' } } }
-      ]);
-
-      const occupancyRate = eventBookings.length > 0 
-        ? ((eventBookings[0].totalTickets / booking.event.maxAttendees) * 100).toFixed(1)
-        : 0;
-
-      return {
-        ...booking.toObject(),
-        userStats: {
-          totalBookings: userBookingCount,
-          isReturningCustomer: userBookingCount > 1,
-          customerSince: booking.user.createdAt,
-          lastLogin: booking.user.lastLogin
-        },
-        eventStats: {
-          occupancyRate: parseFloat(occupancyRate),
-          remainingCapacity: booking.event.maxAttendees - (eventBookings.length > 0 ? eventBookings[0].totalTickets : 0)
-        },
-        ticketStats: {
-          availabilityPercentage: ((booking.ticket.availableQuantity / booking.ticket.quantity) * 100).toFixed(1)
-        }
-      };
-    }));
-
-    const totalPages = Math.ceil(totalBookings / limit);
-
-    res.status(200).json({
-      success: true,
-      bookings: enrichedBookings,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages,
-        totalBookings,
-        hasNext: page < totalPages,
-        hasPrev: page > 1
-      },
-      summary: summary.length > 0 ? {
-        totalRevenue: summary[0].totalRevenue || 0,
-        totalTickets: summary[0].totalTickets || 0,
-        completedBookings: summary[0].completedBookings || 0,
-        averageOrderValue: summary[0].averageOrderValue || 0
-      } : { totalRevenue: 0, totalTickets: 0, completedBookings: 0, averageOrderValue: 0 }
-    });
-
-  } catch (error) {
-    console.error('Get detailed bookings error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch detailed bookings',
-      error: error.message
-    });
-  }
-};
-
-/**
- * get booking statistics for organizer dashboard
- */
 export const getBookingStats = async (req, res) => {
   try {
     const organizerId = req.user._id;
     const { eventId, startDate, endDate } = req.query;
 
-    // find events for the organizer
     let eventQuery = { organizer: organizerId };
-    if (eventId) {
-      eventQuery._id = eventId;
-    }
+    if (eventId) eventQuery._id = eventId;
 
     const organizerEvents = await Event.find(eventQuery).select("_id");
     const eventIds = organizerEvents.map((event) => event._id);
 
     if (eventIds.length === 0) {
       return res.status(200).json({
+        success: true,
         totalBookings: 0,
         totalRevenue: 0,
         confirmedBookings: 0,
@@ -861,7 +717,6 @@ export const getBookingStats = async (req, res) => {
       });
     }
 
-    // building date filter
     let dateFilter = {};
     if (startDate || endDate) {
       dateFilter.createdAt = {};
@@ -869,7 +724,6 @@ export const getBookingStats = async (req, res) => {
       if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
     }
 
-    // get booking query 
     const bookingQuery = { event: { $in: eventIds }, ...dateFilter };
 
     const [
@@ -898,6 +752,7 @@ export const getBookingStats = async (req, res) => {
     const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
 
     res.status(200).json({
+      success: true,
       totalBookings,
       totalRevenue,
       confirmedBookings,
@@ -906,9 +761,10 @@ export const getBookingStats = async (req, res) => {
       recentBookings,
     });
   } catch (error) {
-    console.error("Get booking stats error:", error);
+    logger.error("Get booking stats error:", error);
     res.status(500).json({
-      message: "Failed to fetch booking statistics",
+      success: false,
+      message: "فشل في جلب إحصائيات الحجوزات",
       error: error.message,
     });
   }

@@ -26,18 +26,24 @@ class QRCodeService {
         eventLocation,
       } = ticketData;
 
-      // إنشاء بيانات مشفرة للحماية من التزوير
-      const secureData = {
-        bookingId: bookingId.toString(),
-        bookingCode,
-        eventId: eventId.toString(),
-        userId: userId.toString(),
+      // تخزين بيانات العرض في متغير منفصل لاستخدامها لاحقاً
+      const displayData = {
         attendeeName,
         attendeeEmail,
         ticketType,
-        quantity,
-        eventDate: eventDate.toISOString(),
-        timestamp: new Date().toISOString(),
+        eventDate,
+        eventTitle,
+        eventLocation
+      };
+
+      // إنشاء بيانات مشفرة للحماية من التزوير - تقليل حجم البيانات
+      const secureData = {
+        bid: bookingId.toString(), // اختصار bookingId
+        bc: bookingCode, // اختصار bookingCode
+        eid: eventId.toString(), // اختصار eventId
+        uid: userId.toString(), // اختصار userId
+        q: quantity, // اختصار quantity
+        ts: new Date().getTime(), // استخدام timestamp بدلاً من ISO string كامل
       };
 
       // إنشاء توقيع رقمي للتحقق من صحة التذكرة
@@ -47,8 +53,18 @@ class QRCodeService {
       // تحويل البيانات إلى JSON مشفر
       const encryptedData = this.encryptData(JSON.stringify(secureData));
 
-      // إنشاء URL للتحقق من التذكرة
-      const verificationUrl = `${process.env.APP_BASE_URL}/api/tickets/verify?token=${encryptedData}`;
+      // إنشاء بيانات بسيطة للتذكرة بدلاً من استخدام البيانات المشفرة
+      const simpleTicketData = {
+        code: bookingCode,
+        event: eventTitle,
+        date: typeof eventDate === 'string' ? eventDate : (eventDate.toISOString ? eventDate.toISOString().split('T')[0] : ''),
+        name: attendeeName,
+        type: ticketType,
+        qty: quantity
+      };
+
+      // إنشاء URL للتحقق من التذكرة - استخدام بيانات بسيطة
+      const verificationUrl = `${process.env.APP_BASE_URL || 'http://localhost:5173'}/ticket?id=${bookingCode}`;
 
       // توليد QR Code
       const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {
@@ -80,14 +96,15 @@ class QRCodeService {
           bookingCode,
           eventTitle,
           attendeeName,
-          eventDate: eventDate.toLocaleDateString("ar-EG", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+          eventDate: typeof eventDate.toLocaleDateString === 'function' ?
+            eventDate.toLocaleDateString("ar-EG", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }) : eventDate.toString(),
           eventLocation,
           ticketType,
           quantity,
@@ -137,7 +154,7 @@ class QRCodeService {
     const key = crypto.scryptSync(secretKey, "salt", 32);
     const iv = crypto.randomBytes(16);
 
-    const cipher = crypto.createCipherGCM(algorithm, key, iv);
+    const cipher = crypto.createCipheriv(algorithm, key, iv);
     cipher.setAAD(Buffer.from("ticket-verification", "utf8"));
 
     let encrypted = cipher.update(text, "utf8", "hex");
@@ -171,7 +188,7 @@ class QRCodeService {
       );
       const { iv, encrypted, authTag } = data;
 
-      const decipher = crypto.createDecipherGCM(
+      const decipher = crypto.createDecipheriv(
         algorithm,
         key,
         Buffer.from(iv, "hex")
@@ -211,8 +228,8 @@ class QRCodeService {
       }
 
       // التحقق من تاريخ الصلاحية (التذكرة صالحة لمدة 24 ساعة بعد الحدث)
-      const eventDate = new Date(ticketData.eventDate);
-      const expiryDate = new Date(eventDate.getTime() + 24 * 60 * 60 * 1000);
+      // استخدام timestamp بدلاً من تاريخ ISO string
+      const expiryDate = new Date(ticketData.ts + 24 * 60 * 60 * 1000);
 
       if (new Date() > expiryDate) {
         return {

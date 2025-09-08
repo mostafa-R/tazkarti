@@ -35,18 +35,32 @@ const bookingSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "completed", "failed", "expired"],
+      enum: ["pending", "completed", "failed", "expired", "cancelled"],
       default: "pending",
     },
     paymentMethod: {
       type: String,
-      enum: ["credit_card", "paypal", "bank_transfer", "cash", "wallet", "card"],
+      enum: ["card", "wallet", "bank_transfer", "cash"],
       default: "card",
     },
     transactionId: {
       type: String,
       unique: true,
       sparse: true,
+    },
+    paymentOrderId: {
+      type: String,
+      sparse: true,
+    },
+    paymentDate: {
+      type: Date,
+    },
+    retryCount: {
+      type: Number,
+      default: 0,
+    },
+    cancelledAt: {
+      type: Date,
     },
     bookingCode: {
       type: String,
@@ -102,10 +116,6 @@ const bookingSchema = new mongoose.Schema(
       default: true,
     },
 
-    // حقول PayMob الجديدة
-    paymentOrderId: String,
-    paymentKey: String,
-    paymentDate: Date,
   },
   {
     timestamps: true,
@@ -114,12 +124,22 @@ const bookingSchema = new mongoose.Schema(
   }
 );
 
-// ✅ Virtual للتحقق من صلاحية الحجز
+// Virtual للتحقق من صلاحية الحجز
 bookingSchema.virtual("isValid").get(function () {
   return this.status === "confirmed" && this.paymentStatus === "completed";
 });
 
-// ✅ توليد كود الحجز بشكل ذكي
+// Virtual للتحقق من إمكانية الإلغاء
+bookingSchema.virtual("canCancel").get(function () {
+  return this.status === "pending" && this.paymentStatus === "pending";
+});
+
+// Virtual للتحقق من إمكانية إعادة المحاولة
+bookingSchema.virtual("canRetry").get(function () {
+  return this.paymentStatus === "failed" && this.retryCount < 3;
+});
+
+// توليد كود الحجز بشكل ذكي
 bookingSchema.pre("save", async function (next) {
   if (!this.bookingCode) {
     const timestamp = Date.now().toString().slice(-6);
@@ -131,11 +151,21 @@ bookingSchema.pre("save", async function (next) {
   next();
 });
 
-// ✅ Indexes لتحسين البحث والأداء
+// تحديث حالة الإلغاء عند الإلغاء
+bookingSchema.pre("save", function (next) {
+  if (this.isModified("status") && this.status === "cancelled" && !this.cancelledAt) {
+    this.cancelledAt = new Date();
+  }
+  next();
+});
+
+// فهارس لتحسين البحث والأداء
 bookingSchema.index({ user: 1, event: 1 });
-// bookingCode index already created by unique: true in field definition
 bookingSchema.index({ status: 1, paymentStatus: 1 });
 bookingSchema.index({ event: 1, status: 1 });
+bookingSchema.index({ bookingCode: 1 });
+bookingSchema.index({ paymentOrderId: 1 });
+bookingSchema.index({ createdAt: -1 });
 
 const Booking = mongoose.model("Booking", bookingSchema);
 

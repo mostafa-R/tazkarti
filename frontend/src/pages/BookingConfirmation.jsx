@@ -1,7 +1,9 @@
 import {
+  AlertCircle,
   ArrowLeft,
   Calendar,
   CheckCircle,
+  CreditCard,
   Download,
   Loader,
   Mail,
@@ -27,85 +29,142 @@ const BookingConfirmationPage = () => {
   const initialBookingData = location.state?.bookingData;
 
   // إنشاء حالة لبيانات الحجز يمكن تحديثها
-  const [bookingDetails, setBookingDetails] = useState(
-    initialBookingData || {
-      event: {
-        title: t("confirmation.defaultEventTitle"),
-        date: new Date().toLocaleDateString(),
-        location: {
-          venue: t("confirmation.defaultVenue"),
-          city: t("confirmation.defaultCity"),
-        },
-        time: "8:00 PM",
-      },
-      ticket: {
-        type: t("confirmation.defaultTicketType"),
-        quantity: 1,
-        price: 100,
-        currency: "EGP",
-      },
-      customer: {
-        name: t("confirmation.defaultCustomer"),
-        bookingCode: "TZK-" + Math.floor(100000 + Math.random() * 900000),
-      },
-    }
-  );
+  const [bookingDetails, setBookingDetails] = useState({
+    event: { title: "", date: "", location: { venue: "", city: "" }, time: "" },
+    ticket: { type: "", quantity: 0, price: 0, currency: "" },
+    customer: { name: "", email: "", phone: "", bookingCode: "" },
+    status: "",
+    paymentStatus: "",
+    bookingId: "",
+    bookingCode: "",
+    qrCode: ""
+  });
 
   // التحقق من حالة الحجز النهائية من الباكاند
   useEffect(() => {
     const fetchBookingStatus = async () => {
-      if (!initialBookingData || !initialBookingData.bookingId) {
+      // تحقق من وجود معلمات URL أولاً
+      const urlParams = new URLSearchParams(window.location.search);
+      const bookingCodeFromUrl = urlParams.get("bookingCode");
+      const success = urlParams.get("success");
+      
+      // إذا كان هناك bookingCode في URL، استخدمه
+      if (bookingCodeFromUrl) {
+        setLoading(true);
+        setError("");
+        
+        try {
+          // استدعاء API للحصول على تفاصيل التذكرة باستخدام bookingCode من URL
+          const response = await bookingAPI.getTicketDetails(bookingCodeFromUrl);
+          
+          if (response.data && response.data.success) {
+            const bookingData = response.data.data;
+            
+            // تحديث بيانات الحجز من الاستجابة
+            setBookingDetails({
+              status: bookingData.bookingStatus || bookingData.status || "",
+              paymentStatus: bookingData.paymentStatus || "",
+              qrCode: bookingData.qrCode || "",
+              event: {
+                title: bookingData.event?.title || "",
+                date: bookingData.event?.startDate || bookingData.event?.date || "",
+                location: {
+                  venue: bookingData.event?.location?.venue || "",
+                  city: bookingData.event?.location?.city || "",
+                },
+                time: bookingData.event?.time || "",
+              },
+              ticket: {
+                type: bookingData.ticket?.type || "",
+                quantity: bookingData.quantity || 0,
+                price: bookingData.totalPrice || bookingData.ticket?.price || 0,
+                currency: bookingData.ticket?.currency || "",
+              },
+              customer: {
+                name: bookingData.attendeeInfo?.name || "",
+                email: bookingData.attendeeInfo?.email || "",
+                phone: bookingData.attendeeInfo?.phone || "",
+                bookingCode: bookingData.bookingCode || "",
+              },
+              bookingCode: bookingData.bookingCode || "",
+              bookingId: bookingData._id || "",
+              bookingDate: bookingData.createdAt || "",
+              paymentDate: bookingData.paymentDate || "",
+            });
+          } else {
+            setError(t("confirmation.errors.fetchFailed"));
+          }
+        } catch (error) {
+          console.error("خطأ في جلب تفاصيل الحجز من URL:", error);
+          setError(t("confirmation.errors.fetchFailed"));
+        } finally {
+          setLoading(false);
+        }
         return;
       }
-
-      setLoading(true);
-      setError("");
-
-      try {
-        // استدعاء API للحصول على آخر حالة للحجز
-        const response = await bookingAPI.getBookingStatus(
-          initialBookingData.bookingId
-        );
-
-        if (response.data && response.data.success) {
-          // تحديث بيانات الحجز بالمعلومات الجديدة
-          const updatedBookingData = response.data.booking;
-
-          setBookingDetails((prev) => ({
-            ...prev,
-            status: updatedBookingData.status,
-            paymentStatus: updatedBookingData.paymentStatus,
-            qrCode: updatedBookingData.qrCode,
-            event: {
-              ...prev.event,
-              ...updatedBookingData.event,
+      
+      // استخدام initialBookingData إذا لم يكن هناك معلمات URL
+      if (initialBookingData) {
+        setBookingDetails({
+          status: initialBookingData.status || "",
+          paymentStatus: initialBookingData.paymentStatus || "",
+          qrCode: initialBookingData.qrCode || "",
+          event: {
+            title: initialBookingData.event?.title || "",
+            date: initialBookingData.event?.date || "",
+            location: {
+              venue: initialBookingData.event?.location?.venue || "",
+              city: initialBookingData.event?.location?.city || "",
             },
-            ticket: {
-              ...prev.ticket,
-              ...updatedBookingData.ticket,
-            },
-            customer: {
-              name:
-                updatedBookingData.attendeeInfo?.name || prev.customer?.name,
-              email:
-                updatedBookingData.attendeeInfo?.email || prev.customer?.email,
-              phone:
-                updatedBookingData.attendeeInfo?.phone || prev.customer?.phone,
-              bookingCode:
-                updatedBookingData.bookingCode || prev.customer?.bookingCode,
-            },
-            bookingCode: updatedBookingData.bookingCode,
-            bookingDate: updatedBookingData.createdAt,
-            paymentDate: updatedBookingData.paymentDate,
-          }));
-        } else {
-          setError(t("confirmation.errors.fetchFailed"));
+            time: initialBookingData.event?.time || "",
+          },
+          ticket: {
+            type: initialBookingData.ticket?.type || "",
+            quantity: initialBookingData.ticket?.quantity || 0,
+            price: initialBookingData.ticket?.price || 0,
+            currency: initialBookingData.ticket?.currency || "",
+          },
+          customer: {
+            name: initialBookingData.customer?.name || "",
+            email: initialBookingData.customer?.email || "",
+            phone: initialBookingData.customer?.phone || "",
+            bookingCode: initialBookingData.customer?.bookingCode || initialBookingData.bookingCode || "",
+          },
+          bookingCode: initialBookingData.bookingCode || "",
+          bookingId: initialBookingData.bookingId || "",
+          bookingDate: initialBookingData.bookingDate || "",
+          paymentDate: initialBookingData.paymentDate || "",
+        });
+        
+        // إذا كان هناك bookingId، قم بجلب أحدث البيانات من الخادم
+        if (initialBookingData.bookingId) {
+          setLoading(true);
+          
+          try {
+            const response = await bookingAPI.getTicketDetails(initialBookingData.bookingId);
+            
+            if (response.data && response.data.success) {
+              const serverData = response.data.data;
+              
+              setBookingDetails(prev => ({
+                ...prev,
+                status: serverData.bookingStatus || serverData.status || prev.status,
+                paymentStatus: serverData.paymentStatus || prev.paymentStatus,
+                qrCode: serverData.qrCode || prev.qrCode,
+                bookingCode: serverData.bookingCode || prev.bookingCode,
+                bookingDate: serverData.createdAt || prev.bookingDate,
+                paymentDate: serverData.paymentDate || prev.paymentDate,
+              }));
+            }
+          } catch (error) {
+            console.error("خطأ في جلب تفاصيل الحجز من الخادم:", error);
+          } finally {
+            setLoading(false);
+          }
         }
-      } catch (error) {
-        console.error("خطأ في جلب تفاصيل الحجز:", error);
-        setError(t("confirmation.errors.fetchFailed"));
-      } finally {
-        setLoading(false);
+      } else {
+        // لا توجد بيانات للحجز
+        setError(t("confirmation.errors.noBookingData"));
       }
     };
 
@@ -118,6 +177,33 @@ const BookingConfirmationPage = () => {
 
   const handleBackToEvents = () => {
     navigate("/events");
+  };
+  
+  const handleDownloadTicket = async (bookingId) => {
+    if (!bookingId) {
+      setError(t("confirmation.errors.noBookingId"));
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await bookingAPI.downloadTicket(bookingId);
+      
+      // إنشاء رابط تنزيل للملف
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `ticket-${bookingId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("خطأ في تنزيل التذكرة:", error);
+      setError(t("confirmation.errors.downloadFailed"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatEventDate = (dateString) => {
@@ -192,14 +278,28 @@ const BookingConfirmationPage = () => {
 
         {/* Ticket Card */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8 border border-gray-200">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+          <div className={`px-6 py-4 ${
+            bookingDetails?.status === "cancelled" || bookingDetails?.paymentStatus === "failed" 
+              ? "bg-gradient-to-r from-red-600 to-orange-600" 
+              : "bg-gradient-to-r from-blue-600 to-purple-600"
+          }`}>
             <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
               <h2 className="text-xl font-bold text-white text-center sm:text-left">
                 {bookingDetails.event.title}
               </h2>
-              <span className="bg-green-400 text-black px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
-                {t("confirmation.status.confirmed")}
-              </span>
+              {bookingDetails?.status === "cancelled" ? (
+                <span className="bg-red-400 text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                  {t("confirmation.status.cancelled")}
+                </span>
+              ) : bookingDetails?.paymentStatus === "failed" ? (
+                <span className="bg-orange-400 text-white px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                  {t("confirmation.status.paymentFailed")}
+                </span>
+              ) : (
+                <span className="bg-green-400 text-black px-3 py-1 rounded-full text-sm font-bold whitespace-nowrap">
+                  {t("confirmation.status.confirmed")}
+                </span>
+              )}
             </div>
           </div>
 
@@ -289,7 +389,31 @@ const BookingConfirmationPage = () => {
                       {t("confirmation.loadingQR")}
                     </span>
                   </div>
-                ) : bookingDetails.qrCode ? (
+                ) : bookingDetails?.status === "cancelled" ? (
+                  <div className="w-48 h-48 bg-red-50 rounded-xl flex items-center justify-center mb-4 relative">
+                    <div className="text-center p-4">
+                      <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-2" />
+                      <p className="text-red-700 font-medium">
+                        {t("confirmation.ticketCancelled")}
+                      </p>
+                      <p className="text-sm text-red-600 mt-2">
+                        {t("confirmation.ticketCancelledMessage")}
+                      </p>
+                    </div>
+                  </div>
+                ) : bookingDetails?.paymentStatus === "failed" ? (
+                  <div className="w-48 h-48 bg-orange-50 rounded-xl flex items-center justify-center mb-4 relative">
+                    <div className="text-center p-4">
+                      <AlertCircle className="h-16 w-16 text-orange-500 mx-auto mb-2" />
+                      <p className="text-orange-700 font-medium">
+                        {t("confirmation.paymentFailed")}
+                      </p>
+                      <p className="text-sm text-orange-600 mt-2">
+                        {t("confirmation.paymentFailedMessage")}
+                      </p>
+                    </div>
+                  </div>
+                ) : bookingDetails?.qrCode ? (
                   <div className="w-48 h-48 mb-4">
                     <img
                       src={bookingDetails.qrCode}
@@ -310,22 +434,47 @@ const BookingConfirmationPage = () => {
                     </div>
                   </div>
                 )}
-                <p className="text-sm text-gray-600 text-center">
-                  {t("confirmation.qrInstructions")}
-                </p>
+                {bookingDetails?.status !== "cancelled" && bookingDetails?.paymentStatus !== "failed" && (
+                  <p className="text-sm text-gray-600 text-center">
+                    {t("confirmation.qrInstructions")}
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
-              <button className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl">
-                <Download className="h-5 w-5 mr-2" />
-                {t("confirmation.downloadTicket")}
-              </button>
-              <button className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center font-medium">
-                <Share2 className="h-5 w-5 mr-2" />
-                {t("confirmation.share")}
-              </button>
+              {bookingDetails?.status !== "cancelled" && bookingDetails?.paymentStatus !== "failed" ? (
+                <>
+                  <button 
+                    onClick={() => handleDownloadTicket(bookingDetails?.bookingId || bookingDetails?.bookingCode)}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center justify-center font-medium shadow-lg hover:shadow-xl"
+                  >
+                    <Download className="h-5 w-5 mr-2" />
+                    {t("confirmation.downloadTicket")}
+                  </button>
+                  <button className="flex-1 bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center font-medium">
+                    <Share2 className="h-5 w-5 mr-2" />
+                    {t("confirmation.share")}
+                  </button>
+                </>
+              ) : bookingDetails?.paymentStatus === "failed" ? (
+                <button 
+                  onClick={() => navigate(`/payment?retry=true&bookingCode=${bookingDetails?.bookingCode}`)}
+                  className="flex-1 bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center font-medium"
+                >
+                  <CreditCard className="h-5 w-5 mr-2" />
+                  {t("confirmation.retryPayment")}
+                </button>
+              ) : (
+                <button 
+                  onClick={handleBackToEvents}
+                  className="flex-1 bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center font-medium"
+                >
+                  <ArrowLeft className="h-5 w-5 mr-2" />
+                  {t("confirmation.browseEvents")}
+                </button>
+              )}
             </div>
           </div>
         </div>

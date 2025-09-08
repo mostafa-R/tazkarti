@@ -28,16 +28,14 @@ const Booking = () => {
     phone: "",
   });
 
-  // Validation patterns
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^01[0-9]{9}$/; // Egyptian phone format
-  const nameRegex = /^[a-zA-Z\u0600-\u06FF\s]{2,50}$/; // Supports Arabic and English names
+  const phoneRegex = /^01[0-9]{9}$/;
+  const nameRegex = /^[a-zA-Z\u0600-\u06FF\s]{2,50}$/;
 
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
 
-  // Get event and ticket data from navigation state
   const eventData = location.state?.event || {
     _id: id,
     title: t("booking.defaultEventTitle"),
@@ -123,7 +121,7 @@ const Booking = () => {
   };
 
   const handleGoBack = () => {
-    navigate(-1); // Go back to previous page
+    navigate(-1);
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -139,18 +137,15 @@ const Booking = () => {
     setBookingError("");
 
     try {
-      // إنشاء حجز مؤقت آمن في الباكاند
       const response = await bookingAPI.createSecureBooking({
         ticketId: selectedTicketData?._id,
         eventId: eventData._id,
         type: selectedTicketData?.type,
         quantity: quantity,
-        paymentMethod: "card", // افتراضي: كارت
+        paymentMethod: "card",
       });
 
-      // التحقق من نجاح إنشاء الحجز
       if (response.data && response.data.success) {
-        // الانتقال إلى صفحة الدفع مع معلومات الحجز
         navigate("/payment", {
           state: {
             eventData: eventData,
@@ -205,7 +200,6 @@ const Booking = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with Back Button */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <button
@@ -219,7 +213,6 @@ const Booking = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {t("booking.pageTitle")}
@@ -228,9 +221,7 @@ const Booking = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Event Details and Ticket Selection */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Event Summary */}
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
               <h2 className="text-xl font-semibold mb-4">
                 {t("booking.eventSummary")}
@@ -266,7 +257,6 @@ const Booking = () => {
               </div>
             </div>
 
-            {/* Selected Ticket Display */}
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
               <h2 className="text-xl font-semibold mb-4">
                 {t("booking.yourTickets")}
@@ -330,7 +320,6 @@ const Booking = () => {
               </div>
             </div>
 
-            {/* Customer Information */}
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
               <h2 className="text-xl font-semibold mb-4">
                 {t("booking.yourInformation")}

@@ -1,32 +1,37 @@
 import express from "express";
 
 import {
-    bookingTicket,
-    cancelPendingBooking,
-    createBookingWithSecurePayment,
-    getBookingById,
-    getBookingStats,
-    getBookingStatus,
-    getDetailedBookings,
-    getEventBookings,
-    getOrganizerBookings,
-    getUserBookings,
-    updateBookingStatus,
+  bookingTicket,
+  cancelPendingBooking,
+  createBookingWithSecurePayment,
+  getBookingById,
+  getBookingStats,
+  getBookingStatus,
+  getEventBookings,
+  getOrganizerBookings,
+  getUserBookings,
+  updateBookingStatus,
 } from "../controllers/booking.controller.js";
 import {
-    cancelPayment,
-    checkoutHealthCheck,
-    checkoutWebhook,
-    createPaymentLink,
-    getPaymentDetails,
-    payWithToken,
-    retryPayment,
-    verifyPaymentStatus,
+  downloadTicket,
+  getTicketDetails
+} from "../controllers/bookingTicket.js";
+import {
+  cancelPayment,
+  checkoutHealthCheck,
+  checkoutWebhook,
+  createPaymentLink,
+  getPaymentDetails,
+  payWithToken,
+  retryPayment,
+  verifyPaymentStatus,
+  verifyPaymentWithGateway,
+  verifyPendingBookingsWithGateway,
 } from "../controllers/checkout.controller.js";
 import { authMiddleware as authenticateToken } from "../middleware/authMiddleware.js";
 import {
-    cacheOrganizerBookings,
-    paymentRateLimit,
+  cacheOrganizerBookings,
+  paymentRateLimit,
 } from "../middleware/performanceMiddleware.js";
 import { roleMiddleware as requireRole } from "../middleware/roleMiddleware.js";
 
@@ -49,6 +54,12 @@ router.delete(
 
 // التحقق من حالة الحجز
 router.get("/status/:bookingId", authenticateToken, getBookingStatus);
+
+// الحصول على تفاصيل التذكرة
+router.get("/ticket/:bookingId", authenticateToken, getTicketDetails);
+
+// تنزيل التذكرة
+router.get("/ticket/:bookingId/download", authenticateToken, downloadTicket);
 
 // الحصول على جميع حجوزات المستخدم
 router.get("/my-bookings", authenticateToken, getUserBookings);
@@ -75,6 +86,30 @@ router.post('/cancel/:bookingId', authenticateToken, cancelPayment);
 
 // Health check
 router.get('/health',checkoutHealthCheck);
+
+// ====== Payment Gateway Verification Routes ======
+// التحقق من حالة الدفع مع بوابة الدفع مباشرة (للمشرفين والمنظمين)
+router.get(
+  '/verify-payment-gateway/:paymentId',
+  authenticateToken,
+  requireRole(["admin", "organizer"]),
+  verifyPaymentWithGateway
+);
+
+router.get(
+  '/verify-payment-gateway/:paymentId/:bookingId',
+  authenticateToken,
+  requireRole(["admin", "organizer"]),
+  verifyPaymentWithGateway
+);
+
+// التحقق من جميع الحجوزات المعلقة مع بوابة الدفع (للمشرفين فقط)
+router.post(
+  '/verify-pending-bookings',
+  authenticateToken,
+  requireRole(["admin"]),
+  verifyPendingBookingsWithGateway
+);
 
 // router.get("/payment-status/:bookingId", authenticateToken, checkPaymentStatus);
 
@@ -111,17 +146,5 @@ router.get(
   requireRole(["organizer"]),
   getEventBookings
 );
-
-// Enhanced booking management routes (simplified)
-router.get(
-  "/organizer/bookings/detailed",
-  authenticateToken,
-  requireRole(["organizer"]),
-  getDetailedBookings
-);
-
-// إعداد Cron Job لإلغاء الحجوزات المنتهية الصلاحية
-// يتم تشغيله كل 5 دقائق
-// setInterval(cancelExpiredBookings, 5 * 60 * 1000);
 
 export default router;

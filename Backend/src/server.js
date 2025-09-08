@@ -30,6 +30,7 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import bookingRoutes from "./routes/booking.routes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
+import paymentStatusRoutes from "./routes/paymentStatus.routes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
 import "./utils/archiveOldUsers.js";
@@ -39,7 +40,7 @@ dotenv.config();
 const app = express();
 
 // Configure Express to trust the proxy (important for rate limiting behind proxies)
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 // 📚 Documentation
 app.get(
@@ -79,7 +80,7 @@ const allowedOrigins = process.env.FRONTEND_URL
 app.use(
   cors({
     origin: function (origin, callback) {
-        console.log("🔎 Incoming request origin:", origin);
+      console.log("🔎 Incoming request origin:", origin);
 
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) {
@@ -130,7 +131,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(
-  "/api/payments/checkout/webhook",
+  "/api/booking/checkout/webhook",
   express.raw({ type: "application/json" })
 );
 
@@ -140,6 +141,8 @@ app.use("/api", chatRoutes);
 // Public routes
 app.use("/auth", authRoutes);
 app.use("/api/events", eventRoutes);
+// Booking routes (some need to be public like webhook)
+app.use("/api/booking", bookingRoutes);
 
 // Protected routes
 app.use(authMiddleware);
@@ -155,14 +158,11 @@ app.use((req, res, next) => {
 
 app.use("/user", userRoutes);
 app.use("/api/tickets", ticketRoutes);
-app.use("/api/booking", bookingRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/payment-status", paymentStatusRoutes);
 
 app.use(errorMiddleware);
-
-
-
 
 export const Bootstrap = async () => {
   try {

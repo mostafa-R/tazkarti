@@ -1,6 +1,6 @@
+import { ArrowLeft, Calendar, Download, MapPin } from 'lucide-react';
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, ArrowLeft, Download } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const mockTickets = [
   {

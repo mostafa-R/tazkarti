@@ -191,7 +191,7 @@ const HomePage = () => {
                 />
                 <input
                   type="text"
-                  placeholder={t("search.placeholder")}
+                  placeholder={t("mainSearch.placeholder")}
                   className={`w-full py-4 border-0 focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-900 rounded-xl bg-gray-50 transition-all duration-300 ${
                     isRTL ? "pr-12 pl-4" : "pl-12 pr-4"
                   }`}
@@ -209,7 +209,7 @@ const HomePage = () => {
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
-                  <option value="">{t("search.allCategories")}</option>
+                  <option value="">{t("mainSearch.allCategories")}</option>
                   {categories.map((cat) => (
                     <option key={cat.key} value={cat.key}>
                       {cat.name}
@@ -227,7 +227,7 @@ const HomePage = () => {
                 onClick={handleSearchEvents}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
-                {t("search.button")}
+                {t("mainSearch.button")}
               </button>
             </div>
           </div>

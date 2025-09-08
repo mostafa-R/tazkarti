@@ -32,13 +32,7 @@ const PaymentPage = () => {
   // استخدام useMemo لتجنب تغيير التبعيات في كل رندر
   const eventData = useMemo(
     () =>
-      location.state?.eventData || {
-        title: "Event Title",
-        date: new Date().toLocaleDateString(),
-        time: "7:00 PM",
-        location: "Venue Location",
-        images: ["https://via.placeholder.com/120"],
-      },
+      location.state?.eventData ||
     [location.state?.eventData]
   );
 
@@ -137,11 +131,7 @@ const PaymentPage = () => {
             } else if (paymentStatus === "failed") {
               setMessage("❌ فشل الدفع. يرجى المحاولة مرة أخرى.");
               setPaymentStatus("error");
-            } else {
-              setMessage("⏳ جاري معالجة الدفع...");
-              // إعادة المحاولة بعد 3 ثواني
-              setTimeout(() => checkPaymentStatus(), 3000);
-            }
+            } 
           }
         } catch (error) {
           console.error("Error verifying payment:", error);
@@ -153,7 +143,6 @@ const PaymentPage = () => {
       }
     };
 
-    // تشغيل فقط عندما يكون هناك بيانات حجز متاحة
     if (bookingData && bookingData.bookingCode) {
       checkPaymentStatus();
     }
@@ -294,8 +283,8 @@ const PaymentPage = () => {
           orderTotal: orderSummary.total,
         },
         threeDS: true, // تفعيل 3D Secure
-        success_url: `${window.location.origin}/payment?success=true&bookingCode=${bookingData.bookingCode || ''}`,
-        failure_url: `${window.location.origin}/payment?success=false&bookingCode=${bookingData.bookingCode || ''}`,
+        success_url: `${window.location.origin}/booking-confirmation?success=true&bookingCode=${bookingData.bookingCode || ''}&paymentId=${Date.now()}`,
+        failure_url: `${window.location.origin}/booking-confirmation?success=false&bookingCode=${bookingData.bookingCode || ''}&paymentId=${Date.now()}`,
       });
 
       const data = paymentRes.data;
@@ -618,7 +607,7 @@ const PaymentPage = () => {
             </div>
 
             {/* Payment Methods Accepted */}
-            <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
+            {/* <div className="mt-6 bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-sm font-medium text-gray-900 mb-3">
                 Accepted Payment Methods
               </h3>
@@ -627,7 +616,7 @@ const PaymentPage = () => {
                 <img src="/mastercard.svg" alt="Mastercard" className="h-8" />
                 <img src="/amex.svg" alt="American Express" className="h-8" />
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Column - Order Summary */}

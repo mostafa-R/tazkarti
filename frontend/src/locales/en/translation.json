@@ -7,11 +7,12 @@
   "logout": "Logout",
   "signin": "Sign In",
   "language": "Language",
+  "organizerDashboard": "Organizer Dashboard",
   "hero": {
     "title": "Book Tickets for Any Event You Love",
     "description": "Concerts, Sports, Conferences, Movies – All in one place"
   },
-  "search": {
+  "mainSearch": {
     "placeholder": "Search events, artists, venues...",
     "allCategories": "All Categories",
     "button": "Search Events"
@@ -369,6 +370,41 @@
     "success": {
       "updated": "Profile updated successfully",
       "imageUploaded": "Profile image updated successfully"
+    }
+  },
+  "ticketView": {
+    "title": "Event Ticket",
+    "subtitle": "QR Code successfully scanned - Viewing ticket details",
+    "loading": "Loading ticket details...",
+    "error": "Error",
+    "notFound": "Ticket Not Found",
+    "notFoundMessage": "We couldn't find the requested ticket",
+    "validTicket": "Valid Ticket",
+    "validMessage": "This ticket is confirmed and can be used for entry",
+    "invalidTicket": "Invalid Ticket",
+    "cancelledMessage": "This ticket has been cancelled",
+    "paymentFailedMessage": "Payment for this ticket has failed",
+    "pendingMessage": "This ticket is pending confirmation",
+    "noQRCode": "QR Code not available",
+    "dateAndTime": "Date & Time",
+    "attendeeName": "Attendee Name",
+    "ticketDetails": "Ticket Details",
+    "paymentStatus": "Payment Status",
+    "paymentCompleted": "Completed",
+    "paymentFailed": "Failed",
+    "paymentPending": "Pending",
+    "paymentCancelled": "Cancelled",
+    "notSpecified": "Not specified",
+    "back": "Back",
+    "clickToEnlarge": "Click to enlarge",
+    "qrCodeFullscreen": "QR Code",
+    "qrInstructions": "Present this code at the venue entrance",
+    "downloadSuccess": "Ticket downloaded successfully",
+    "errors": {
+      "noTicketId": "Ticket ID is missing",
+      "fetchFailed": "Failed to fetch ticket details",
+      "general": "An error occurred while fetching ticket details",
+      "downloadFailed": "Failed to download ticket"
     }
   }
 }

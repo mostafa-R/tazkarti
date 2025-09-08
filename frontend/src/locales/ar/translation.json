@@ -7,12 +7,13 @@
   "logout": "تسجيل الخروج",
   "signin": "تسجيل الدخول",
   "language": "اللغة",
+  "organizerDashboard": "لوحة التحكم",
 
   "hero": {
     "title": "احجز تذاكر لأي حدث تحبه",
     "description": "الحفلات، الرياضة، المؤتمرات، الأفلام – كلها في مكان واحد"
   },
-  "search": {
+  "mainSearch": {
     "placeholder": "ابحث عن الفعاليات، الفنانين، الأماكن...",
     "allCategories": "جميع الفئات",
     "button": "البحث عن الفعاليات"
@@ -369,6 +370,41 @@
     "success": {
       "updated": "تم تحديث الملف الشخصي بنجاح",
       "imageUploaded": "تم تحديث صورة الملف الشخصي بنجاح"
+    }
+  },
+  "ticketView": {
+    "title": "تذكرة الفعالية",
+    "subtitle": "تم مسح رمز QR بنجاح - عرض تفاصيل التذكرة",
+    "loading": "جاري تحميل بيانات التذكرة...",
+    "error": "خطأ",
+    "notFound": "التذكرة غير موجودة",
+    "notFoundMessage": "لم نتمكن من العثور على التذكرة المطلوبة",
+    "validTicket": "تذكرة صالحة",
+    "validMessage": "تم تأكيد هذه التذكرة ويمكن استخدامها للدخول",
+    "invalidTicket": "تذكرة غير صالحة",
+    "cancelledMessage": "تم إلغاء هذه التذكرة",
+    "paymentFailedMessage": "فشلت عملية الدفع لهذه التذكرة",
+    "pendingMessage": "هذه التذكرة في انتظار التأكيد",
+    "noQRCode": "رمز QR غير متوفر",
+    "dateAndTime": "التاريخ والوقت",
+    "attendeeName": "اسم الحاضر",
+    "ticketDetails": "تفاصيل التذكرة",
+    "paymentStatus": "حالة الدفع",
+    "paymentCompleted": "مكتمل",
+    "paymentFailed": "فشل",
+    "paymentPending": "قيد الانتظار",
+    "paymentCancelled": "ملغي",
+    "notSpecified": "غير محدد",
+    "back": "العودة",
+    "clickToEnlarge": "انقر لتكبير الصورة",
+    "qrCodeFullscreen": "رمز QR",
+    "qrInstructions": "قم بعرض هذا الرمز عند مدخل الفعالية",
+    "downloadSuccess": "تم تنزيل التذكرة بنجاح",
+    "errors": {
+      "noTicketId": "معرف التذكرة غير موجود",
+      "fetchFailed": "فشل في جلب بيانات التذكرة",
+      "general": "حدث خطأ أثناء جلب بيانات التذكرة",
+      "downloadFailed": "فشل في تنزيل التذكرة"
     }
   }
 }

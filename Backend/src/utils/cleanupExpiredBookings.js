@@ -5,10 +5,7 @@ import Payment from "../models/Payment.js";
 import { Ticket } from "../models/Ticket.js";
 import User from "../models/User.js";
 
-/**
- * تنظيف الحجوزات المعلقة المنتهية الصلاحية
- * يتم تشغيل هذه المهمة كل 5 دقائق
- */
+
 export const cleanupExpiredBookings = async () => {
   const session = await mongoose.startSession();
 
@@ -35,63 +32,115 @@ export const cleanupExpiredBookings = async () => {
       `[Cleanup] Found ${expiredBookings.length} expired bookings to clean up`
     );
 
-    // معالجة كل حجز منتهي الصلاحية
-    for (const booking of expiredBookings) {
-      session.startTransaction();
+    // Start a single transaction for all bookings
+    session.startTransaction();
 
-      try {
+    try {
+      // Group bookings by ticket to aggregate quantity updates
+      const ticketUpdates = new Map();
+      const userUpdates = new Map();
+      const bookingIds = [];
+      const paymentUpdates = [];
+
+      // First pass: collect all updates
+      for (const booking of expiredBookings) {
         console.log(`[Cleanup] Processing expired booking: ${booking._id}`);
 
-        // تحديث حالة الحجز
-        booking.status = "cancelled";
-        booking.paymentStatus = "expired";
-        await booking.save({ session });
+        bookingIds.push(booking._id);
 
-        // إعادة التذاكر إلى المخزون
-        if (booking.ticket) {
-          await Ticket.findByIdAndUpdate(
-            booking.ticket._id,
-            { $inc: { availableQuantity: booking.quantity } },
-            { session }
-          );
-          console.log(
-            `[Cleanup] Returned ${booking.quantity} tickets to stock for ticket ${booking.ticket._id}`
-          );
+        // Aggregate ticket quantity updates
+        if (booking.ticket && booking.ticket._id) {
+          const ticketId = booking.ticket._id.toString();
+          const currentQuantity = ticketUpdates.get(ticketId) || 0;
+          ticketUpdates.set(ticketId, currentQuantity + booking.quantity);
         }
 
-        // إزالة الحجز من قائمة حجوزات المستخدم
-        await User.findByIdAndUpdate(
-          booking.user,
-          { $pull: { ticketsBooked: booking._id } },
-          { session }
-        );
+        // Aggregate user updates (remove booking from user's ticketsBooked)
+        if (booking.user) {
+          const userId = booking.user.toString();
+          if (!userUpdates.has(userId)) {
+            userUpdates.set(userId, []);
+          }
+          userUpdates.get(userId).push(booking._id);
+        }
 
-        // تحديث سجل الدفعة إن وجد
-        const payment = await Payment.findOne({ booking: booking._id }).session(
-          session
-        );
+        // Collect payment updates
+        const payment = await Payment.findOne({ booking: booking._id }).session(session);
         if (payment) {
-          payment.status = "expired";
-          payment.expiredAt = new Date();
-          await payment.save({ session });
+          paymentUpdates.push({
+            _id: payment._id,
+            status: "expired",
+            expiredAt: new Date(),
+          });
         }
+      }
 
-        await session.commitTransaction();
-        console.log(
-          `[Cleanup] Successfully cleaned up booking: ${booking._id}`
+      // Bulk update all bookings
+      await Booking.updateMany(
+        { _id: { $in: bookingIds } },
+        {
+          status: "cancelled",
+          paymentStatus: "expired"
+        },
+        { session }
+      );
+
+      // Update tickets with aggregated quantities
+      const ticketUpdatePromises = [];
+      for (const [ticketId, totalQuantityToReturn] of ticketUpdates) {
+        ticketUpdatePromises.push(
+          Ticket.findByIdAndUpdate(
+            ticketId,
+            { $inc: { availableQuantity: totalQuantityToReturn } },
+            { session }
+          )
         );
-      } catch (error) {
-        await session.abortTransaction();
-        console.error(
-          `[Cleanup] Error processing booking ${booking._id}:`,
-          error
+        console.log(
+          `[Cleanup] Returned ${totalQuantityToReturn} tickets to stock for ticket ${ticketId}`
         );
       }
+      await Promise.all(ticketUpdatePromises);
+
+      // Update users (remove bookings from their ticketsBooked arrays)
+      const userUpdatePromises = [];
+      for (const [userId, bookingIdsToRemove] of userUpdates) {
+        userUpdatePromises.push(
+          User.findByIdAndUpdate(
+            userId,
+            { $pull: { ticketsBooked: { $in: bookingIdsToRemove } } },
+            { session }
+          )
+        );
+      }
+      await Promise.all(userUpdatePromises);
+
+      // Update payments
+      if (paymentUpdates.length > 0) {
+        const paymentUpdatePromises = paymentUpdates.map(update =>
+          Payment.findByIdAndUpdate(
+            update._id,
+            { status: update.status, expiredAt: update.expiredAt },
+            { session }
+          )
+        );
+        await Promise.all(paymentUpdatePromises);
+      }
+
+      await session.commitTransaction();
+
+      console.log(
+        `[Cleanup] Successfully cleaned up ${expiredBookings.length} expired bookings`
+      );
+      console.log(
+        `[Cleanup] Updated ${ticketUpdates.size} unique tickets, ${userUpdates.size} users, ${paymentUpdates.length} payments`
+      );
+
+    } catch (error) {
+      await session.abortTransaction();
+      console.error("[Cleanup] Error in cleanup transaction:", error);
+      throw error;
     }
 
-    console.log(
-      `[Cleanup] Finished processing ${expiredBookings.length} expired bookings`
-    );
   } catch (error) {
     console.error("[Cleanup] Error in cleanupExpiredBookings:", error);
   } finally {
@@ -149,6 +198,81 @@ export const logBookingStats = async () => {
 };
 
 /**
+ * التحقق من الحجوزات المعلقة مع بوابة الدفع
+ * للتأكد من تزامن حالة الدفع
+ */
+export const verifyPendingPaymentsWithGateway = async () => {
+  try {
+    console.log("[Payment Verification] Starting pending payments verification...");
+
+    // استيراد PaymentService و WebhookService بشكل ديناميكي لتجنب circular dependency
+    const { default: PaymentService } = await import("../controllers/checkout.controller.js");
+
+    // العثور على الحجوزات المعلقة لأكثر من 10 دقائق ولديها paymentOrderId
+    const pendingBookings = await Booking.find({
+      status: 'pending',
+      paymentStatus: { $in: ['pending', 'processing'] },
+      createdAt: { $lt: new Date(Date.now() - 10 * 60 * 1000) }, // أكثر من 10 دقائق
+      paymentOrderId: { $exists: true, $ne: null }
+    });
+
+    if (pendingBookings.length === 0) {
+      console.log("[Payment Verification] No pending bookings found");
+      return;
+    }
+
+    console.log(`[Payment Verification] Found ${pendingBookings.length} pending bookings to verify`);
+
+    let verifiedCount = 0;
+    let updatedCount = 0;
+    let errorCount = 0;
+
+    for (const booking of pendingBookings) {
+      try {
+        // استيراد checkout controller للوصول إلى PaymentService
+        const checkoutModule = await import("../controllers/checkout.controller.js");
+        const PaymentService = checkoutModule.PaymentService;
+
+        if (PaymentService && PaymentService.getPaymentDetails) {
+          const paymentDetails = await PaymentService.getPaymentDetails(booking.paymentOrderId);
+
+          if (paymentDetails) {
+            verifiedCount++;
+            const gatewayStatus = paymentDetails.status?.toLowerCase();
+
+            // استيراد WebhookService
+            const WebhookService = checkoutModule.WebhookService;
+
+            if (['captured', 'paid'].includes(gatewayStatus) && booking.paymentStatus !== 'completed') {
+              // الدفع نجح ولكن لم يتم تحديث قاعدة البيانات
+              if (WebhookService && WebhookService.handleSuccessfulPayment) {
+                await WebhookService.handleSuccessfulPayment(paymentDetails);
+                updatedCount++;
+                console.log(`[Payment Verification] Updated successful payment for booking ${booking._id}`);
+              }
+            } else if (['declined', 'failed', 'cancelled'].includes(gatewayStatus) && booking.paymentStatus !== 'failed') {
+              // الدفع فشل ولكن لم يتم تحديث قاعدة البيانات
+              if (WebhookService && WebhookService.handleFailedPayment) {
+                await WebhookService.handleFailedPayment(paymentDetails);
+                updatedCount++;
+                console.log(`[Payment Verification] Updated failed payment for booking ${booking._id}`);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        errorCount++;
+        console.error(`[Payment Verification] Error verifying booking ${booking._id}:`, error.message);
+      }
+    }
+
+    console.log(`[Payment Verification] Completed - Checked: ${pendingBookings.length}, Verified: ${verifiedCount}, Updated: ${updatedCount}, Errors: ${errorCount}`);
+  } catch (error) {
+    console.error("[Payment Verification] Error in verifyPendingPaymentsWithGateway:", error);
+  }
+};
+
+/**
  * تشغيل جميع مهام التنظيف باستخدام cron jobs
  */
 export const startCleanupJobs = () => {
@@ -156,6 +280,12 @@ export const startCleanupJobs = () => {
   cron.schedule("*/5 * * * *", () => {
     console.log("[Cron] Running expired bookings cleanup...");
     cleanupExpiredBookings();
+  });
+
+  // تشغيل التحقق من الحجوزات المعلقة مع بوابة الدفع كل 10 دقائق
+  cron.schedule("*/10 * * * *", () => {
+    console.log("[Cron] Running pending payments verification with gateway...");
+    verifyPendingPaymentsWithGateway();
   });
 
   // تشغيل تنظيف الدفعات القديمة يومياً في الساعة 2:00 صباحاً

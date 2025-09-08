@@ -59,43 +59,34 @@ export const getPlatformAnalytics = async (req, res) => {
       revenueByCategory,
       bookingTrends,
     ] = await Promise.all([
-      // إجمالي المستخدمين
       User.countDocuments({ role: { $in: ["user", "organizer"] } }),
 
-      // إجمالي المنظمين
       User.countDocuments({ role: "organizer" }),
 
-      // إجمالي الأحداث
       Event.countDocuments({ isActive: true }),
 
-      // إجمالي الحجوزات
       Booking.countDocuments({ paymentStatus: "completed" }),
 
-      // إجمالي الإيرادات
       Booking.aggregate([
         { $match: { paymentStatus: "completed" } },
         { $group: { _id: null, total: { $sum: "$totalPrice" } } },
       ]),
 
-      // المستخدمين الجدد
       User.countDocuments({
         createdAt: { $gte: startDate },
         role: { $in: ["user", "organizer"] },
       }),
 
-      // الأحداث الجديدة
       Event.countDocuments({
         createdAt: { $gte: startDate },
         isActive: true,
       }),
 
-      // الحجوزات الجديدة
       Booking.countDocuments({
         createdAt: { $gte: startDate },
         paymentStatus: "completed",
       }),
 
-      // أفضل الأحداث
       Booking.aggregate([
         {
           $match: {
@@ -125,7 +116,6 @@ export const getPlatformAnalytics = async (req, res) => {
         { $limit: 10 },
       ]),
 
-      // أفضل المنظمين
       Booking.aggregate([
         {
           $match: {
@@ -174,7 +164,6 @@ export const getPlatformAnalytics = async (req, res) => {
         { $limit: 10 },
       ]),
 
-      // الإيرادات حسب الفئة
       Booking.aggregate([
         {
           $match: {
