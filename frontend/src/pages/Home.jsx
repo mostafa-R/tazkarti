@@ -9,7 +9,6 @@ import {
   GraduationCap,
   Loader2,
   MapPin,
-  MoreHorizontal,
   Music,
   Search,
   Theater,
@@ -17,7 +16,6 @@ import {
   Users,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import Footer from "../Components/footer.jsx";
 import EventService from "../services/eventService";
 
 const HomePage = () => {
@@ -29,7 +27,6 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // تحسين Categories مع إضافة أيقونات حقيقية
   const categories = useMemo(
     () => [
       {
@@ -62,12 +59,12 @@ const HomePage = () => {
         color: "bg-orange-100 text-orange-600 hover:bg-orange-200",
         key: "movies",
       },
-      {
-        name: t("category.others"),
-        icon: MoreHorizontal,
-        color: "bg-pink-100 text-pink-600 hover:bg-pink-200",
-        key: "others",
-      },
+      // {
+      //   name: t("category.others"),
+      //   icon: MoreHorizontal,
+      //   color: "bg-pink-100 text-pink-600 hover:bg-pink-200",
+      //   key: "others",
+      // },
     ],
     [t]
   );
@@ -119,7 +116,7 @@ const HomePage = () => {
 
   const handleCategoryClick = useCallback(
     (category) => {
-      navigate("/events", {
+      navigate(`/events?search=${category.key}`, {
         state: {
           selectedCategory: category.key || category.name,
         },
@@ -130,7 +127,7 @@ const HomePage = () => {
 
   const handleSearchEvents = useCallback(() => {
     if (searchQuery.trim()) {
-      navigate("/events", {
+      navigate("/events?search=" + searchQuery.trim(), {
         state: {
           searchQuery: searchQuery.trim(),
           selectedCategory: selectedCategory || undefined,
@@ -245,7 +242,7 @@ const HomePage = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="flex flex-wrap justify-between items-center space-around gap-6">
           {categories.map((category) => {
             const IconComponent = category.icon;
             return (
@@ -514,8 +511,6 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-
-  
     </div>
   );
 };

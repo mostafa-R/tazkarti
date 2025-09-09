@@ -27,7 +27,7 @@ const Navbar = () => {
         try {
           const userData = JSON.parse(userJson);
           setIsLoggedIn(true);
-          setUserName(userData.firstName || "User");
+          setUserName(userData.userName || "User");
           setUser(userData);
         } catch (error) {
           console.error("Error parsing user data:", error);

@@ -19,7 +19,7 @@ const eventSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, "Event category is required"],
-      enum: ["music", "sports", "theater", "conference", "workshop", "other"],
+      
     },
 
     // date: {
@@ -136,7 +136,7 @@ const eventSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Ticket",
-        
+
       },
     ],
 

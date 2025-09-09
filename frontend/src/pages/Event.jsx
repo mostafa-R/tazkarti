@@ -43,18 +43,33 @@ const EventsPage = () => {
     totalEvents: 0,
   });
 
-  // Available categories (unified from both pages)
+  // Available categories (extended for flexibility)
   const categories = [
     { value: "", label: t("search.allCategories") },
-    { value: "technology", label: t("search.categories.technology") },
-    { value: "business", label: t("search.categories.business") },
-    { value: "entertainment", label: t("search.categories.entertainment") },
-    { value: "sports", label: t("search.categories.sports") },
-    { value: "education", label: t("search.categories.education") },
-    { value: "health", label: t("search.categories.health") },
     { value: "music", label: t("eventsPage.categories.music") },
+    { value: "sports", label: t("search.categories.sports") },
     { value: "theater", label: t("eventsPage.categories.theater") },
-    { value: "movies", label: t("eventsPage.categories.movies") },
+    {
+      value: "conference",
+      label: t("search.categories.conference") || "Conference",
+    },
+    { value: "workshop", label: t("search.categories.workshop") || "Workshop" },
+    {
+      value: "technology",
+      label: t("search.categories.technology") || "Technology",
+    },
+    { value: "business", label: t("search.categories.business") || "Business" },
+    {
+      value: "entertainment",
+      label: t("search.categories.entertainment") || "Entertainment",
+    },
+    {
+      value: "education",
+      label: t("search.categories.education") || "Education",
+    },
+    { value: "health", label: t("search.categories.health") || "Health" },
+    { value: "movies", label: t("eventsPage.categories.movies") || "Movies" },
+    { value: "other", label: t("search.categories.other") || "Other" },
   ];
 
   // Main search function (from SearchPage - server-side filtering)
@@ -67,6 +82,11 @@ const EventsPage = () => {
         page,
         limit: 12,
       };
+
+      // Special handling for "other" category - show all events
+      if (searchParams.category === "other") {
+        delete searchParams.category;
+      }
 
       // Remove empty filters
       Object.keys(searchParams).forEach((key) => {
@@ -169,18 +189,21 @@ const EventsPage = () => {
     });
   };
 
-  // Category badge color (from original EventsPage)
+  // Category badge color (extended for all categories)
   const getCategoryBadgeColor = (category) => {
     const colors = {
       music: "bg-purple-100 text-purple-800",
       sports: "bg-red-100 text-red-800",
       theater: "bg-green-100 text-green-800",
-      education: "bg-blue-100 text-blue-800",
-      movies: "bg-yellow-100 text-yellow-800",
+      conference: "bg-blue-100 text-blue-800",
+      workshop: "bg-yellow-100 text-yellow-800",
       technology: "bg-indigo-100 text-indigo-800",
       business: "bg-gray-100 text-gray-800",
       entertainment: "bg-pink-100 text-pink-800",
+      education: "bg-blue-100 text-blue-800",
       health: "bg-green-100 text-green-800",
+      movies: "bg-yellow-100 text-yellow-800",
+      other: "bg-gray-100 text-gray-800",
     };
     return colors[category?.toLowerCase()] || "bg-gray-100 text-gray-800";
   };

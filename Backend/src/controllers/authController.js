@@ -249,7 +249,7 @@ export const login = async (req, res) => {
 
     const token = generateToken(user, res);
 
-    res.status(200).json({ user , token });
+    res.status(200).json({ user, token });
   } catch (error) {
     res.status(500).json({ error, message: error.message });
   }
@@ -266,11 +266,23 @@ export const logingoogle = async (req, res) => {
         .json({ message: "something went wrong, please try again" });
     }
 
-    res.setItem.localstorge = "isLoggedIn", true
     res.cookie("isLoggedIn", true);
-    res.redirect(`${process.env.FRONT_URL}/home`);
+
+    const {
+      password,
+      emailVerificationCode,
+      expireVerificationAt,
+      ...safeUserData
+    } = user.toObject();
+
+    const encodedUserData = encodeURIComponent(JSON.stringify(safeUserData));
+
+    res.redirect(
+      `${process.env.APP_BASE_URL}/oauth-callback?token=${token}&role=${user.role}&userData=${encodedUserData}`
+    );
   } catch (error) {
-    res.status(500).json({ error, message: error.message });
+    console.error("Google login error:", error);
+    res.redirect(`${process.env.APP_BASE_URL}/login?error=auth_failed`);
   }
 };
 

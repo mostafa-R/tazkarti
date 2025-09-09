@@ -1,12 +1,12 @@
 import bcrypt from "bcrypt";
 import fs from "fs";
+import mongoose from "mongoose";
 import { Event } from "../models/Event.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
 import { sendEmail } from "../services/emailService.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendAcceptEmail, sendRejectEmail } from "../utils/emailTemplates.js";
-import mongoose from "mongoose";
 
 export const getUser = async (req, res) => {
   try {
@@ -71,6 +71,13 @@ export const update = async (req, res) => {
     for (const field of allowedFields) {
       if (field in req.body) {
         const value = req.body[field];
+
+        if (field === "phone") {
+          if (value === "") {
+            continue;
+          }
+        }
+
         updates[field] = typeof value === "string" ? value.trim() : value;
       }
     }
@@ -275,11 +282,10 @@ export const approveEvent = async (req, res) => {
     const user = await User.findById(event.organizer);
 
     if (approved === true || approved === "true") {
-      
       await Notification.findOneAndDelete({
         "data.eventId": new mongoose.Types.ObjectId(event._id),
       });
-  
+
       await sendEmail(
         user.email,
         "Your Event is Approved",
@@ -295,7 +301,6 @@ export const approveEvent = async (req, res) => {
       );
     }
 
- 
     res.status(200).json({
       message: `Event approval updated to ${approved}`,
       event,

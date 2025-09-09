@@ -128,11 +128,13 @@ export const getAllEvents = async (req, res) => {
       query.category = category;
     }
 
-    // Search in title and description
+    // Search in title, description, and category
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+        { tags: { $in: [new RegExp(search, "i")] } },
       ];
     }
 
@@ -278,7 +280,7 @@ export const getOrganizerEvents = async (req, res) => {
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Find event and verify existence
     const existingEvent = await Event.findById(id);
     if (!existingEvent) {

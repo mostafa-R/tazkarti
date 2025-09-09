@@ -136,7 +136,7 @@ const UserProfile = () => {
       newErrors.lastName = t("profile.errors.lastNameRequired");
     }
 
-    if (formData.phone && !/^01[0-2,5]{1}[0-9]{8}$/.test(formData.phone)) {
+    if (formData.phone && formData.phone.trim() !== '' && !/^01[0-2,5]{1}[0-9]{8}$/.test(formData.phone)) {
       newErrors.phone = t("profile.errors.phoneInvalid");
     }
 

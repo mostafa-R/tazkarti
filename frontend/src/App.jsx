@@ -23,6 +23,7 @@ import EventDetailsPage from "./pages/EventDetails.jsx";
 import HomePage from "./pages/Home.jsx";
 import LoginPage from "./pages/Login.jsx";
 import ManageTickets from "./pages/ManageTickets.jsx";
+import OAuthCallback from "./pages/OAuthCallback.jsx";
 import OrganizerDashboard from "./pages/OrganizerDashboard.jsx";
 import PaymentPage from "./pages/Payment.jsx";
 import TicketView from "./pages/TicketView.jsx";
@@ -45,6 +46,7 @@ const Layout = ({ children }) => {
     "/booking-confirm",
     "/payment",
     "/verify-email",
+    "/oauth-callback",
   ];
   const hideNavbarPatterns = [
     "/event/",
@@ -83,6 +85,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/verify-email" element={<EmailVerification />} />
+              <Route path="/oauth-callback" element={<OAuthCallback />} />
 
               <Route
                 path="/booking-confirmation"
