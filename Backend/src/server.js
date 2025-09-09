@@ -75,6 +75,8 @@ const allowedOrigins = process.env.FRONTEND_URL
       "http://127.0.0.1:3000",
       "http://localhost:4200",
       "http://127.0.0.1:4200",
+      "https://tazkarti.vercel.app",
+      "https://tazkarti-ddg5ftu4q-mostafas-projects-e9614a99.vercel.app"
     ];
 
 app.use(
