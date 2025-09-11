@@ -55,6 +55,13 @@ app.get("/api-spec.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(specs);
 });
+
+// Add the missing /swagger.json endpoint that ReDoc is looking for
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(specs);
+});
+
 app.get("/", (req, res) =>
   res.json({
     message: "🎫 Tazkarti API",
