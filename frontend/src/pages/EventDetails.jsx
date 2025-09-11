@@ -113,7 +113,8 @@ const EventDetailsPage = () => {
 
   const handleBookNow = () => {
     if (!selectedTicket) {
-      alert(t('eventDetails.selectTicketAlert'));
+      toast.error(t('eventDetails.selectTicketAlert'));
+
       return;
     }
 
