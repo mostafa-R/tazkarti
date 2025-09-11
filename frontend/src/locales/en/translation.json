@@ -181,10 +181,16 @@
     "defaultTicketType": "Standard",
     "defaultCustomer": "Guest User",
     "dateNotSpecified": "Date not specified",
+    "Failed to download ticket": "Failed to download ticket",
+    "retry": "Retry",
     "progress": {
       "eventSelected": "Event Selected",
       "paymentComplete": "Payment Complete",
       "confirmed": "Confirmed"
+    },
+    "errors": {
+      "noBookingId": "No booking ID provided",
+      "downloadFailed": "Failed to download ticket"
     },
     "title": "Your booking is confirmed!",
     "subtitle": "Thank you for choosing Tazkarti. Your ticket details are below.",

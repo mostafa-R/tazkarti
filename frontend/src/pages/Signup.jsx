@@ -1,8 +1,8 @@
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import React, { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
-import { toast } from 'react-toastify';
-import { authAPI } from '../services/api';
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { authAPI } from "../services/api";
 
 const SignUpPage = ({ onSignupSuccess }) => {
   const navigate = useNavigate();
@@ -26,20 +26,20 @@ const SignUpPage = ({ onSignupSuccess }) => {
   });
 
   const [fieldErrors, setFieldErrors] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    phone: '',
-    country: '',
-    city: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phone: "",
+    country: "",
+    city: "",
   });
 
   // Validation patterns (matching backend requirements)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^01[0-9]{9}$/;
-  
+
   // Password strength checker
   const checkPasswordStrength = (password) => {
     const checks = {
@@ -47,129 +47,142 @@ const SignUpPage = ({ onSignupSuccess }) => {
       uppercase: /[A-Z]/.test(password),
       lowercase: /[a-z]/.test(password),
       number: /\d/.test(password),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
     };
-    
+
     const score = Object.values(checks).filter(Boolean).length;
-    let strength = 'Very Weak';
-    let color = 'bg-red-500';
-    
+    let strength = "Very Weak";
+    let color = "bg-red-500";
+
     if (score >= 4) {
-      strength = 'Strong';
-      color = 'bg-green-500';
+      strength = "Strong";
+      color = "bg-green-500";
     } else if (score >= 3) {
-      strength = 'Medium';
-      color = 'bg-yellow-500';
+      strength = "Medium";
+      color = "bg-yellow-500";
     } else if (score >= 2) {
-      strength = 'Weak';
-      color = 'bg-orange-500';
+      strength = "Weak";
+      color = "bg-orange-500";
     }
-    
+
     return { checks, score, strength, color, percentage: (score / 5) * 100 };
   };
 
-  const [passwordStrength, setPasswordStrength] = useState(checkPasswordStrength(''));
+  const [passwordStrength, setPasswordStrength] = useState(
+    checkPasswordStrength("")
+  );
 
   // Real-time field validation
   const validateField = (fieldName, value) => {
-    let error = '';
-    
+    let error = "";
+
     switch (fieldName) {
-      case 'firstName':
+      case "firstName":
         if (!value.trim()) {
-          error = 'First name is required';
+          error = "First name is required";
         } else if (value.trim().length < 3) {
-          error = 'First name must be at least 3 characters';
+          error = "First name must be at least 3 characters";
         } else if (value.trim().length > 15) {
-          error = 'First name must be no more than 15 characters';
+          error = "First name must be no more than 15 characters";
         } else if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
-          error = 'First name can only contain letters, numbers, underscores, and hyphens';
+          error =
+            "First name can only contain letters, numbers, underscores, and hyphens";
         }
         break;
-      case 'lastName':
+      case "lastName":
         if (!value.trim()) {
-          error = 'Last name is required';
+          error = "Last name is required";
         } else if (value.trim().length < 3) {
-          error = 'Last name must be at least 3 characters';
+          error = "Last name must be at least 3 characters";
         } else if (value.trim().length > 15) {
-          error = 'Last name must be no more than 15 characters';
+          error = "Last name must be no more than 15 characters";
         } else if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
-          error = 'Last name can only contain letters, numbers, underscores, and hyphens';
+          error =
+            "Last name can only contain letters, numbers, underscores, and hyphens";
         }
         break;
-      case 'email':
+      case "email":
         if (!value.trim()) {
-          error = 'Email is required';
+          error = "Email is required";
         } else if (!emailRegex.test(value)) {
-          error = 'Please enter a valid email address';
+          error = "Please enter a valid email address";
         }
         break;
-      case 'password':
+      case "password":
         if (!value) {
-          error = 'Password is required';
+          error = "Password is required";
         } else if (value.length < 8) {
-          error = 'Password must be at least 8 characters';
+          error = "Password must be at least 8 characters";
         } else {
           const strength = checkPasswordStrength(value);
           if (strength.score < 3) {
-            error = 'Password is too weak. Include uppercase, lowercase, numbers, and special characters';
+            error =
+              "Password is too weak. Include uppercase, lowercase, numbers, and special characters";
           }
         }
         break;
-      case 'confirmPassword':
+      case "confirmPassword":
         if (!value) {
-          error = 'Please confirm your password';
+          error = "Please confirm your password";
         } else if (value !== signupForm.password) {
-          error = 'Passwords do not match';
+          error = "Passwords do not match";
         }
         break;
-      case 'phone':
+      case "phone":
         if (!value.trim()) {
-          error = 'Phone number is required';
+          error = "Phone number is required";
         } else if (!phoneRegex.test(value)) {
-          error = 'Please enter a valid phone number';
+          error = "Please enter a valid phone number";
         }
         break;
-      case 'country':
+      case "country":
         if (!value.trim()) {
-          error = 'Country is required';
+          error = "Country is required";
         }
         break;
-      case 'city':
+      case "city":
         if (!value.trim()) {
-          error = 'City is required';
+          error = "City is required";
         }
         break;
       default:
         break;
     }
-    
-    setFieldErrors(prev => ({ ...prev, [fieldName]: error }));
-    return error === '';
+
+    setFieldErrors((prev) => ({ ...prev, [fieldName]: error }));
+    return error === "";
   };
 
   const validateForm = () => {
-    const { firstName, lastName, email, password, confirmPassword, phone, address } = signupForm;
-    
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+      phone,
+      address,
+    } = signupForm;
+
     const validations = [
-      validateField('firstName', firstName),
-      validateField('lastName', lastName),
-      validateField('email', email),
-      validateField('password', password),
-      validateField('confirmPassword', confirmPassword),
-      validateField('phone', phone),
-      validateField('country', address.country),
-      validateField('city', address.city)
+      validateField("firstName", firstName),
+      validateField("lastName", lastName),
+      validateField("email", email),
+      validateField("password", password),
+      validateField("confirmPassword", confirmPassword),
+      validateField("phone", phone),
+      validateField("country", address.country),
+      validateField("city", address.city),
     ];
-    
-    return validations.every(isValid => isValid);
+
+    return validations.every((isValid) => isValid);
   };
 
   const handleSignupSubmit = async () => {
     console.log("Signup submitted:", signupForm);
 
     if (!validateForm()) {
-      toast.error('Please fix the errors below');
+      toast.error("Please fix the errors below");
       return;
     }
 
@@ -197,60 +210,74 @@ const SignUpPage = ({ onSignupSuccess }) => {
       });
 
       console.log("✅ Signup successful:", response.data);
-      
+
       // Show success message with user's name
-      toast.success(`Welcome to Tazkarti, ${firstName}! 🎉 Please check your email for verification code.`);
-      
+      toast.success(
+        `Welcome to Tazkarti, ${firstName}! 🎉 Please check your email for verification code.`
+      );
+
       // Call success callback with user email for verification
       if (onSignupSuccess) {
-        onSignupSuccess(email, 'user');
+        onSignupSuccess(email, "user");
       } else {
         // Fallback navigation if no callback provided
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       }
-
     } catch (error) {
       console.error("❌ Signup failed:", error.response?.data || error.message);
-      
+
       // Handle different error scenarios with user-friendly messages
-      let errorMessage = 'Registration failed. Please try again.';
-      
+      let errorMessage = "Registration failed. Please try again.";
+
       if (error.response?.status === 400) {
-        const backendMessage = error.response.data?.error || error.response.data?.message;
-        
+        const backendMessage =
+          error.response.data?.error || error.response.data?.message;
+
         if (backendMessage) {
           // Handle specific backend error messages
-          if (backendMessage.includes('Email already exists')) {
-            errorMessage = 'An account with this email already exists. Please try logging in instead.';
-          } else if (backendMessage.includes('Phone number already exists')) {
-            errorMessage = 'This phone number is already registered. Please use a different phone number.';
-          } else if (backendMessage.includes('Passwords do not match')) {
-            errorMessage = 'Passwords do not match. Please check your password confirmation.';
-          } else if (backendMessage.includes('Name must be between 3 and 15 characters')) {
-            errorMessage = 'First name and last name must be between 3 and 15 characters long.';
-          } else if (backendMessage.includes('Invalid email format')) {
-            errorMessage = 'Please enter a valid email address.';
-          } else if (backendMessage.includes('Invalid phone number format')) {
-            errorMessage = 'Please enter a valid phone number (format: 01xxxxxxxxx).';
-          } else if (backendMessage.includes('Password must be at least 8 characters')) {
-            errorMessage = 'Password must be at least 8 characters long with uppercase, lowercase, numbers, and special characters.';
+          if (backendMessage.includes("Email already exists")) {
+            errorMessage =
+              "An account with this email already exists. Please try logging in instead.";
+          } else if (backendMessage.includes("Phone number already exists")) {
+            errorMessage =
+              "This phone number is already registered. Please use a different phone number.";
+          } else if (backendMessage.includes("Passwords do not match")) {
+            errorMessage =
+              "Passwords do not match. Please check your password confirmation.";
+          } else if (
+            backendMessage.includes("Name must be between 3 and 15 characters")
+          ) {
+            errorMessage =
+              "First name and last name must be between 3 and 15 characters long.";
+          } else if (backendMessage.includes("Invalid email format")) {
+            errorMessage = "Please enter a valid email address.";
+          } else if (backendMessage.includes("Invalid phone number format")) {
+            errorMessage =
+              "Please enter a valid phone number (format: 01xxxxxxxxx).";
+          } else if (
+            backendMessage.includes("Password must be at least 8 characters")
+          ) {
+            errorMessage =
+              "Password must be at least 8 characters long with uppercase, lowercase, numbers, and special characters.";
           } else {
             // Use the backend message directly if it doesn't match specific patterns
             errorMessage = backendMessage;
           }
         } else {
-          errorMessage = 'Invalid registration data. Please check your information.';
+          errorMessage =
+            "Invalid registration data. Please check your information.";
         }
       } else if (error.response?.status === 409) {
-        errorMessage = 'An account with this email already exists. Please try logging in instead.';
+        errorMessage =
+          "An account with this email already exists. Please try logging in instead.";
       } else if (error.response?.status === 500) {
-        errorMessage = 'Server error. Please try again later.';
+        errorMessage = "Server error. Please try again later.";
       } else if (error.response?.data?.error || error.response?.data?.message) {
         errorMessage = error.response.data.error || error.response.data.message;
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -261,7 +288,6 @@ const SignUpPage = ({ onSignupSuccess }) => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         {/* Header */}
-      
 
         {/* Signup Form */}
         <div className="bg-white rounded-lg shadow-md p-8">
@@ -282,28 +308,31 @@ const SignUpPage = ({ onSignupSuccess }) => {
                   onChange={(e) => {
                     const value = e.target.value;
                     setSignupForm({ ...signupForm, firstName: value });
-                    setTimeout(() => validateField('firstName', value), 300);
+                    setTimeout(() => validateField("firstName", value), 300);
                   }}
-                  onBlur={(e) => validateField('firstName', e.target.value)}
+                  onBlur={(e) => validateField("firstName", e.target.value)}
                   placeholder="Enter your first name"
                   disabled={isLoading}
                   className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.firstName 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.firstName && !fieldErrors.firstName 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.firstName
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.firstName && !fieldErrors.firstName
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
               </div>
               {fieldErrors.firstName && (
-                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p
+                  className="mt-1 text-sm text-red-600"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
                   {fieldErrors.firstName}
                 </p>
               )}
             </div>
-            
+
             {/* Last Name Field */}
             <div>
               <label
@@ -320,28 +349,31 @@ const SignUpPage = ({ onSignupSuccess }) => {
                   onChange={(e) => {
                     const value = e.target.value;
                     setSignupForm({ ...signupForm, lastName: value });
-                    setTimeout(() => validateField('lastName', value), 300);
+                    setTimeout(() => validateField("lastName", value), 300);
                   }}
-                  onBlur={(e) => validateField('lastName', e.target.value)}
+                  onBlur={(e) => validateField("lastName", e.target.value)}
                   placeholder="Enter your last name"
                   disabled={isLoading}
                   className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.lastName 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.lastName && !fieldErrors.lastName 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.lastName
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.lastName && !fieldErrors.lastName
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
               </div>
               {fieldErrors.lastName && (
-                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p
+                  className="mt-1 text-sm text-red-600"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
                   {fieldErrors.lastName}
                 </p>
               )}
             </div>
-            
+
             {/* Phone Field */}
             <div>
               <label
@@ -357,28 +389,31 @@ const SignUpPage = ({ onSignupSuccess }) => {
                   onChange={(e) => {
                     const value = e.target.value;
                     setSignupForm({ ...signupForm, phone: value });
-                    setTimeout(() => validateField('phone', value), 300);
+                    setTimeout(() => validateField("phone", value), 300);
                   }}
-                  onBlur={(e) => validateField('phone', e.target.value)}
+                  onBlur={(e) => validateField("phone", e.target.value)}
                   placeholder="Enter your phone number (e.g., 01234567890)"
                   disabled={isLoading}
                   className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.phone 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.phone && !fieldErrors.phone 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.phone
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.phone && !fieldErrors.phone
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
               </div>
               {fieldErrors.phone && (
-                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p
+                  className="mt-1 text-sm text-red-600"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
                   {fieldErrors.phone}
                 </p>
               )}
             </div>
-            
+
             {/* Address Fields */}
             <div>
               <label
@@ -400,22 +435,25 @@ const SignUpPage = ({ onSignupSuccess }) => {
                         country: value,
                       },
                     });
-                    setTimeout(() => validateField('country', value), 300);
+                    setTimeout(() => validateField("country", value), 300);
                   }}
-                  onBlur={(e) => validateField('country', e.target.value)}
+                  onBlur={(e) => validateField("country", e.target.value)}
                   placeholder="Enter your country"
                   disabled={isLoading}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.country 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.address.country && !fieldErrors.country 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.country
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.address.country && !fieldErrors.country
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
                 {fieldErrors.country && (
-                  <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  <p
+                    className="mt-1 text-sm text-red-600"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
                     {fieldErrors.country}
                   </p>
                 )}
@@ -428,22 +466,25 @@ const SignUpPage = ({ onSignupSuccess }) => {
                       ...signupForm,
                       address: { ...signupForm.address, city: value },
                     });
-                    setTimeout(() => validateField('city', value), 300);
+                    setTimeout(() => validateField("city", value), 300);
                   }}
-                  onBlur={(e) => validateField('city', e.target.value)}
+                  onBlur={(e) => validateField("city", e.target.value)}
                   placeholder="Enter your city"
                   disabled={isLoading}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.city 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.address.city && !fieldErrors.city 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.city
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.address.city && !fieldErrors.city
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
                 {fieldErrors.city && (
-                  <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  <p
+                    className="mt-1 text-sm text-red-600"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
                     {fieldErrors.city}
                   </p>
                 )}
@@ -459,22 +500,25 @@ const SignUpPage = ({ onSignupSuccess }) => {
                         street: value,
                       },
                     });
-                    setTimeout(() => validateField('street', value), 300);
+                    setTimeout(() => validateField("street", value), 300);
                   }}
-                  onBlur={(e) => validateField('street', e.target.value)}
+                  onBlur={(e) => validateField("street", e.target.value)}
                   placeholder="Enter your street"
                   disabled={isLoading}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.street 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.address.street && !fieldErrors.street 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.street
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.address.street && !fieldErrors.street
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
                 {fieldErrors.street && (
-                  <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  <p
+                    className="mt-1 text-sm text-red-600"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
                     {fieldErrors.street}
                   </p>
                 )}
@@ -487,22 +531,25 @@ const SignUpPage = ({ onSignupSuccess }) => {
                       ...signupForm,
                       address: { ...signupForm.address, zip: value },
                     });
-                    setTimeout(() => validateField('zip', value), 300);
+                    setTimeout(() => validateField("zip", value), 300);
                   }}
-                  onBlur={(e) => validateField('zip', e.target.value)}
+                  onBlur={(e) => validateField("zip", e.target.value)}
                   placeholder="Enter your zip"
                   disabled={isLoading}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.zip 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.address.zip && !fieldErrors.zip 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.zip
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.address.zip && !fieldErrors.zip
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
                 {fieldErrors.zip && (
-                  <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  <p
+                    className="mt-1 text-sm text-red-600"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
                     {fieldErrors.zip}
                   </p>
                 )}
@@ -525,23 +572,26 @@ const SignUpPage = ({ onSignupSuccess }) => {
                   onChange={(e) => {
                     const value = e.target.value;
                     setSignupForm({ ...signupForm, email: value });
-                    setTimeout(() => validateField('email', value), 300);
+                    setTimeout(() => validateField("email", value), 300);
                   }}
-                  onBlur={(e) => validateField('email', e.target.value)}
+                  onBlur={(e) => validateField("email", e.target.value)}
                   placeholder="Enter your email"
                   disabled={isLoading}
                   className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.email 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.email && !fieldErrors.email 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.email
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.email && !fieldErrors.email
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
               </div>
               {fieldErrors.email && (
-                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p
+                  className="mt-1 text-sm text-red-600"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
                   {fieldErrors.email}
                 </p>
               )}
@@ -564,17 +614,17 @@ const SignUpPage = ({ onSignupSuccess }) => {
                     const value = e.target.value;
                     setSignupForm({ ...signupForm, password: value });
                     setPasswordStrength(checkPasswordStrength(value));
-                    setTimeout(() => validateField('password', value), 300);
+                    setTimeout(() => validateField("password", value), 300);
                   }}
-                  onBlur={(e) => validateField('password', e.target.value)}
+                  onBlur={(e) => validateField("password", e.target.value)}
                   placeholder="Enter your password"
                   disabled={isLoading}
                   className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.password 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.password && !fieldErrors.password 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.password
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.password && !fieldErrors.password
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
@@ -591,50 +641,95 @@ const SignUpPage = ({ onSignupSuccess }) => {
                   )}
                 </button>
               </div>
-              
+
               {/* Password Strength Indicator */}
               {signupForm.password && (
                 <div className="mt-2">
                   <div className="flex justify-between text-xs mb-1">
-                    <span style={{ fontFamily: "Inter, sans-serif" }}>Password Strength:</span>
-                    <span className={`font-medium ${
-                      passwordStrength.strength === 'Strong' ? 'text-green-600' :
-                      passwordStrength.strength === 'Medium' ? 'text-yellow-600' :
-                      passwordStrength.strength === 'Weak' ? 'text-orange-600' : 'text-red-600'
-                    }`} style={{ fontFamily: "Inter, sans-serif" }}>
+                    <span style={{ fontFamily: "Inter, sans-serif" }}>
+                      Password Strength:
+                    </span>
+                    <span
+                      className={`font-medium ${
+                        passwordStrength.strength === "Strong"
+                          ? "text-green-600"
+                          : passwordStrength.strength === "Medium"
+                          ? "text-yellow-600"
+                          : passwordStrength.strength === "Weak"
+                          ? "text-orange-600"
+                          : "text-red-600"
+                      }`}
+                      style={{ fontFamily: "Inter, sans-serif" }}
+                    >
                       {passwordStrength.strength}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                       style={{ width: `${passwordStrength.percentage}%` }}
                     ></div>
                   </div>
-                  <div className="mt-1 text-xs text-gray-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                  <div
+                    className="mt-1 text-xs text-gray-600"
+                    style={{ fontFamily: "Inter, sans-serif" }}
+                  >
                     <div className="grid grid-cols-2 gap-1">
-                      <span className={passwordStrength.checks.length ? 'text-green-600' : 'text-gray-400'}>
+                      <span
+                        className={
+                          passwordStrength.checks.length
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }
+                      >
                         ✓ 8+ characters
                       </span>
-                      <span className={passwordStrength.checks.uppercase ? 'text-green-600' : 'text-gray-400'}>
+                      <span
+                        className={
+                          passwordStrength.checks.uppercase
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }
+                      >
                         ✓ Uppercase
                       </span>
-                      <span className={passwordStrength.checks.lowercase ? 'text-green-600' : 'text-gray-400'}>
+                      <span
+                        className={
+                          passwordStrength.checks.lowercase
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }
+                      >
                         ✓ Lowercase
                       </span>
-                      <span className={passwordStrength.checks.number ? 'text-green-600' : 'text-gray-400'}>
+                      <span
+                        className={
+                          passwordStrength.checks.number
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }
+                      >
                         ✓ Number
                       </span>
-                      <span className={passwordStrength.checks.special ? 'text-green-600' : 'text-gray-400'}>
+                      <span
+                        className={
+                          passwordStrength.checks.special
+                            ? "text-green-600"
+                            : "text-gray-400"
+                        }
+                      >
                         ✓ Special char
                       </span>
                     </div>
                   </div>
                 </div>
               )}
-              
+
               {fieldErrors.password && (
-                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p
+                  className="mt-1 text-sm text-red-600"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
                   {fieldErrors.password}
                 </p>
               )}
@@ -659,17 +754,23 @@ const SignUpPage = ({ onSignupSuccess }) => {
                       ...signupForm,
                       confirmPassword: value,
                     });
-                    setTimeout(() => validateField('confirmPassword', value), 300);
+                    setTimeout(
+                      () => validateField("confirmPassword", value),
+                      300
+                    );
                   }}
-                  onBlur={(e) => validateField('confirmPassword', e.target.value)}
+                  onBlur={(e) =>
+                    validateField("confirmPassword", e.target.value)
+                  }
                   placeholder="Confirm your password"
                   disabled={isLoading}
                   className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:border-transparent outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                    fieldErrors.confirmPassword 
-                      ? 'border-red-500 focus:ring-red-500' 
-                      : signupForm.confirmPassword && !fieldErrors.confirmPassword 
-                        ? 'border-green-500 focus:ring-green-500'
-                        : 'border-gray-300 focus:ring-blue-600'
+                    fieldErrors.confirmPassword
+                      ? "border-red-500 focus:ring-red-500"
+                      : signupForm.confirmPassword &&
+                        !fieldErrors.confirmPassword
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-600"
                   }`}
                   style={{ fontFamily: "Roboto, sans-serif" }}
                 />
@@ -687,7 +788,10 @@ const SignUpPage = ({ onSignupSuccess }) => {
                 </button>
               </div>
               {fieldErrors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600" style={{ fontFamily: "Inter, sans-serif" }}>
+                <p
+                  className="mt-1 text-sm text-red-600"
+                  style={{ fontFamily: "Inter, sans-serif" }}
+                >
                   {fieldErrors.confirmPassword}
                 </p>
               )}
@@ -721,10 +825,15 @@ const SignUpPage = ({ onSignupSuccess }) => {
             </div>
 
             {/* Google Button */}
-            <button
-              type="button"
+            <a
+              href={`${
+                import.meta.env.VITE_API_URL || "http://localhost:5000"
+              }/auth/google`}
               className="w-full border border-gray-300 bg-white text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
-              style={{ fontFamily: "Inter, sans-serif" }}
+              style={{
+                fontFamily: "Inter, sans-serif",
+                textDecoration: "none",
+              }}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -745,7 +854,7 @@ const SignUpPage = ({ onSignupSuccess }) => {
                 />
               </svg>
               Continue with Google
-            </button>
+            </a>
 
             {/* Login Link */}
             <p
