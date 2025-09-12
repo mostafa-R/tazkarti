@@ -5,7 +5,7 @@ import { MyTranslateService } from '../../core/services/translation.service';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink,TranslateModule],
+  imports: [RouterLink, TranslateModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
