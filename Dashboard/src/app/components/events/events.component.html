@@ -5,7 +5,7 @@
       <div class="col-md-6">
         <h1 class="display-6 fw-bold text-gradient mb-2">
           <i class="fas fa-calendar-alt me-3"></i>
-          Events Management
+          {{ 'events.Events Management' | translate }}
         </h1>
       </div>
       <div class="col-md-6 text-md-end">
@@ -15,7 +15,7 @@
           </div>
           <div class="stats-content">
             <h3 class="stats-number">{{events.length}}</h3>
-            <p class="stats-label">Total Events</p>
+            <p class="stats-label">{{ 'events.Total Events' | translate }}</p>
           </div>
         </div>
       </div>
@@ -27,29 +27,64 @@
 <div class="filters-section mb-4">
   <div class="container-fluid">
     <div class="row g-3">
-      <div class="col-md-8">
+      <div class="col-md-4">
         <div class="search-box">
           <i class="fas fa-search search-icon"></i>
-          <input 
-            type="text" 
-            class="form-control search-input" 
-            placeholder="Search events by name or location..."
+          <input
+            type="text"
+            class="form-control search-input"
+            placeholder="{{ 'events.Search events...' | translate }}"
             [(ngModel)]="searchTerm"
             (input)="filterEvents()">
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="d-flex gap-2">
-          <button class="btn btn-outline-primary filter-btn" (click)="sortByDateDesc()">
-            <i class="fas fa-clock me-2"></i>
-            Newest First
-          </button>
-          <button class="btn btn-outline-success filter-btn" (click)="sortByPriceDesc()">
-            <i class="fas fa-dollar-sign me-2"></i>
-            Price
-          </button>
-        </div>
+      <div class="col-md-2">
+        <select class="form-select" [(ngModel)]="selectedCategory" (change)="filterEvents()">
+          <option value="">{{ 'events.All Categories' | translate }}</option>
+          @for (category of categories; track category) {
+            <option [value]="category">{{ category }}</option>
+          }
+        </select>
       </div>
+      <div class="col-md-2">
+        <select class="form-select" [(ngModel)]="selectedStatus" (change)="filterEvents()">
+          <option value="">{{ 'events.All Statuses' | translate }}</option>
+          @for (status of statuses; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" [(ngModel)]="selectedUpcoming" (change)="filterEvents()">
+          <option value="">{{ 'events.All Events' | translate }}</option>
+          <option value="upcoming">{{ 'events.Upcoming' | translate }}</option>
+          <option value="past">{{ 'events.Past' | translate }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sort Options -->
+<div class="sort-section mb-3">
+  <div class="container-fluid">
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-outline-primary btn-sm" (click)="sortByDateDesc()">
+        <i class="fas fa-clock me-2"></i>
+        {{ 'events.Newest First' | translate }}
+      </button>
+      <button class="btn btn-outline-primary btn-sm" (click)="sortByDateAsc()">
+        <i class="fas fa-calendar me-2"></i>
+        {{ 'events.Oldest First' | translate }}
+      </button>
+      <button class="btn btn-outline-primary btn-sm" (click)="sortByAttendees()">
+        <i class="fas fa-users me-2"></i>
+        {{ 'events.Most Popular' | translate }}
+      </button>
+      <button class="btn btn-outline-primary btn-sm" (click)="sortByAvailableSpots()">
+        <i class="fas fa-ticket-alt me-2"></i>
+        {{ 'events.Most Available' | translate }}
+      </button>
     </div>
   </div>
 </div>
@@ -57,15 +92,15 @@
 <!-- Events Grid -->
 <div class="events-grid">
   <div class="row g-4">
-    @for (event of filteredEvents; track event.id) {
+    @for (event of filteredEvents; track event._id) {
       <div class="col-lg-4 col-md-6">
         <div class="event-card">
           <div class="event-card-header">
-            <div class="event-status" [class]="getEventStatus(event.date)">
-              {{ getEventStatusText(event.date) }}
+            <div class="event-status" [class]="getEventStatusClass(event)">
+              {{ getEventStatusDisplayText(event) }}
             </div>
             <div class="event-actions">
-              <button class="btn btn-sm btn-outline-primary action-btn" [routerLink]="['/update' , event.id]">
+              <button class="btn btn-sm btn-outline-primary action-btn" [routerLink]="['/update' , event._id]">
                 <i class="fas fa-edit"></i>
               </button>
               <button class="btn btn-sm btn-outline-danger action-btn" (click)="deleteEvent(event)">
@@ -73,51 +108,107 @@
               </button>
             </div>
           </div>
-          
+
+          <!-- Event Image -->
+          <!-- Event Image -->
+<div class="event-image">
+  <img 
+    [src]="event.images && event.images.length > 0 ? event.images[0] : 'assets/events.jpg'" 
+    [alt]="event.title" 
+    class="img-fluid"
+    (error)="onImageError($event)">
+</div>
+
+
           <div class="event-card-body">
-            <h5 class="event-title">{{ event.name }}</h5>
-            
+            <h5 class="event-title">{{ event.title }}</h5>
+            <p class="event-description">{{ event.description }}</p>
+
             <div class="event-details">
               <div class="detail-item">
                 <i class="fas fa-calendar-day detail-icon"></i>
-                <span class="detail-text">{{ event.date | date: 'MMM dd, yyyy' }}</span>
+                <span class="detail-text">
+                  {{ event.startDate | date: 'MMM dd, yyyy' }} - {{ event.endDate | date: 'MMM dd, yyyy' }}
+                </span>
               </div>
-              
+
+              <div class="detail-item">
+                <i class="fas fa-clock detail-icon"></i>
+                <span class="detail-text">{{ event.time }}</span>
+              </div>
+
               <div class="detail-item">
                 <i class="fas fa-map-marker-alt detail-icon"></i>
-                <a 
-                  [href]="'https://www.google.com/maps/search/?api=1&query=' + event.location"
-                  target="_blank"
-                  class="detail-link">
-                  {{ event.location }}
+                <a [href]="getGoogleMapsUrl(event)" target="_blank" class="detail-link">
+                  {{ event.location.venue }}, {{ event.location.city }}
                 </a>
               </div>
-              
+
               <div class="detail-item">
-                <i class="fas fa-ticket-alt detail-icon"></i>
-                <span class="detail-text">{{ event.tickets }} tickets available</span>
+                <i class="fas fa-tag detail-icon"></i>
+                <span class="detail-text">{{ event.category }}</span>
+              </div>
+
+              @if (event.organizer) {
+                <div class="detail-item">
+                  <i class="fas fa-user detail-icon"></i>
+                  <span class="detail-text">{{ event.organizer.email }}</span>
+                </div>
+              }
+
+              @if (event.tags && event.tags.length > 0) {
+                <div class="detail-item">
+                  <i class="fas fa-hashtag detail-icon"></i>
+                  <div class="tags-container">
+                    @for (tag of event.tags; track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Attendance Progress -->
+            <div class="attendance-section">
+              <div class="attendance-info">
+                <span class="attendance-text">
+                  {{ event.currentAttendees }} / {{ event.maxAttendees }} {{ 'events.attendees' | translate }}
+                </span>
+                <span class="attendance-percentage">({{ getAttendancePercentage(event) }}%)</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" [style.width.%]="getAttendancePercentage(event)"></div>
+              </div>
+              <div class="available-spots">
+                {{ 'events.Available spots:' | translate }} {{ event.availableSpots }}
               </div>
             </div>
-            
-            <div class="event-price">
-              <span class="price-amount">{{ event.price }}</span>
-              <span class="price-currency">EGP</span>
+
+            <!-- Event Status Info -->
+            <div class="event-status-info">
+              <div class="status-badge" [class]="'status-' + event.status">
+                {{ event.status }}
+              </div>
+              @if (event.approved) {
+                <div class="approved-badge">
+                  <i class="fas fa-check-circle"></i> {{ 'events.Approved' | translate }}
+                </div>
+              }
             </div>
           </div>
-          
         </div>
       </div>
     }
   </div>
-  
+
   <!-- Empty State -->
   @if (filteredEvents.length === 0) {
     <div class="empty-state">
       <div class="empty-icon">
         <i class="fas fa-calendar-times"></i>
       </div>
-      <h4>No Events Found</h4>
-      <p class="text-muted">Try adjusting your search criteria or add a new event.</p>
+      <h4>{{ 'events.No Events Found' | translate }}</h4>
+      <p class="text-muted">{{ 'events.Try adjusting your search criteria or add a new event.' | translate }}</p>
     </div>
   }
 </div>

@@ -1,37 +1,58 @@
-@if(formUpdate)
-{
-  <div class="card mt-4 p-4 shadow-sm">
-    <h5 class="mb-3 text-primary">✏️ Edit Event</h5>
+<div class="update-event-page d-flex justify-content-center align-items-center">
+  <div class="card update-event-card shadow-lg">
+    
+    <!-- Header -->
+    <div class="card-header bg-gradient text-white text-center">
+      <h4 class="mb-0">✏️ Update Event</h4>
+    </div>
 
-    <form [formGroup]="formUpdate" (ngSubmit)="onSubmit()">
-      <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input formControlName="name" class="form-control" />
-      </div>
+    <!-- Body -->
+    <div class="card-body p-4">
+      <form [formGroup]="formUpdate" (ngSubmit)="onSubmit()">
 
-      <div class="mb-3">
-        <label class="form-label">Location</label>
-        <input formControlName="location" class="form-control" />
-      </div>
+        <!-- Title -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Event Title</label>
+          <input formControlName="title" class="form-control form-control-lg" placeholder="Enter event title" />
+          <div *ngIf="formUpdate.get('title')?.touched && formUpdate.get('title')?.invalid" class="text-danger small">
+            Title is required (min 3 characters)
+          </div>
+        </div>
 
-      <div class="mb-3">
-        <label class="form-label">Date</label>
-        <input type="date" formControlName="date" class="form-control" />
-      </div>
+        <!-- Dates -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Start Date</label>
+            <input type="date" formControlName="startDate" class="form-control form-control-lg" />
+            <div *ngIf="formUpdate.get('startDate')?.touched && formUpdate.get('startDate')?.invalid" class="text-danger small">
+              Start Date is required
+            </div>
+          </div>
 
-      <div class="mb-3">
-        <label class="form-label">Price</label>
-        <input type="number" formControlName="price" class="form-control" />
-      </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">End Date</label>
+            <input type="date" formControlName="endDate" class="form-control form-control-lg" />
+            <div *ngIf="formUpdate.get('endDate')?.touched && formUpdate.get('endDate')?.invalid" class="text-danger small">
+              End Date is required
+            </div>
+          </div>
+        </div>
 
-      <div class="mb-3">
-        <label class="form-label">Tickets</label>
-        <input type="number" formControlName="tickets" class="form-control" />
-      </div>
+        <!-- Time -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Event Time</label>
+          <input type="time" formControlName="time" class="form-control form-control-lg" />
+          <div *ngIf="formUpdate.get('time')?.touched && formUpdate.get('time')?.invalid" class="text-danger small">
+            Time is required
+          </div>
+        </div>
 
-      <div class="d-flex justify-content-end gap-2">
-        <button type="submit" class="btn btn-outline-success p-2" [disabled]="formUpdate.invalid">💾 Save</button>
-      </div>
-    </form>
+        <!-- Actions -->
+        <div class="d-flex justify-content-end gap-3 mt-4">
+          <button type="button" class="btn btn-outline-secondary px-4" routerLink="/events">❌ Cancel</button>
+          <button type="submit" class="btn gradient-btn px-4" [disabled]="formUpdate.invalid">💾 Save</button>
+        </div>
+      </form>
+    </div>
   </div>
-}
+</div>

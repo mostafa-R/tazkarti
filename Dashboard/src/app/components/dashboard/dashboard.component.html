@@ -5,7 +5,7 @@
       <div class="col-md-8">
         <h1 class="display-5 fw-bold text-gradient mb-2">
           <i class="fas fa-tachometer-alt me-3"></i>
-          Dashboard Overview
+          {{ 'dashboard.Dashboard Overview' | translate }}
         </h1>
       </div>
       <div class="col-md-4 text-md-end">
@@ -18,60 +18,84 @@
   </div>
 </div>
 
-<!-- Statistics Cards -->
-<div class="stats-section">
-  <div class="container-fluid">
-    <div class="row g-4">
-      <div class="col-lg-3 col-md-6">
-        <div class="stat-card users-card">
-          <div class="stat-icon">
-            <i class="fas fa-users"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-number">{{ usersCount() }}</h3>
-            <p class="stat-label">Total Users</p>
-            <div class="stat-trend">
-              <i class="fas fa-arrow-up text-success"></i>
-              <span class="trend-text">+12% this month</span>
+<!-- Error State -->
+@if (hasError()) {
+  <div class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ 'dashboard.Error loading dashboard data. Please try again.' | translate }}
+    <button class="btn btn-outline-danger btn-sm ms-3" (click)="loadDashboardData()">
+      <i class="fas fa-redo me-1"></i>
+      {{ 'dashboard.Retry' | translate }}
+    </button>
+  </div>
+}
+
+<!-- Loading State -->
+@if (isLoading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3">{{ 'dashboard.Loading dashboard data...' | translate }}</p>
+  </div>
+}
+
+<!-- Dashboard Content -->
+@if (!isLoading() && !hasError()) {
+  <!-- Statistics Cards -->
+  <div class="stats-section">
+    <div class="container-fluid">
+      <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-card users-card">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ usersCount() }}</h3>
+              <p class="stat-label">{{ 'dashboard.Total Users' | translate }}</p>
+              <div class="stat-trend">
+                <i class="fas fa-arrow-up text-success"></i>
+                <span class="trend-text">{{ 'dashboard.+12% this month' | translate }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-lg-3 col-md-6">
-        <div class="stat-card events-card">
-          <div class="stat-icon">
-            <i class="fas fa-calendar-alt"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-number">{{ eventsCount() }}</h3>
-            <p class="stat-label">Active Events</p>
-            <div class="stat-trend">
-              <i class="fas fa-arrow-up text-success"></i>
-              <span class="trend-text">+8% this week</span>
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-card events-card">
+            <div class="stat-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ eventsCount() }}</h3>
+              <p class="stat-label">{{ 'dashboard.Active Events' | translate }}</p>
+              <div class="stat-trend">
+                <i class="fas fa-arrow-up text-success"></i>
+                <span class="trend-text">{{ 'dashboard.+8% this week' | translate }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="col-lg-3 col-md-6">
-        <div class="stat-card tickets-card">
-          <div class="stat-icon">
-            <i class="fas fa-ticket-alt"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-number">{{ ticketsCount() }}</h3>
-            <p class="stat-label">Tickets Sold</p>
-            <div class="stat-trend">
-              <i class="fas fa-arrow-up text-success"></i>
-              <span class="trend-text">+15% today</span>
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-card tickets-card">
+            <div class="stat-icon">
+              <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">{{ ticketsCount() }}</h3>
+              <p class="stat-label">{{ 'dashboard.Tickets Sold' | translate }}</p>
+              <div class="stat-trend">
+                <i class="fas fa-arrow-up text-success"></i>
+                <span class="trend-text">{{ 'dashboard.+10% today' | translate }}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
 <!-- Charts Section -->
 <div class="charts-section">
@@ -83,7 +107,7 @@
           <div class="chart-header">
             <h3 class="chart-title">
               <i class="fas fa-chart-line me-2"></i>
-              Users Growth
+              {{ 'dashboard.Users Growth' | translate }}
             </h3>
 
           </div>
@@ -110,7 +134,7 @@
                 <div class="loading-spinner">
                   <i class="fas fa-spinner fa-spin"></i>
                 </div>
-                <p>Loading chart data...</p>
+                <p>{{ 'dashboard.Loading chart data...' | translate }}</p>
               </div>
             }
           </div>
@@ -123,7 +147,7 @@
           <div class="quick-stats-header">
             <h3 class="quick-stats-title">
               <i class="fas fa-chart-pie me-2"></i>
-              Quick Stats
+              {{ 'dashboard.Quick Stats' | translate }}
             </h3>
           </div>
           <div class="quick-stats-body">
@@ -133,7 +157,7 @@
               </div>
               <div class="quick-stat-content">
                 <h4>{{ newUsersThisMonth() }}</h4>
-                <p>New Users This Month</p>
+                <p>{{ 'dashboard.New Users This Month' | translate }}</p>
               </div>
             </div>
 
@@ -143,7 +167,7 @@
               </div>
               <div class="quick-stat-content">
                 <h4>{{ upcomingEvents() }}</h4>
-                <p>Upcoming Events</p>
+                <p>{{ 'dashboard.Upcoming Events' | translate }}</p>
               </div>
             </div>
 
@@ -153,7 +177,7 @@
               </div>
               <div class="quick-stat-content">
                 <h4>{{ averageRating() }}</h4>
-                <p>Average Event Rating</p>
+                <p>{{ 'dashboard.Average Event Rating' | translate }}</p>
               </div>
             </div>
           </div>
@@ -170,7 +194,7 @@
       <div class="chart-header">
         <h3 class="chart-title">
           <i class="fas fa-chart-bar me-2"></i>
-          Platform Statistics
+          {{ 'dashboard.Platform Statistics' | translate }}
         </h3>
       </div>
       <div class="chart-body">
@@ -195,7 +219,7 @@
             <div class="loading-spinner">
               <i class="fas fa-spinner fa-spin"></i>
             </div>
-            <p>Loading statistics...</p>
+            <p>{{ 'dashboard.Loading statistics...' | translate }}</p>
           </div>
         }
       </div>
@@ -210,11 +234,11 @@
       <div class="events-header">
         <h3 class="events-title">
           <i class="fas fa-clock me-2"></i>
-          Latest Events
+          {{ 'dashboard.Latest Events' | translate }}
         </h3>
         <a routerLink="/events" class="btn btn-outline-primary btn-sm">
           <i class="fas fa-external-link-alt me-1"></i>
-          View All
+          {{ 'dashboard.View All Events' | translate }}
         </a>
       </div>
 
@@ -224,38 +248,38 @@
             <table class="events-table">
               <thead>
                 <tr>
-                  <th>Event Name</th>
-                  <th>Location</th>
-                  <th>Date</th>
-                  <th>Status</th>
+                  <th>{{ 'dashboard.Event Name' | translate }}</th>
+                  <th>{{ 'dashboard.Location' | translate }}</th>
+                  <th>{{ 'dashboard.Date' | translate }}</th>
+                  <th>{{ 'dashboard.Status' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
-                @for (event of latestEvents(); track event.id) {
+                @for (event of latestEvents(); track event._id) {
                   <tr>
                     <td>
                       <div class="event-info">
                         <div class="event-icon">
                           <i class="fas fa-calendar"></i>
                         </div>
-                        <span class="event-name">{{ event.name }}</span>
+                        <span class="event-name">{{ event.title || event.title || 'No Title' }}</span>
                       </div>
                     </td>
                     <td>
-                      <div class="location-info">
-                        <i class="fas fa-map-marker-alt me-1"></i>
-                        {{ event.location }}
-                      </div>
+                     <div class="location-info">
+                    <i class="fas fa-map-marker-alt me-1"></i>
+                    {{ event.location ? (event.location.venue + ', ' + event.location.city + ', ' + event.location.address) : 'No Location' }}
+                  </div>
                     </td>
                     <td>
                       <div class="date-info">
                         <i class="fas fa-calendar-day me-1"></i>
-                        {{ event.date | date:'MMM dd, yyyy' }}
+                        {{ event.startDate ? (event.startDate | date:'MMM dd, yyyy') : 'No Date' }}
                       </div>
                     </td>
                     <td>
-                      <span class="status-badge" [class]="getEventStatus(event.date)">
-                        {{ getEventStatusText(event.date) }}
+                      <span class="status-badge" [class]="getEventStatus(event.startDate || '')">
+                        {{ getEventStatusText(event.startDate || '') }}
                       </span>
                     </td>
                   </tr>
@@ -268,10 +292,15 @@
             <div class="loading-spinner">
               <i class="fas fa-spinner fa-spin"></i>
             </div>
-            <p>Loading events...</p>
+            <p>{{ 'dashboard.Loading events...' | translate }}</p>
+            <small class="text-muted">Events count: {{ latestEvents().length }}</small>
+            <br>
+            <small class="text-muted">Total events from API: {{ eventsCount() }}</small>
           </div>
         }
       </div>
     </div>
   </div>
 </div>
+
+}

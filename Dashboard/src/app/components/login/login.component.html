@@ -1,3 +1,4 @@
+@if (isTranslationReady) {
 <div class="login-page">
   <div class="login-background">
     <div class="background-overlay"></div>
@@ -17,7 +18,7 @@
           <div class="logo-icon">
             <i class="fas fa-ticket-alt"></i>
           </div>
-          <h1 class="logo-title">Tazkarti</h1>
+          <h1 class="logo-title">{{ 'login.Tazkarti' | translate }}</h1>
         </div>
       </div>
 
@@ -27,15 +28,15 @@
         <div class="form-group">
           <label for="email" class="form-label">
             <i class="fas fa-envelope"></i>
-            Email Address
+            {{ 'login.Email Address' | translate }}
           </label>
           <div class="input-wrapper">
-            <input 
-              formControlName="email" 
-              type="email" 
+            <input
+              formControlName="email"
+              type="email"
               id="email"
-              class="form-input" 
-              placeholder="Enter your email"
+              class="form-input"
+              placeholder="{{ 'login.Enter your email' | translate }}"
               [class.error]="LoginForm.get('email')?.invalid && LoginForm.get('email')?.touched"
               required>
             <div class="input-icon">
@@ -45,7 +46,7 @@
           @if (LoginForm.get('email')?.invalid && LoginForm.get('email')?.touched) {
             <div class="error-message">
               <i class="fas fa-exclamation-circle"></i>
-              Please enter a valid email address
+              {{ 'login.Please enter a valid email address' | translate }}
             </div>
           }
         </div>
@@ -54,7 +55,7 @@
         <div class="form-group">
           <label for="password" class="form-label">
             <i class="fas fa-lock"></i>
-            Password
+            {{ 'login.Password' | translate }}
           </label>
           <div class="input-wrapper">
             <input
@@ -62,7 +63,7 @@
               formControlName="password"
               id="password"
               class="form-input"
-              placeholder="Enter your password"
+              placeholder="{{ 'login.Enter your password' | translate }}"
               [class.error]="LoginForm.get('password')?.invalid && LoginForm.get('password')?.touched"
               required>
             <div class="input-icon">
@@ -79,26 +80,26 @@
           @if (LoginForm.get('password')?.invalid && LoginForm.get('password')?.touched) {
             <div class="error-message">
               <i class="fas fa-exclamation-circle"></i>
-              Password is required
+              {{ 'login.Password is required' | translate }}
             </div>
           }
         </div>
 
 
         <!-- Submit Button -->
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           class="login-button"
           [disabled]="LoginForm.invalid || isLoading">
           @if (isLoading) {
             <div class="button-content">
               <i class="fas fa-spinner fa-spin"></i>
-              <span>Signing in...</span>
+              <span>{{ 'login.Signing in...' | translate }}</span>
             </div>
           } @else {
             <div class="button-content">
               <i class="fas fa-sign-in-alt"></i>
-              <span>Sign In</span>
+              <span>{{ 'login.Sign In' | translate }}</span>
             </div>
           }
         </button>
@@ -106,3 +107,10 @@
     </div>
   </div>
 </div>
+
+
+
+
+
+
+}

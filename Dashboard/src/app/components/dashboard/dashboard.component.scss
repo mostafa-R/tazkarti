@@ -13,14 +13,14 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   padding: 2rem 0;
   border-radius: 15px;
   margin-bottom: 2rem;
-  
+
   .text-gradient {
     background: linear-gradient(45deg, #fff, #f0f0f0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .date-display {
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
@@ -45,24 +45,24 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   border: 1px solid #e9ecef;
   transition: all 0.3s ease;
   height: 100%;
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: $card-shadow-hover;
   }
-  
+
   &.users-card {
     border-left: 4px solid #667eea;
   }
-  
+
   &.events-card {
     border-left: 4px solid #4facfe;
   }
-  
+
   &.tickets-card {
     border-left: 4px solid #fa709a;
   }
-  
+
   &.revenue-card {
     border-left: 4px solid #ff6b6b;
   }
@@ -78,19 +78,19 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   font-size: 1.5rem;
   color: white;
   margin-bottom: 1rem;
-  
+
   .users-card & {
     background: $primary-gradient;
   }
-  
+
   .events-card & {
     background: $success-gradient;
   }
-  
+
   .tickets-card & {
     background: $warning-gradient;
   }
-  
+
   .revenue-card & {
     background: $danger-gradient;
   }
@@ -103,19 +103,19 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
     color: #2c3e50;
     margin-bottom: 0.5rem;
   }
-  
+
   .stat-label {
     color: #6c757d;
     font-size: 0.9rem;
     margin-bottom: 0.75rem;
   }
-  
+
   .stat-trend {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.8rem;
-    
+
     .trend-text {
       color: #28a745;
       font-weight: 500;
@@ -143,14 +143,14 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  
+
   .chart-title {
     color: #2c3e50;
     font-weight: 700;
     font-size: 1.25rem;
     margin: 0;
   }
-  
+
   .chart-actions {
     .btn {
       border-radius: 20px;
@@ -183,7 +183,7 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   padding: 1.5rem;
   border-bottom: 1px solid #e9ecef;
-  
+
   .quick-stats-title {
     color: #2c3e50;
     font-weight: 700;
@@ -202,7 +202,7 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   gap: 1rem;
   padding: 1rem 0;
   border-bottom: 1px solid #f8f9fa;
-  
+
   &:last-child {
     border-bottom: none;
   }
@@ -227,7 +227,7 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
     color: #2c3e50;
     margin: 0 0 0.25rem 0;
   }
-  
+
   p {
     color: #6c757d;
     font-size: 0.9rem;
@@ -260,14 +260,14 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  
+
   .events-title {
     color: #2c3e50;
     font-weight: 700;
     font-size: 1.25rem;
     margin: 0;
   }
-  
+
   .btn {
     border-radius: 20px;
     font-size: 0.8rem;
@@ -286,7 +286,7 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
 .events-table {
   width: 100%;
   border-collapse: collapse;
-  
+
   th {
     background: #f8f9fa;
     color: #2c3e50;
@@ -298,16 +298,16 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  
+
   td {
     padding: 1rem;
     border-bottom: 1px solid #f8f9fa;
     vertical-align: middle;
   }
-  
+
   tr {
     transition: all 0.3s ease;
-    
+
     &:hover {
       background: #f8f9fa;
     }
@@ -350,17 +350,17 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  
+
   &.upcoming {
     background: rgba(102, 126, 234, 0.1);
     color: #667eea;
   }
-  
+
   &.ongoing {
     background: rgba(40, 167, 69, 0.1);
     color: #28a745;
   }
-  
+
   &.past {
     background: rgba(108, 117, 125, 0.1);
     color: #6c757d;
@@ -372,13 +372,13 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   text-align: center;
   padding: 3rem 1rem;
   color: #6c757d;
-  
+
   .loading-spinner {
     font-size: 2rem;
     color: #667eea;
     margin-bottom: 1rem;
   }
-  
+
   p {
     margin: 0;
     font-size: 0.9rem;
@@ -389,47 +389,47 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
 @media (max-width: 768px) {
   .dashboard-header {
     padding: 1.5rem 0;
-    
+
     .display-5 {
       font-size: 1.5rem;
     }
-    
+
     .date-display {
       margin-top: 1rem;
       text-align: center;
     }
   }
-  
+
   .stat-card {
     padding: 1rem;
     margin-bottom: 1rem;
   }
-  
+
   .stat-icon {
     width: 50px;
     height: 50px;
     font-size: 1.2rem;
   }
-  
+
   .stat-content .stat-number {
     font-size: 1.5rem;
   }
-  
+
   .chart-header {
     padding: 1rem;
     flex-direction: column;
     gap: 1rem;
     text-align: center;
   }
-  
+
   .chart-body {
     padding: 1rem;
   }
-  
+
   .chart-container {
     height: 300px;
   }
-  
+
   .quick-stats-header,
   .events-header {
     padding: 1rem;
@@ -437,36 +437,36 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
     gap: 1rem;
     text-align: center;
   }
-  
+
   .quick-stats-body {
     padding: 1rem;
   }
-  
+
   .quick-stat-item {
     padding: 0.75rem 0;
   }
-  
+
   .quick-stat-icon {
     width: 40px;
     height: 40px;
     font-size: 1rem;
   }
-  
+
   .quick-stat-content h4 {
     font-size: 1.2rem;
   }
-  
+
   .events-body {
     padding: 1rem;
   }
-  
+
   .events-table {
     th, td {
       padding: 0.75rem 0.5rem;
       font-size: 0.9rem;
     }
   }
-  
+
   .event-icon {
     width: 30px;
     height: 30px;

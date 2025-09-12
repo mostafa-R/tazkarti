@@ -5,14 +5,14 @@ import { AppService } from '../services/App.service';
 export const loginGuard: CanActivateFn = (route, state) => {
   const app = inject(AppService);
   const _Router = inject(Router);
-if(app.Tokin == true)
-{
-  return true
-}
-else
-{
-  _Router.navigate(['/login']);
-  return false
-}
 
+  if (typeof localStorage !== 'undefined') {
+    if (localStorage.getItem('userToken') !== null) {
+      return true;
+    } else {
+      return _Router.createUrlTree(['/login']);
+    }
+  } else {
+    return _Router.createUrlTree(['/login']);
+  }
 };

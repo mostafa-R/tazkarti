@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { loginGuard } from './core/guards/login.guard';
-import { WaitingEventsComponent } from './components/waiting-events/waiting-events.component';
 
 export const routes: Routes = [
   {

@@ -5,14 +5,14 @@
       <div class="title-section">
         <h1 class="page-title">
           <i class="fas fa-ticket-alt"></i>
-          Ticket Management
+          {{ 'tickets.Ticket Management' | translate }}
         </h1>
-        <p class="page-subtitle">View ticket statistics for all events</p>
+        <p class="page-subtitle">{{ 'tickets.View ticket statistics for all events' | translate }}</p>
       </div>
       <div class="header-actions">
         <button class="btn btn-primary" (click)="refreshData()" [disabled]="loading">
           <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
-          {{ loading ? 'Loading...' : 'Refresh Data' }}
+          {{ loading ? 'Loading...' : ('tickets.Refresh Data' | translate) }}
         </button>
       </div>
     </div>
@@ -28,27 +28,16 @@
         </div>
         <div class="stat-content">
           <h3 class="stat-number">{{ totalEvents }}</h3>
-          <p class="stat-label">Total Events</p>
+          <p class="stat-label">{{ 'tickets.Total Events' | translate }}</p>
         </div>
       </div>
-
-      <div class="stat-card total-tickets">
-        <div class="stat-icon">
-          <i class="fas fa-tickets"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-number">{{ totalTickets }}</h3>
-          <p class="stat-label">Total Tickets</p>
-        </div>
-      </div>
-
       <div class="stat-card reserved-tickets">
         <div class="stat-icon">
           <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
           <h3 class="stat-number">{{ totalReserved }}</h3>
-          <p class="stat-label">Reserved Tickets</p>
+          <p class="stat-label">{{ 'tickets.Reserved Tickets' | translate }}</p>
         </div>
       </div>
 
@@ -58,7 +47,7 @@
         </div>
         <div class="stat-content">
           <h3 class="stat-number">{{ totalAvailable }}</h3>
-          <p class="stat-label">Available Tickets</p>
+          <p class="stat-label">{{ 'tickets.Available Tickets' | translate }}</p>
         </div>
       </div>
     </div>
@@ -73,7 +62,7 @@
           type="text"
           [(ngModel)]="searchTerm"
           (input)="onSearch()"
-          placeholder="Search events..."
+          placeholder="{{ 'tickets.Search events...' | translate }}"
           class="search-input"
         >
       </div>
@@ -88,8 +77,8 @@
       <div class="loading-spinner">
         <i class="fas fa-spinner fa-spin"></i>
       </div>
-      <h3>Loading Data...</h3>
-      <p>Please wait a moment</p>
+      <h3>{{ 'tickets.Loading Data...' | translate }}</h3>
+      <p>{{ 'tickets.Please wait a moment...' | translate }}</p>
     </div>
     }
 
@@ -105,9 +94,10 @@
             <div class="event-title">
               <h3>{{ event.eventName }}</h3>
               <span class="event-location">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ event.eventLocation }}
-              </span>
+  <i class="fas fa-map-marker-alt"></i>
+  {{ event.eventLocation ? (event.eventLocation.venue + ', ' + event.eventLocation.city ) : 'No Location' }}
+</span>
+
             </div>
             <div class="event-status">
               <span class="status-badge" [class]="getStatusClass(event)">
@@ -118,14 +108,14 @@
 
           <div class="event-date">
             <i class="fas fa-calendar"></i>
-            {{ event.eventDate }}
+            {{ event.eventDate | date: 'MMM dd, yyyy' }}
           </div>
 
           <div class="tickets-overview">
             <div class="tickets-total">
               <div class="ticket-stat">
-                <span class="stat-label">Total Tickets</span>
-                <span class="stat-value">{{ event.totalTickets }}</span>
+                <span class="stat-label">{{ 'tickets.Total Tickets' | translate }}</span>
+                <span class="stat-value">{{ totalTickets?.length }}</span>
               </div>
             </div>
 
@@ -133,7 +123,7 @@
               <div class="ticket-category reserved">
                 <div class="category-header">
                   <i class="fas fa-check-circle"></i>
-                  <span>Reserved</span>
+                  <span>{{ 'tickets.Reserved Tickets' | translate }}</span>
                 </div>
                 <div class="category-stats">
                   <span class="ticket-count">{{ event.reservedTickets }}</span>
@@ -147,7 +137,7 @@
               <div class="ticket-category available">
                 <div class="category-header">
                   <i class="fas fa-clock"></i>
-                  <span>Available</span>
+                  <span>{{ 'tickets.Available Tickets' | translate }}</span>
                 </div>
                 <div class="category-stats">
                   <span class="ticket-count">{{ event.availableTickets }}</span>
@@ -168,8 +158,8 @@
       <div class="empty-icon">
         <i class="fas fa-ticket-alt"></i>
       </div>
-      <h3>No Events Found</h3>
-      <p>No events match the search criteria</p>
+      <h3>{{ 'tickets.No Events Found' | translate }}</h3>
+      <p>{{ 'tickets.No events match the search criteria' | translate }}</p>
     </div>
   </div>
 </div>
