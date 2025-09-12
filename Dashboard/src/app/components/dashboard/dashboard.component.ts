@@ -19,7 +19,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
   styleUrls: ['./dashboard.component.scss']
 })
 
-const BASE_URL = "https://tazkaritbackend.fly.dev"
+
 
 export class DashboardComponent implements OnInit {
   chartData = signal<{ name: string; value: number }[]>([]);
@@ -58,6 +58,9 @@ export class DashboardComponent implements OnInit {
     }
 
     const headers = { Authorization: `Bearer ${token}` };
+
+    const BASE_URL = 'https://tazkaritbackend.fly.dev';
+    
 
     const users$ = this.http.get<User[]>(`${BASE_URL}/user/allusers`, { headers })
       .pipe(catchError(error => {

@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom'; 
-import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Calendar, Clock, MapPin, Heart, Share2, Star, Users, Music, Award } from 'lucide-react';
-import { eventsAPI } from '../services/api';
-import { ticketsAPI } from '../services/api';   
+import {
+  ArrowLeft,
+  Award,
+  Calendar,
+  Clock,
+  Heart,
+  MapPin,
+  Share2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { eventsAPI, ticketsAPI } from "../services/api";
 
 const EventDetailsPage = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); 
-  const location = useLocation(); 
+  const { id } = useParams();
+  const location = useLocation();
   const { t } = useTranslation();
-  
+
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [loadingTickets, setLoadingTickets] = useState(true);
@@ -23,21 +30,32 @@ const EventDetailsPage = () => {
   const normalizeEventData = (eventData) => {
     return {
       ...eventData,
-      location: typeof eventData.location === 'string' 
-        ? { venue: eventData.location, city: eventData.location }
-        : eventData.location || { venue: 'TBD', city: 'TBD' },
-      organizer: eventData.organizer || { name: t('eventDetails.unknownOrganizer'), email: 'unknown@example.com' },
-      images: eventData.images && eventData.images.length > 0 
-        ? eventData.images.map(img => img.startsWith('http') ? img : `http://localhost:5000/uploads/${img}`)
-        : eventData.image 
-          ? [eventData.image] 
-          : ['https://via.placeholder.com/800x400?text=No+Image'],
-      startDate: eventData.startDate ? new Date(eventData.startDate).toLocaleDateString() : eventData.date,
+      location:
+        typeof eventData.location === "string"
+          ? { venue: eventData.location, city: eventData.location }
+          : eventData.location || { venue: "TBD", city: "TBD" },
+      organizer: eventData.organizer || {
+        name: t("eventDetails.unknownOrganizer"),
+        email: "unknown@example.com",
+      },
+      images:
+        eventData.images && eventData.images.length > 0
+          ? eventData.images.map((img) =>
+              img.startsWith("http")
+                ? img
+                : `http://localhost:5000/uploads/${img}`
+            )
+          : eventData.image
+          ? [eventData.image]
+          : ["https://via.placeholder.com/800x400?text=No+Image"],
+      startDate: eventData.startDate
+        ? new Date(eventData.startDate).toLocaleDateString()
+        : eventData.date,
       currentAttendees: eventData.currentAttendees || 0,
       maxAttendees: eventData.maxAttendees || 100,
-      category: eventData.category || t('eventDetails.other'),
-      description: eventData.description || t('eventDetails.noDescription'),
-      time: eventData.time || 'TBD'
+      category: eventData.category || t("eventDetails.other"),
+      description: eventData.description || t("eventDetails.noDescription"),
+      time: eventData.time || "TBD",
     };
   };
 
@@ -49,8 +67,8 @@ const EventDetailsPage = () => {
       const normalizedEvent = normalizeEventData(response.data);
       setEvent(normalizedEvent);
     } catch (err) {
-      console.error('Error fetching event details:', err);
-      setError(t('eventDetails.loadError'));
+      console.error("Error fetching event details:", err);
+      setError(t("eventDetails.loadError"));
       setEvent(null);
     } finally {
       setLoading(false);
@@ -66,9 +84,9 @@ const EventDetailsPage = () => {
         setSelectedTicket(response.data[0]);
       }
     } catch (err) {
-      console.error('Error fetching tickets:', err);
+      console.error("Error fetching tickets:", err);
       if (err.response?.status === 404) {
-        console.log('No tickets found for this event');
+        console.log("No tickets found for this event");
         setTickets([]);
       }
     } finally {
@@ -82,7 +100,7 @@ const EventDetailsPage = () => {
       fetchTickets();
     } else {
       setLoading(false);
-      setError(t('eventDetails.noEventId'));
+      setError(t("eventDetails.noEventId"));
     }
   }, [id]);
 
@@ -96,39 +114,41 @@ const EventDetailsPage = () => {
 
   const relatedEvents = [
     {
-      id: '124',
-      title: t('eventDetails.relatedEvents.sunsetVibes'),
-      date: t('eventDetails.relatedEvents.sep2'),
-      location: t('eventDetails.relatedEvents.northCoast'),
-      image: 'https://images.unsplash.com/photo-1521335629791-ce4aec67dd47?auto=format&fit=crop&w=1470&q=80',
+      id: "124",
+      title: t("eventDetails.relatedEvents.sunsetVibes"),
+      date: t("eventDetails.relatedEvents.sep2"),
+      location: t("eventDetails.relatedEvents.northCoast"),
+      image:
+        "https://images.unsplash.com/photo-1521335629791-ce4aec67dd47?auto=format&fit=crop&w=1470&q=80",
     },
     {
-      id: '125',
-      title: t('eventDetails.relatedEvents.nightPulse'),
-      date: t('eventDetails.relatedEvents.oct12'),
-      location: t('eventDetails.relatedEvents.cairoFestival'),
-      image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1470&q=80',
-    }
+      id: "125",
+      title: t("eventDetails.relatedEvents.nightPulse"),
+      date: t("eventDetails.relatedEvents.oct12"),
+      location: t("eventDetails.relatedEvents.cairoFestival"),
+      image:
+        "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1470&q=80",
+    },
   ];
 
   const handleBookNow = () => {
     if (!selectedTicket) {
-      toast.error(t('eventDetails.selectTicketAlert'));
+      toast.error(t("eventDetails.selectTicketAlert"));
 
       return;
     }
 
-    navigate(`/booking/${event._id}`, { 
-      state: { 
+    navigate(`/booking/${event._id}`, {
+      state: {
         event: {
           ...event,
           selectedTicket,
           quantity,
           subtotal: getTicketPrice() * quantity,
           serviceFee: 5,
-          total: getTicketPrice() * quantity + 5
-        }
-      }
+          total: getTicketPrice() * quantity + 5,
+        },
+      },
     });
   };
 
@@ -137,10 +157,10 @@ const EventDetailsPage = () => {
   };
 
   const handleBack = () => {
-    if (document.referrer.includes('/events')) {
-      navigate('/events');
+    if (document.referrer.includes("/events")) {
+      navigate("/events");
     } else {
-      navigate('/home');
+      navigate("/home");
     }
   };
 
@@ -149,7 +169,7 @@ const EventDetailsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-gray-600">{t('eventDetails.loading')}</p>
+          <p className="mt-2 text-gray-600">{t("eventDetails.loading")}</p>
         </div>
       </div>
     );
@@ -160,11 +180,11 @@ const EventDetailsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <button 
+          <button
             onClick={fetchEventDetails}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            {t('eventDetails.tryAgain')}
+            {t("eventDetails.tryAgain")}
           </button>
         </div>
       </div>
@@ -175,12 +195,12 @@ const EventDetailsPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-500">{t('eventDetails.notFound')}</p>
-          <button 
-            onClick={() => navigate('/events')}
+          <p className="text-gray-500">{t("eventDetails.notFound")}</p>
+          <button
+            onClick={() => navigate("/events")}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-4"
           >
-            {t('eventDetails.backToEvents')}
+            {t("eventDetails.backToEvents")}
           </button>
         </div>
       </div>
@@ -192,9 +212,12 @@ const EventDetailsPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Back Button */}
         <div className="flex items-center mb-6">
-          <button onClick={handleBack} className="text-blue-600 hover:text-blue-800 transition-colors flex items-center">
+          <button
+            onClick={handleBack}
+            className="text-blue-600 hover:text-blue-800 transition-colors flex items-center"
+          >
             <ArrowLeft className="mr-2" size={20} />
-            {t('eventDetails.backButton')}
+            {t("eventDetails.backButton")}
           </button>
         </div>
 
@@ -203,17 +226,22 @@ const EventDetailsPage = () => {
           {/* Left Section: Image & Info */}
           <div className="md:col-span-2 space-y-6">
             <div className="relative rounded-xl overflow-hidden shadow-lg">
-              <img 
-                src={event.images[0]} 
-                alt={event.title} 
-                className="w-full h-96 object-cover transition-transform duration-300 hover:scale-105" 
+              <img
+                src={event.images[0]}
+                alt={event.title}
+                className="w-full h-96 object-cover transition-transform duration-300 hover:scale-105"
               />
               <div className="absolute top-4 right-4 flex space-x-3">
-                <button 
-                  onClick={() => setIsLiked(!isLiked)} 
+                <button
+                  onClick={() => setIsLiked(!isLiked)}
                   className="p-2 bg-white bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all"
                 >
-                  <Heart size={20} className={isLiked ? 'text-red-500 fill-current' : 'text-gray-600'} />
+                  <Heart
+                    size={20}
+                    className={
+                      isLiked ? "text-red-500 fill-current" : "text-gray-600"
+                    }
+                  />
                 </button>
                 <button className="p-2 bg-white bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all">
                   <Share2 size={20} className="text-gray-600" />
@@ -222,44 +250,50 @@ const EventDetailsPage = () => {
             </div>
 
             <div className="space-y-4">
-              <h1 className="text-3xl font-bold text-gray-900">{event.title}</h1>
-              
+              <h1 className="text-3xl font-bold text-gray-900">
+                {event.title}
+              </h1>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center text-gray-700">
                   <Calendar className="mr-3 text-blue-500" size={20} />
                   <div>
-                    <p className="font-medium">{t('eventDetails.date')}</p>
+                    <p className="font-medium">{t("eventDetails.date")}</p>
                     <p>{event.startDate}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-700">
                   <Clock className="mr-3 text-blue-500" size={20} />
                   <div>
-                    <p className="font-medium">{t('eventDetails.time')}</p>
+                    <p className="font-medium">{t("eventDetails.time")}</p>
                     <p>{event.time}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-700">
                   <MapPin className="mr-3 text-blue-500" size={20} />
                   <div>
-                    <p className="font-medium">{t('eventDetails.location')}</p>
-                    <p>{event.location.venue}, {event.location.city}</p>
+                    <p className="font-medium">{t("eventDetails.location")}</p>
+                    <p>
+                      {event.location.venue}, {event.location.city}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center text-gray-700">
                   <Award className="mr-3 text-blue-500" size={20} />
                   <div>
-                    <p className="font-medium">{t('eventDetails.organizer')}</p>
+                    <p className="font-medium">{t("eventDetails.organizer")}</p>
                     <p>{event.organizer.name}</p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-gray-200">
-                <h3 className="text-xl font-semibold mb-3">{t('eventDetails.aboutEvent')}</h3>
+                <h3 className="text-xl font-semibold mb-3">
+                  {t("eventDetails.aboutEvent")}
+                </h3>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                   {event.description}
                 </p>
@@ -269,43 +303,48 @@ const EventDetailsPage = () => {
 
           {/* Right Section: Booking Card */}
           <div className="bg-white rounded-xl shadow-lg p-6 space-y-6 h-fit sticky top-6">
-            <h2 className="text-xl font-semibold text-gray-900">{t('eventDetails.bookYourSpot')}</h2>
-            
+            <h2 className="text-xl font-semibold text-gray-900">
+              {t("eventDetails.bookYourSpot")}
+            </h2>
+
             <div className="space-y-4">
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
-                  {t('eventDetails.ticketType')}
+                  {t("eventDetails.ticketType")}
                 </label>
                 {loadingTickets ? (
                   <div className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-500 animate-pulse">
-                    {t('eventDetails.loadingTickets')}
+                    {t("eventDetails.loadingTickets")}
                   </div>
                 ) : tickets.length > 0 ? (
                   <select
-                    value={selectedTicket?._id || ''}
+                    value={selectedTicket?._id || ""}
                     onChange={(e) => {
-                      const ticket = tickets.find(t => t._id === e.target.value);
+                      const ticket = tickets.find(
+                        (t) => t._id === e.target.value
+                      );
                       setSelectedTicket(ticket);
                     }}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    {tickets.map(ticket => (
+                    {tickets.map((ticket) => (
                       <option key={ticket._id} value={ticket._id}>
-                        {ticket.type} - {ticket.price} {ticket.currency} 
-                        ({ticket.availableQuantity} {t('eventDetails.available')})
+                        {ticket.type} - {ticket.price} {ticket.currency}(
+                        {ticket.availableQuantity} {t("eventDetails.available")}
+                        )
                       </option>
                     ))}
                   </select>
                 ) : (
                   <div className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-500">
-                    {t('eventDetails.noTickets')}
+                    {t("eventDetails.noTickets")}
                   </div>
                 )}
               </div>
 
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
-                  {t('eventDetails.quantity')}
+                  {t("eventDetails.quantity")}
                 </label>
                 <input
                   type="number"
@@ -318,23 +357,30 @@ const EventDetailsPage = () => {
                 />
                 {selectedTicket && (
                   <p className="text-sm text-gray-500 mt-2">
-                    {getAvailableQuantity()} {t('eventDetails.ticketsAvailable')}
+                    {getAvailableQuantity()}{" "}
+                    {t("eventDetails.ticketsAvailable")}
                   </p>
                 )}
               </div>
 
               <div className="border-t border-gray-200 pt-4 space-y-3">
                 <div className="flex justify-between text-gray-700">
-                  <span>{t('eventDetails.subtotal')}</span>
-                  <span>{getTicketPrice() * quantity} {selectedTicket?.currency || 'EGP'}</span>
+                  <span>{t("eventDetails.subtotal")}</span>
+                  <span>
+                    {getTicketPrice() * quantity}{" "}
+                    {selectedTicket?.currency || "EGP"}
+                  </span>
                 </div>
                 <div className="flex justify-between text-gray-700">
-                  <span>{t('eventDetails.serviceFee')}</span>
-                  <span>5 {selectedTicket?.currency || 'EGP'}</span>
+                  <span>{t("eventDetails.serviceFee")}</span>
+                  <span>5 {selectedTicket?.currency || "EGP"}</span>
                 </div>
                 <div className="flex justify-between text-gray-900 font-bold text-lg pt-2">
-                  <span>{t('eventDetails.total')}</span>
-                  <span>{getTicketPrice() * quantity + 5} {selectedTicket?.currency || 'EGP'}</span>
+                  <span>{t("eventDetails.total")}</span>
+                  <span>
+                    {getTicketPrice() * quantity + 5}{" "}
+                    {selectedTicket?.currency || "EGP"}
+                  </span>
                 </div>
               </div>
 
@@ -343,11 +389,11 @@ const EventDetailsPage = () => {
                 disabled={!selectedTicket || getAvailableQuantity() === 0}
                 className={`w-full py-3 px-4 rounded-lg font-medium shadow-lg transition-all duration-300 ${
                   !selectedTicket || getAvailableQuantity() === 0
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-xl'
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-xl"
                 }`}
               >
-                {t('eventDetails.bookNow')} →
+                {t("eventDetails.bookNow")} →
               </button>
             </div>
           </div>
@@ -385,7 +431,6 @@ const EventDetailsPage = () => {
             ))}
           </div>
         </div> */}
-        
       </div>
     </div>
   );
