@@ -4,10 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --configuration=production",
+    "build:prod": "ng build --configuration=production",
+    "build:dev": "ng build --configuration=development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:Tazkarti-Dashboard": "node dist/tazkarti-dashboard/server/server.mjs"
+    "serve:ssr:Tazkarti-Dashboard": "node docs/server/server.mjs",
+    "vercel-build": "ng build --configuration=production"
   },
   "private": true,
   "dependencies": {
