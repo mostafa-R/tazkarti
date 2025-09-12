@@ -18,6 +18,9 @@ import { NgxSpinnerService } from 'ngx-spinner';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
+
+const BASE_URL = "https://tazkaritbackend.fly.dev"
+
 export class DashboardComponent implements OnInit {
   chartData = signal<{ name: string; value: number }[]>([]);
   latestEvents = signal<AppEvent[]>([]);
@@ -56,20 +59,20 @@ export class DashboardComponent implements OnInit {
 
     const headers = { Authorization: `Bearer ${token}` };
 
-    const users$ = this.http.get<User[]>('http://localhost:5000/user/allusers', { headers })
+    const users$ = this.http.get<User[]>(`${BASE_URL}/user/allusers`, { headers })
       .pipe(catchError(error => {
         console.error('Error loading users:', error);
         return of([]);
       }));
 
-    const tickets$ = this.http.get<Tickets[]>('http://localhost:5000/api/tickets', { headers })
+    const tickets$ = this.http.get<Tickets[]>(`${BASE_URL}/api/tickets`, { headers })
       .pipe(catchError(error => {
         console.error('Error loading tickets:', error);
         return of([]);
       }));
 
     const events$ = this.http
-      .get<{ events: AppEvent[] }>('http://localhost:5000/api/events', {
+      .get<{ events: AppEvent[] }>(`${BASE_URL}/api/events`, {
         headers,
       })
       .pipe(
