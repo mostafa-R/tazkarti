@@ -13,6 +13,14 @@ export class NavbarComponent {
   private _MyTranslateService = inject(MyTranslateService);
   readonly _TranslateService = inject(TranslateService);
 
+  get currentLanguage(): string {
+    return this._TranslateService.currentLang?.toUpperCase() || 'EN';
+  }
+
+  isCurrentLanguage(lang: string): boolean {
+    return this._TranslateService.currentLang === lang;
+  }
+
   chooselang(lang: string): void {
     this._MyTranslateService.setLanguage(lang);
   }
