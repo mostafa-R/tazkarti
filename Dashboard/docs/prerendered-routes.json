@@ -5,6 +5,7 @@
     "/events",
     "/login",
     "/tickets",
-    "/users"
+    "/users",
+    "/waiting"
   ]
 }
