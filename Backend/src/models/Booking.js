@@ -82,7 +82,6 @@ const bookingSchema = new mongoose.Schema(
       },
       phone: {
         type: String,
-        required: true,
         trim: true,
         match: [/^01[0-2,5]{1}[0-9]{8}$/, "Invalid Egyptian phone number"],
       },

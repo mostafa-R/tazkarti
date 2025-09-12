@@ -1,15 +1,22 @@
-import {  Component } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { AppService } from '../../core/services/App.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AppEvent } from '../../core/interfaces/event';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-update',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink],
   templateUrl: './update.component.html',
-  styleUrl: './update.component.scss',
+  styleUrls: ['./update.component.scss'],
 })
 export class UpdateComponent {
   id: string = '';
@@ -20,60 +27,71 @@ export class UpdateComponent {
     private _fb: FormBuilder,
     private _AppService: AppService,
     private _ActivatedRoute: ActivatedRoute,
-  ) {
-    this._ActivatedRoute.params.subscribe({
-      next: (params) => {
-        this.id = params['id'];
-        console.log('Event ID:', this.id);
-      },
-    });
-  }
+    private _Router: Router,
+    private _Toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
+    // تهيئة مبدأية
+    this.formUpdate = this._fb.group({
+      title: ['', [Validators.required, Validators.minLength(3)]],
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required],
+      time: ['', Validators.required],
+    });
+
+    // بعدين نجيب الداتا
+    this.id = this._ActivatedRoute.snapshot.params['id'];
     this._AppService.geteventById(this.id).subscribe({
       next: (data) => {
         this.formData = data;
-        console.log('Event Data:', data);
-        this.initForm();
+        this.formUpdate.patchValue({
+          title: this.formData.title,
+          startDate: this.formatDate(this.formData.startDate),
+          endDate: this.formatDate(this.formData.endDate),
+          time: this.formatTime(this.formData.time),
+        });
       },
-      error: (err) => {
-        console.log(err);
-      },
+      error: (err) => console.error('Get Event Error:', err),
     });
   }
 
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    return dateString.split('T')[0]; // yyyy-MM-dd
+  }
+
+  formatTime(timeString: string): string {
+    if (!timeString) return '';
+    return timeString.substring(0, 5); // hh:mm
+  }
+
   initForm() {
-    this.formUpdate =this._fb.group({
-      name: [this.formData.name, [Validators.required , Validators.minLength(3)]],
-      location: [this.formData.location, [Validators.required , Validators.minLength(5)]],
-      date: [this.formData.date, Validators.required],
-      price: [this.formData.price, [Validators.required, Validators.min(0)]],
-      tickets: [
-        this.formData.tickets,
-        [Validators.required],
+    this.formUpdate = this._fb.group({
+      title: [
+        this.formData.title || '',
+        [Validators.required, Validators.minLength(3)],
       ],
+      startDate: [this.formData.startDate || '', Validators.required],
+      endDate: [this.formData.endDate || '', Validators.required],
+      time: [this.formData.time || '', Validators.required],
     });
   }
 
   onSubmit() {
-    console.log(this.formUpdate.value);
-    const event = this.formUpdate.value;
-    this._AppService.updateEvent(event , this.id).subscribe({
-      next:(data)=>{
-        console.log("updated" , data);
-      }
-    })
+    if (this.formUpdate.invalid) {
+      this.formUpdate.markAllAsTouched();
+      return;
+    }
 
+    const event: Partial<AppEvent> = this.formUpdate.value;
+    this._AppService.updateEvent(event, this.id).subscribe({
+      next: (data) => {
+        this._Toastr.success('Event updated successfully');
+        this._Router.navigate(['/events']);
+        console.log('Event updated', data);
+      },
+      error: (err) => console.error('Update Event Error:', err),
+    });
   }
 }
-
-
-
-
-// formUpdate: FormGroup = this._fb.group({
-//   name: [null, [Validators.required, Validators.minLength(2)]],
-//   location: [null, [Validators.required]],
-//   Date: [null, [Validators.required]],
-//   price: [null, [Validators.required]],
-//   tickets: [null, [Validators.required]],
-// });

@@ -55,6 +55,13 @@ app.get("/api-spec.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(specs);
 });
+
+// Add the missing /swagger.json endpoint that ReDoc is looking for
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(specs);
+});
+
 app.get("/", (req, res) =>
   res.json({
     message: "🎫 Tazkarti API",
@@ -76,7 +83,8 @@ const allowedOrigins = process.env.FRONTEND_URL
       "http://localhost:4200",
       "http://127.0.0.1:4200",
       "https://tazkarti.vercel.app",
-      "https://tazkarti-ddg5ftu4q-mostafas-projects-e9614a99.vercel.app"
+      "https://tazkarti-ddg5ftu4q-mostafas-projects-e9614a99.vercel.app",
+      "https://tazkarte.netlify.app",
     ];
 
 app.use(

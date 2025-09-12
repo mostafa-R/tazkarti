@@ -10,6 +10,7 @@ import {
   Plus,
 } from "lucide-react";
 import { eventsAPI } from "../services/api";
+import { toast } from "react-toastify";
 
 const EventCreationForm = ({ onSuccess, onCancel }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -144,7 +145,7 @@ const EventCreationForm = ({ onSuccess, onCancel }) => {
 
   const handleSubmit = async (isDraft = false) => {
     if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
-      alert("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -177,7 +178,7 @@ const EventCreationForm = ({ onSuccess, onCancel }) => {
       const response = await eventsAPI.createEvent(submitData);
 
       if (response.data) {
-        alert(`Event ${isDraft ? "saved as draft" : "created"} successfully!`);
+        toast.success(`Event ${isDraft ? "saved as draft" : "created"} successfully!`);
         if (onSuccess) {
           onSuccess(response.data);
         }
@@ -187,7 +188,7 @@ const EventCreationForm = ({ onSuccess, onCancel }) => {
       const errorMessage =
         error.response?.data?.message ||
         "Failed to create event. Please try again.";
-      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

@@ -96,6 +96,8 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
     border-radius: 25px;
     border: 2px solid #e9ecef;
     transition: all 0.3s ease;
+    height: 50px;
+    font-size: 1rem;
     
     &:focus {
       border-color: #667eea;
@@ -231,6 +233,30 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
   font-weight: 600;
   font-size: 0.9rem;
   display: inline-block;
+}
+
+.events-badge {
+  background: $warning-gradient;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.organization-badge {
+  background: $primary-gradient;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .event-badge {
@@ -405,3 +431,5 @@ $card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
 .table-container {
   animation: fadeInUp 0.6s ease-out;
 }
+
+

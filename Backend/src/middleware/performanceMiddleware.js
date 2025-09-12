@@ -15,7 +15,7 @@ import cacheService, {
  * Rate limiter عام للـ API
  */
 export const generalRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 دقيقة
+  windowMs: 1 * 60 * 1000, // 15 دقيقة
   max: 100, // 100 طلب كحد أقصى لكل IP
   message: {
     success: false,
@@ -36,8 +36,8 @@ export const generalRateLimit = rateLimit({
  * Rate limiter للمصادقة (تسجيل دخول/خروج)
  */
 export const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 دقيقة
-  max: 5, // 5 محاولات فقط لكل IP
+  windowMs: 1 * 60 * 1000, // 15 دقيقة
+  max: 20, // 5 محاولات فقط لكل IP
   message: {
     success: false,
     message:
@@ -54,8 +54,8 @@ export const authRateLimit = rateLimit({
  * Rate limiter للدفعات
  */
 export const paymentRateLimit = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5 دقائق
-  max: 3, // 3 محاولات دفع فقط لكل IP
+  windowMs: 1 * 60 * 1000, // 5 دقائق
+  max: 15, // 3 محاولات دفع فقط لكل IP
   message: {
     success: false,
     message: "تم تجاوز الحد المسموح من محاولات الدفع. يرجى الانتظار 5 دقائق",
@@ -69,8 +69,8 @@ export const paymentRateLimit = rateLimit({
  * Rate limiter لإنشاء الأحداث
  */
 export const createEventRateLimit = rateLimit({
-  windowMs: 60 * 60 * 1000, // ساعة واحدة
-  max: 5, // 5 أحداث كحد أقصى في الساعة
+  windowMs: 1 * 60 * 1000, // ساعة واحدة
+  max: 15, // 5 أحداث كحد أقصى في الساعة
   message: {
     success: false,
     message: "تم تجاوز الحد المسموح من إنشاء الأحداث في الساعة الواحدة",

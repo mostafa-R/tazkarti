@@ -1,1 +1,152 @@
-<p>waiting-events works!</p>
+<div class="waiting-events-container">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="header-icon">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <div class="header-text">
+          <h1 class="page-title">Pending Event Requests</h1>
+          <p class="page-subtitle">Review and manage event submissions from organizers</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-card">
+          <div class="stat-number">{{ notifications.length }}</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    @if (notifications.length > 0) {
+     
+      <!-- Events Grid -->
+      <div class="events-grid">
+        @for (notif of notifications; track notif._id) {
+          <div class="event-card">
+            <!-- Card Header -->
+            <div class="card-header">
+              <div class="event-type-badge">
+                <i class="fa-solid fa-calendar-plus"></i>
+                New Event
+              </div>
+              <div class="event-priority high">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                High Priority
+              </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="card-body">
+              <div class="event-title">
+                <i class="fa-solid fa-star title-icon"></i>
+                {{ notif.data?.eventTitle || 'Untitled Event' }}
+              </div>
+              
+              <div class="event-details">
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <i class="fa-solid fa-building"></i>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Organization</span>
+                    <span class="detail-value">{{ notif.data?.organizationName || 'Unknown Organization' }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <i class="fa-solid fa-tag"></i>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Event Type</span>
+                    <span class="detail-value">{{ notif.type }}</span>
+                  </div>
+                </div>
+
+                <div class="detail-item">
+                  <div class="detail-icon">
+                    <i class="fa-solid fa-clock"></i>
+                  </div>
+                  <div class="detail-content">
+                    <span class="detail-label">Submitted</span>
+                    <span class="detail-value">{{ notif.createdAt | date: 'MMM dd, yyyy HH:mm' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Event Description Preview -->
+              <div class="event-description">
+                <p>This event is waiting for your approval. Review the details and take action.</p>
+              </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="card-footer">
+              <div class="action-buttons">
+                <button class="btn-approve" (click)="onApprove(notif.data?.eventId)">
+  <i class="fa-solid fa-check"></i>
+  <span>Approve</span>
+</button>
+
+                <!-- <button class="btn-reject" (click)="onReject(notif.data?.eventId)">
+                  <i class="fa-solid fa-xmark"></i>
+                  <span>Reject</span>
+                </button> -->
+              </div>
+              <div class="quick-actions">
+                <button class="quick-action-btn" title="View Details">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="quick-action-btn" title="Edit">
+                  <i class="fa-solid fa-edit"></i>
+                </button>
+                <button class="quick-action-btn" title="More Options">
+                  <i class="fa-solid fa-ellipsis-v"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+    } @else {
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-illustration">
+          <div class="empty-icon">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+          <div class="empty-rings">
+            <div class="ring ring-1"></div>
+            <div class="ring ring-2"></div>
+            <div class="ring ring-3"></div>
+          </div>
+        </div>
+        <h2 class="empty-title">All Caught Up!</h2>
+        <p class="empty-message">No pending event requests at the moment. You're all set!</p>
+        <div class="empty-actions">
+          <button class="btn-refresh">
+            <i class="fa-solid fa-refresh"></i>
+            Refresh
+          </button>
+          <button class="btn-dashboard">
+            <i class="fa-solid fa-chart-line"></i>
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Floating Action Button -->
+  <div class="fab">
+    <button class="fab-button">
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  </div>
+</div>

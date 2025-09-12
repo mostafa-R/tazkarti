@@ -12,22 +12,21 @@
        aria-labelledby="sidebarLabel"
        style="width: 250px; min-height: 100vh;">
 
-    <h4 id="sidebarLabel" class="mb-4">Control Panel</h4>
     <ul class="nav flex-column">
       <li class="nav-item mb-2">
-        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link text-white">📊 Dashboard</a>
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link text-white">📊 {{'sidebar.Dashboard' | translate}}</a>
       </li>
       <li class="nav-item mb-2">
-        <a routerLink="/events" routerLinkActive="active" class="nav-link text-white">🎫 Events</a>
+        <a routerLink="/events" routerLinkActive="active" class="nav-link text-white">🎫 {{'sidebar.Events' | translate}}</a>
       </li>
       <li class="nav-item mb-2">
-        <a routerLink="/users" routerLinkActive="active" class="nav-link text-white">👥 Users</a>
+        <a routerLink="/users" routerLinkActive="active" class="nav-link text-white">👥 {{'sidebar.Users' | translate}}</a>
       </li>
       <li class="nav-item mb-2">
-        <a routerLink="/tickets" routerLinkActive="active" class="nav-link text-white">🎟️ Tickets</a>
+        <a routerLink="/tickets" routerLinkActive="active" class="nav-link text-white">🎟️ {{'sidebar.Tickets' | translate}}</a>
       </li>
       <li class="nav-item mt-4">
-        <a routerLink="/login" class="btn btn-outline-light w-100">Logout</a>
+        <a (click)="logout()" class="btn btn-outline-light w-100">{{'sidebar.Logout' | translate}}</a>
       </li>
     </ul>
   </div>

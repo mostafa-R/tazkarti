@@ -29,11 +29,8 @@ const PaymentPage = () => {
     cvv: "",
   });
 
-  // استخدام useMemo لتجنب تغيير التبعيات في كل رندر
   const eventData = useMemo(
-    () =>
-      location.state?.eventData ||
-    [location.state?.eventData]
+    () => location.state?.eventData || [location.state?.eventData]
   );
 
   const bookingData = useMemo(
@@ -57,15 +54,15 @@ const PaymentPage = () => {
     bookingCode: bookingData.bookingCode,
   };
 
-  // التحقق من وجود بيانات الحجز الأساسية المطلوبة
   useEffect(() => {
-    // تحقق من وجود البيانات الأساسية فقط: bookingCode أو bookingId
-    if (!location.state || (!bookingData.bookingCode && !bookingData.bookingId)) {
+    if (
+      !location.state ||
+      (!bookingData.bookingCode && !bookingData.bookingId)
+    ) {
       setMessage("⚠️ بيانات الحجز غير كاملة، يرجى العودة لصفحة الحجز");
       setPaymentStatus("error");
       console.error("Missing essential booking data:", bookingData);
     } else {
-      // تسجيل توفر بيانات الحجز
       console.log("Booking data available:", {
         bookingId: bookingData.bookingId,
         bookingCode: bookingData.bookingCode,
@@ -80,7 +77,6 @@ const PaymentPage = () => {
       setMessage("✅ تم الدفع بنجاح!");
       setPaymentStatus("success");
 
-      // الانتقال إلى صفحة تأكيد الحجز
       setTimeout(() => {
         navigate("/booking-confirmation", {
           state: {
@@ -106,7 +102,6 @@ const PaymentPage = () => {
     [bookingData, orderSummary, eventData, navigate]
   );
 
-  // التحقق من حالة الدفع عند العودة من 3D Secure
   useEffect(() => {
     const checkPaymentStatus = async () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -117,7 +112,6 @@ const PaymentPage = () => {
       if ((sessionId || paymentId) && reference) {
         setVerifyingPayment(true);
         try {
-          // التحقق من حالة الدفع باستخدام المرجع (reference)
           const response = await paymentAPI.verifyPaymentStatus(reference);
 
           if (response.data.success) {
@@ -131,7 +125,7 @@ const PaymentPage = () => {
             } else if (paymentStatus === "failed") {
               setMessage("❌ فشل الدفع. يرجى المحاولة مرة أخرى.");
               setPaymentStatus("error");
-            } 
+            }
           }
         } catch (error) {
           console.error("Error verifying payment:", error);
@@ -205,24 +199,22 @@ const PaymentPage = () => {
     setPaymentStatus("pending");
 
     try {
-      // التحقق من بيانات الحجز ووضع قيم افتراضية إذا كانت غير موجودة
-      const paymentAmount = paymentDetails?.amount || orderSummary.total * 100; // تحويل إلى cents
-      const paymentCurrency = paymentDetails?.currency || orderSummary.currency || "EGP";
-      
+      const paymentAmount = paymentDetails?.amount || orderSummary.total * 100;
+      const paymentCurrency =
+        paymentDetails?.currency || orderSummary.currency || "EGP";
+
       if (!paymentAmount) {
         throw new Error("لا يمكن تحديد مبلغ الدفع");
       }
-      
+
       console.log("Processing payment:", {
         amount: paymentAmount,
         currency: paymentCurrency,
         bookingCode: bookingData.bookingCode,
       });
 
-      // 1️⃣ فصل تاريخ الانتهاء (MM/YY)
       const [expiryMonth, expiryYear] = cardData.expiryDate.split("/");
 
-      // استخدام المتغيرات البيئية
       const CKO_API_URL =
         import.meta.env.VITE_CKO_API_URL || "https://api.sandbox.checkout.com";
 
@@ -232,7 +224,6 @@ const PaymentPage = () => {
         throw new Error("مفتاح الدفع غير متوفر");
       }
 
-      // 2️⃣ إنشاء توكن للكارت باستخدام Checkout.com API
       const tokenRes = await axios.post(
         `${CKO_API_URL}/tokens`,
         {
@@ -257,22 +248,19 @@ const PaymentPage = () => {
 
       const cardToken = tokenRes.data.token;
 
-      // 3️⃣ إرسال التوكن للباكاند مع معلومات الدفع
-      // سبق وقمنا بتحديد المبلغ في القسم السابق (paymentAmount)
-      // الآن نتأكد من أن المبلغ عدد صحيح (بالـ cents/pennies)
-      const finalAmount = Number.isInteger(paymentAmount) 
-        ? paymentAmount 
+      const finalAmount = Number.isInteger(paymentAmount)
+        ? paymentAmount
         : Math.round(paymentAmount);
-        
-      console.log('Payment amount in cents:', finalAmount);
-      
+
+      console.log("Payment amount in cents:", finalAmount);
+
       const paymentRes = await paymentAPI.payWithToken({
         token: cardToken,
-        amount: finalAmount, // استخدام القيمة المعدلة التي تأكدنا أنها رقم صحيح
-        currency: paymentCurrency, // استخدام العملة التي حددناها سابقًا
+        amount: finalAmount,
+        currency: paymentCurrency,
         reference: bookingData.bookingCode || `order_${Date.now()}`,
         customer: {
-          email: bookingData.customerInfo?.email || 'customer@example.com',
+          email: bookingData.customerInfo?.email || "customer@example.com",
           name: bookingData.customerInfo?.fullName || cardData.nameOnCard,
           phone: bookingData.customerInfo?.phone,
         },
@@ -283,23 +271,27 @@ const PaymentPage = () => {
           orderTotal: orderSummary.total,
         },
         threeDS: true, // تفعيل 3D Secure
-        success_url: `${window.location.origin}/booking-confirmation?success=true&bookingCode=${bookingData.bookingCode || ''}&paymentId=${Date.now()}`,
-        failure_url: `${window.location.origin}/booking-confirmation?success=false&bookingCode=${bookingData.bookingCode || ''}&paymentId=${Date.now()}`,
+        success_url: `${
+          window.location.origin
+        }/booking-confirmation?success=true&bookingCode=${
+          bookingData.bookingCode || ""
+        }&paymentId=${Date.now()}`,
+        failure_url: `${
+          window.location.origin
+        }/booking-confirmation?success=false&bookingCode=${
+          bookingData.bookingCode || ""
+        }&paymentId=${Date.now()}`,
       });
 
       const data = paymentRes.data;
 
-      // 4️⃣ التعامل مع نتيجة الدفع
       if (data.success) {
         if (data.data.requires_redirect) {
-          // إعادة التوجيه إلى صفحة مصادقة 3D Secure
           setMessage("🔐 جاري التوجيه للمصادقة الآمنة...");
           window.location.href = data.data.redirect_url;
         } else if (data.data.approved) {
-          // الدفع نجح بدون حاجة لمصادقة 3D Secure
           handlePaymentSuccess(data.data);
         } else {
-          // الدفع لم ينجح
           setMessage(
             `❌ فشل الدفع: ${data.data.response_summary || "خطأ غير معروف"}`
           );
@@ -326,7 +318,6 @@ const PaymentPage = () => {
     }
   };
 
-  // إعادة محاولة الدفع للحجوزات الفاشلة
   const handleRetryPayment = async () => {
     if (!orderSummary.bookingId) {
       setMessage("⚠️ معرف الحجز غير متوفر");
@@ -337,7 +328,6 @@ const PaymentPage = () => {
     setMessage("");
 
     try {
-      // إنشاء توكن جديد للبطاقة
       const [expiryMonth, expiryYear] = cardData.expiryDate.split("/");
       const CKO_API_URL =
         import.meta.env.VITE_CKO_API_URL || "https://api.sandbox.checkout.com";
@@ -361,7 +351,6 @@ const PaymentPage = () => {
         }
       );
 
-      // إعادة محاولة الدفع
       const retryRes = await paymentAPI.retryPayment(orderSummary.bookingId, {
         token: tokenRes.data.token,
       });
@@ -386,7 +375,6 @@ const PaymentPage = () => {
     }
   };
 
-  // إلغاء الدفع والعودة
   const handleCancelPayment = async () => {
     if (orderSummary.bookingId) {
       try {
@@ -398,7 +386,6 @@ const PaymentPage = () => {
     navigate(-1);
   };
 
-  // عرض شاشة التحقق من الدفع
   if (verifyingPayment) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

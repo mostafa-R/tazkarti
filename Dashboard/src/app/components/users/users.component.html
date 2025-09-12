@@ -5,7 +5,7 @@
       <div class="col-md-6">
         <h1 class="display-6 fw-bold text-gradient mb-2">
           <i class="fas fa-users me-3"></i>
-          Users Management
+          {{ 'users.Users Management' | translate }}
         </h1>
       </div>
       <div class="col-md-6 text-md-end">
@@ -16,7 +16,7 @@
             </div>
             <div class="stats-content">
               <h3 class="stats-number">{{usersOnly.length}}</h3>
-              <p class="stats-label">Total Users</p>
+              <p class="stats-label">{{ 'users.Total Users' | translate }}</p>
             </div>
           </div>
           <div class="stats-card">
@@ -24,8 +24,8 @@
               <i class="fas fa-user-tie"></i>
             </div>
             <div class="stats-content">
-              <h3 class="stats-number">{{organizersWithEvents.length}}</h3>
-              <p class="stats-label">Organizers</p>
+              <h3 class="stats-number">{{organizersOnly.length}}</h3>
+              <p class="stats-label">{{ 'users.Organizers' | translate }}</p>
             </div>
           </div>
         </div>
@@ -38,19 +38,30 @@
 <div class="search-section mb-4">
   <div class="container-fluid">
     <div class="row g-3">
-      <div class="col-md-12">
+      <div class="col-md-8">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            class="form-control search-input"
+            placeholder="{{ 'users.Search users...' | translate }}"
+            [(ngModel)]="searchTerm"
+            (input)="filterUsers()">
+        </div>
+      </div>
+      <div class="col-md-4">
         <div class="filter-buttons">
-          <button class="btn btn-outline-primary filter-btn" (click)="showUsers = true; showOrganizers = false">
+          <button class="btn btn-outline-primary filter-btn" (click)="showUsersOnly()">
             <i class="fas fa-user me-2"></i>
-            Users Only
+            {{ 'users.Users Only' | translate }}
           </button>
-          <button class="btn btn-outline-success filter-btn" (click)="showUsers = false; showOrganizers = true">
+          <button class="btn btn-outline-success filter-btn" (click)="showOrganizersOnly()">
             <i class="fas fa-user-tie me-2"></i>
-            Organizers Only
+            {{ 'users.Organizers Only' | translate }}
           </button>
-          <button class="btn btn-outline-info filter-btn" (click)="showUsers = true; showOrganizers = true">
+          <button class="btn btn-outline-info filter-btn" (click)="showAll()">
             <i class="fas fa-list me-2"></i>
-            Show All
+            {{ 'users.Show All' | translate }}
           </button>
         </div>
       </div>
@@ -64,24 +75,24 @@
     <div class="section-header">
       <h2 class="section-title">
         <i class="fas fa-user me-2"></i>
-        Users
+        {{ 'users.Users' | translate }}
         <span class="badge bg-success ms-2">{{filteredUsers.length}}</span>
       </h2>
     </div>
-    
+
     <div class="table-container">
       <div class="table-responsive">
         <table class="table custom-table">
           <thead class="table-header">
             <tr>
               <th class="text-center">#</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th class="text-center">Tickets</th>
+              <th>{{ 'users.Name' | translate }}</th>
+              <th>{{ 'users.Email' | translate }}</th>
+              <th class="text-center">{{ 'users.Tickets' | translate }}</th>
             </tr>
           </thead>
           <tbody>
-            @for (user of filteredUsers; track user.id) {
+            @for (user of filteredUsers; track $index) {
               <tr class="table-row">
                 <td class="text-center fw-bold">{{ $index + 1 }}</td>
                 <td>
@@ -89,19 +100,19 @@
                     <div class="user-avatar">
                       <i class="fas fa-user"></i>
                     </div>
-                    <span class="user-name">{{ user.name }}</span>
+                    <span class="user-name">{{ user?.name || user?.userName || user?.firstName }}</span>
                   </div>
                 </td>
                 <td>
                   <div class="email-info">
                     <i class="fas fa-envelope me-2"></i>
-                    {{ user.email }}
+                    {{ user?.email }}
                   </div>
                 </td>
                 <td class="text-center">
                   <span class="tickets-badge">
                     <i class="fas fa-ticket-alt me-1"></i>
-                    {{ user.tickets?.length || 0 }}
+                    {{ user?.ticketsBooked?.length || 0 }}
                   </span>
                 </td>
               </tr>
@@ -119,24 +130,24 @@
     <div class="section-header">
       <h2 class="section-title">
         <i class="fas fa-user-tie me-2"></i>
-        Organizers
+        {{ 'users.Organizers' | translate }}
         <span class="badge bg-primary ms-2">{{filteredOrganizers.length}}</span>
       </h2>
     </div>
-    
+
     <div class="table-container">
       <div class="table-responsive">
         <table class="table custom-table">
           <thead class="table-header">
             <tr>
               <th class="text-center">#</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Events Created</th>
+              <th>{{ 'users.Name' | translate }}</th>
+              <th>{{ 'users.Email' | translate }}</th>
+              <th class="text-center">{{ 'users.Events Created' | translate }}</th>
             </tr>
           </thead>
           <tbody>
-            @for (user of filteredOrganizers; track user.id) {
+            @for (user of filteredOrganizers; track $index) {
               <tr class="table-row">
                 <td class="text-center fw-bold">{{ $index + 1 }}</td>
                 <td>
@@ -144,24 +155,20 @@
                     <div class="user-avatar organizer-avatar">
                       <i class="fas fa-user-tie"></i>
                     </div>
-                    <span class="user-name">{{ user.name }}</span>
+                    <span class="user-name">{{ user?.firstName || user?.name || user?.userName }}</span>
                   </div>
                 </td>
                 <td>
                   <div class="email-info">
                     <i class="fas fa-envelope me-2"></i>
-                    {{ user.email }}
+                    {{ user?.email }}
                   </div>
                 </td>
-                <td>
-                  <div class="events-list">
-                    @for (eventName of user.eventNames; track $index) {
-                      <span class="event-badge">
-                        <i class="fas fa-calendar me-1"></i>
-                        {{ eventName }}
-                      </span>
-                    }
-                  </div>
+                <td class="text-center">
+                  <span class="events-badge">
+                    <i class="fas fa-calendar me-1"></i>
+                    {{ user?.eventsCount || 0 }}
+                  </span>
                 </td>
               </tr>
             }
@@ -178,7 +185,7 @@
     <div class="empty-icon">
       <i class="fas fa-users-slash"></i>
     </div>
-    <h4>No Users Found</h4>
-    <p class="text-muted">Try adjusting your search criteria or add a new user.</p>
+    <h4>{{ 'users.No Users Found' | translate }}</h4>
+    <p class="text-muted">{{ 'users.Try adjusting your search criteria or add a new user.' | translate }}</p>
   </div>
 }

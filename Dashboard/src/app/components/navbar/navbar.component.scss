@@ -1,12 +1,12 @@
-body.dark-mode {
+.dark-mode {
   background-color: #121212;
-  color: #f1f1f1;
+  color: #ffffff;
 }
 
-body.dark-mode .bg-light {
-  background-color: #1e1e1e !important;
+.dark-mode .navbar {
+  background-color: #1f1f1f !important;
 }
 
-body.dark-mode .text-dark {
-  color: #f1f1f1 !important;
+.dropdown-menu .dropdown-item.bg-info {
+  color: white;
 }

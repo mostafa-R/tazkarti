@@ -185,10 +185,16 @@
     "defaultTicketType": "عادي",
     "defaultCustomer": "مستخدم زائر",
     "dateNotSpecified": "تاريخ غير محدد",
+    "Failed to download ticket": "فشل في تنزيل التذكرة",
+    "retry": "حاول مرة أخرى",
     "progress": {
       "eventSelected": "تم اختيار الفعالية",
       "paymentComplete": "اكتمل الدفع",
       "confirmed": "تم التأكيد"
+    },
+    "errors": {
+      "noBookingId": "لم يتم تقديم معرف الحجز",
+      "downloadFailed": "فشل في تنزيل التذكرة"
     },
     "title": "تم تأكيد حجزك!",
     "subtitle": "شكراً لاختيارك تذكري. تفاصيل التذكرة أدناه.",

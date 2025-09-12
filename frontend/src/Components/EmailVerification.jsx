@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authAPI } from '../services/api';
+import { toast } from 'react-toastify';
 
 export default function EmailVerification({ email, userType = 'user', onVerificationSuccess, onBack }) {
   const [verificationCode, setVerificationCode] = useState('');
@@ -21,7 +22,8 @@ export default function EmailVerification({ email, userType = 'user', onVerifica
       const response = await authAPI.verifyEmail(email, verificationCode);
       
       if (response.data) {
-        alert('Email verified successfully! You can now login.');
+        toast.success('Email verified successfully! You can now login.');
+        
         if (onVerificationSuccess) {
           onVerificationSuccess(userType);
         }
@@ -37,7 +39,7 @@ export default function EmailVerification({ email, userType = 'user', onVerifica
 
   const handleResendCode = async () => {
     // Note: You might need to implement a resend endpoint in your backend
-    alert('Resend functionality would be implemented here');
+    toast.error('Resend functionality would be implemented here');
   };
 
   return (

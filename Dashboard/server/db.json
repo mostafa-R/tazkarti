@@ -82,7 +82,7 @@
       "id": "5",
       "name": " sayed",
       "email": "sara@gmail.com",
-
+      "tickets": [10, 20, 30, 10, 10],
       "createdAt": "2025-06-15T20:30:00Z",
       "role": "user"
     },
@@ -90,7 +90,7 @@
       "id": "6",
       "name": " sayed",
       "email": "sara@gmail.com",
-
+      "tickets": [10, 20, 30, 10, 10],
       "createdAt": "2025-09-15T12:30:00Z",
       "role": "user"
     },
@@ -375,7 +375,7 @@
       "userId": 6,
       "status": "pending"
     }
- 
-    
+
+
   ]
 }

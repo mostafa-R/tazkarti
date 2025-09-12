@@ -1,22 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { MyTranslateService } from '../../core/services/translation.service';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink,TranslateModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss',
 })
 export class NavbarComponent {
-  currentLang: string = 'AR';
+  private _MyTranslateService = inject(MyTranslateService);
+  readonly _TranslateService = inject(TranslateService);
 
-  toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-  }
-
-  switchLanguage() {
-    this.currentLang = this.currentLang === 'AR' ? 'EN' : 'AR';
-    // تقدر تضيف i18n أو ngx-translate هنا لاحقًا
+  chooselang(lang: string): void {
+    this._MyTranslateService.setLanguage(lang);
   }
 }
