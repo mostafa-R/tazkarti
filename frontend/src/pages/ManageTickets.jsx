@@ -358,8 +358,15 @@ const ManageTickets = () => {
 
                 {/* Tickets List */}
                 <div className="bg-white rounded-lg shadow">
-                  <div className="p-6 border-b">
+                  <div className="p-6 border-b flex justify-between items-center">
                     <h3 className="text-lg font-semibold text-gray-900">Ticket Types</h3>
+                    <button
+                      onClick={() => setShowAddTicketForm(true)}
+                      className="flex items-center px-4 py-2 bg-[#0052CC] text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Ticket Type
+                    </button>
                   </div>
                   <div className="overflow-x-auto">
                     {tickets.length > 0 ? (

@@ -1,0 +1,188 @@
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-09T10:21:15.506Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-09T10:21:15.509Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-09T10:21:15.510Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-09T10:21:15.511Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-09T10:22:11.496Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-09T10:22:11.499Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-09T10:22:11.500Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-09T10:22:11.501Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-09T10:22:15.835Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-09T10:22:15.838Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-09T10:22:15.839Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-09T10:22:15.840Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-09T10:22:27.788Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-09T10:22:27.791Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-09T10:22:27.791Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-09T10:22:27.793Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-09T10:22:51.759Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-09T10:22:51.762Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-09T10:22:51.763Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-09T10:22:51.764Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-09T10:24:32.817Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-09T10:24:32.820Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-09T10:24:32.820Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-09T10:24:32.822Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-09T10:24:41.670Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-09T10:24:41.673Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-09T10:24:41.673Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-09T10:24:41.675Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T05:55:02.522Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T05:55:02.527Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T05:55:02.528Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T05:55:02.530Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T05:59:47.868Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T05:59:47.873Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T05:59:47.874Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T05:59:47.875Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:09:58.957Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:09:58.962Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:09:58.963Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:09:58.965Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:12:01.222Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:12:01.227Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:12:01.228Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:12:01.230Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:12:39.755Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:12:39.760Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:12:39.761Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:12:39.763Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:49:56.872Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:49:56.878Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:49:56.879Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:49:56.882Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:54:32.921Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:54:32.925Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:54:32.926Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:54:32.929Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:55:00.019Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:55:00.028Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:55:00.030Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:55:00.033Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:56:53.750Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:56:53.751Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:56:53.756Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:56:53.757Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:56:53.759Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:56:53.757Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:56:53.758Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:56:53.760Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T06:57:21.460Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T06:57:21.465Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T06:57:21.466Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T06:57:21.468Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:09:46.170Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:09:46.175Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:09:46.176Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:09:46.178Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:09:46.191Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:09:46.195Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:09:46.196Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:09:46.198Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:09:55.773Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:09:55.778Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:09:55.779Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:09:55.782Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:09:55.821Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:09:55.826Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:09:55.827Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:09:55.829Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:11:23.995Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:11:24.002Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:11:24.003Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:11:24.005Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:11:24.064Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:11:24.068Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:11:24.069Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:11:24.071Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:23:56.768Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:23:56.771Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:23:56.772Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:23:56.773Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:23:56.809Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:23:56.814Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:23:56.815Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:23:56.818Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:25:04.688Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:25:04.691Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:25:04.692Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:25:04.693Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-10T07:32:40.827Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-10T07:32:40.830Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-10T07:32:40.831Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-10T07:32:40.832Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:25:12.869Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:25:12.872Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:25:12.873Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:25:12.874Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:31:37.336Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:31:37.340Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:31:37.340Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:31:37.341Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:34:56.675Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:34:56.678Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:34:56.679Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:34:56.680Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:44:44.797Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:44:44.800Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:44:44.801Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:44:44.802Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:46:53.565Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:46:53.568Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:46:53.568Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:46:53.569Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:50:58.363Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:50:58.366Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:50:58.367Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:50:58.368Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:52:08.886Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:52:08.889Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:52:08.889Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:52:08.890Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:53:00.174Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:53:00.177Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:53:00.177Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:53:00.179Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:55:59.593Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:55:59.596Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:55:59.596Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:55:59.598Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T06:57:05.219Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T06:57:05.222Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T06:57:05.223Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T06:57:05.224Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T07:03:03.958Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T07:03:03.960Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T07:03:03.961Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T07:03:03.962Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T07:06:07.636Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T07:06:07.638Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T07:06:07.639Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T07:06:07.640Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T07:06:31.325Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T07:06:31.329Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T07:06:31.329Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T07:06:31.330Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-11T23:57:20.724Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-11T23:57:20.727Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-11T23:57:20.727Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-11T23:57:20.728Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-12T00:01:35.639Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-12T00:01:35.642Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-12T00:01:35.643Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-12T00:01:35.644Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-12T05:21:34.290Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-12T05:21:34.293Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-12T05:21:34.293Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-12T05:21:34.294Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-12T15:35:16.287Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-12T15:35:16.290Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-12T15:35:16.290Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-12T15:35:16.291Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-12T15:49:50.202Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-12T15:49:50.205Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-12T15:49:50.206Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-12T15:49:50.209Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_SECRET_KEY (Checkout.com Secret Key)","service":"checkout-service","timestamp":"2025-09-12T15:56:27.521Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: CKO_PROCESSING_CHANNEL_ID (Checkout.com Processing Channel ID)","service":"checkout-service","timestamp":"2025-09-12T15:56:27.526Z"}
+{"level":"error","message":"[CKO Config] Missing environment variable: APP_BASE_URL (Application Base URL for callbacks)","service":"checkout-service","timestamp":"2025-09-12T15:56:27.527Z"}
+{"level":"error","message":"[CKO] Missing API key: CKO_SECRET_KEY is not defined in environment variables","service":"checkout-service","timestamp":"2025-09-12T15:56:27.528Z"}
