@@ -230,7 +230,8 @@ const EventDetailsPage = () => {
               <img
                 src={event.images[0]}
                 alt={event.title}
-                className="w-full h-96 object-cover transition-transform duration-300 hover:scale-105"
+                className="w-full object-contain bg-gray-100 transition-transform duration-300 hover:scale-105"
+                style={{ maxHeight: "500px", minHeight: "300px" }}
               />
               <div className="absolute top-4 right-4 flex space-x-3">
                 <button

@@ -19,7 +19,7 @@ function EventCard({
     >
       <div
         className={`relative ${
-          viewMode === "list" ? "w-48 flex-shrink-0" : ""
+          viewMode === "list" ? "w-64 flex-shrink-0" : ""
         }`}
       >
         <img
@@ -28,8 +28,8 @@ function EventCard({
             "https://via.placeholder.com/400x300?text=No+Image"
           }
           alt={event.title}
-          className={`object-cover group-hover:scale-105 transition-transform duration-300 ${
-            viewMode === "list" ? "w-full h-full" : "w-full h-48"
+          className={`w-full group-hover:scale-105 transition-transform duration-300 bg-gray-100 ${
+            viewMode === "list" ? "h-48" : "h-48"
           }`}
         />
 
