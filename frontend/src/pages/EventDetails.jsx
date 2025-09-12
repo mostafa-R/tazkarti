@@ -354,7 +354,8 @@ const EventDetailsPage = () => {
         </div>
 
         {/* Related Events */}
-        <div className="mt-16">
+
+        {/* <div className="mt-16">
           <h3 className="text-2xl font-semibold mb-6 text-gray-900">
             {t('eventDetails.youMightLike')}
           </h3>
@@ -383,7 +384,8 @@ const EventDetailsPage = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
+        
       </div>
     </div>
   );
