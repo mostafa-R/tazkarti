@@ -9,13 +9,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { eventsAPI, ticketsAPI } from "../services/api";
 
 const EventDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const location = useLocation();
+  // const location = useLocation();
   const { t } = useTranslation();
 
   const [tickets, setTickets] = useState([]);
@@ -112,24 +113,24 @@ const EventDetailsPage = () => {
     return selectedTicket ? selectedTicket.availableQuantity : 0;
   };
 
-  const relatedEvents = [
-    {
-      id: "124",
-      title: t("eventDetails.relatedEvents.sunsetVibes"),
-      date: t("eventDetails.relatedEvents.sep2"),
-      location: t("eventDetails.relatedEvents.northCoast"),
-      image:
-        "https://images.unsplash.com/photo-1521335629791-ce4aec67dd47?auto=format&fit=crop&w=1470&q=80",
-    },
-    {
-      id: "125",
-      title: t("eventDetails.relatedEvents.nightPulse"),
-      date: t("eventDetails.relatedEvents.oct12"),
-      location: t("eventDetails.relatedEvents.cairoFestival"),
-      image:
-        "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1470&q=80",
-    },
-  ];
+  // const relatedEvents = [
+  //   {
+  //     id: "124",
+  //     title: t("eventDetails.relatedEvents.sunsetVibes"),
+  //     date: t("eventDetails.relatedEvents.sep2"),
+  //     location: t("eventDetails.relatedEvents.northCoast"),
+  //     image:
+  //       "https://images.unsplash.com/photo-1521335629791-ce4aec67dd47?auto=format&fit=crop&w=1470&q=80",
+  //   },
+  //   {
+  //     id: "125",
+  //     title: t("eventDetails.relatedEvents.nightPulse"),
+  //     date: t("eventDetails.relatedEvents.oct12"),
+  //     location: t("eventDetails.relatedEvents.cairoFestival"),
+  //     image:
+  //       "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1470&q=80",
+  //   },
+  // ];
 
   const handleBookNow = () => {
     if (!selectedTicket) {
@@ -152,9 +153,9 @@ const EventDetailsPage = () => {
     });
   };
 
-  const handleRelatedEventClick = (relatedEventId) => {
-    navigate(`/event/${relatedEventId}`);
-  };
+  // const handleRelatedEventClick = (relatedEventId) => {
+  //   navigate(`/event/${relatedEventId}`);
+  // };
 
   const handleBack = () => {
     if (document.referrer.includes("/events")) {

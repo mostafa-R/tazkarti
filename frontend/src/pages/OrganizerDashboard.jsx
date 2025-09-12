@@ -391,7 +391,7 @@ const OrganizerDashboard = () => {
                             {event.status}
                           </span>
                         </td>
-                        <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        {/* <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
                             <button
                               onClick={() => navigate(`/events/${event.id}`)}
@@ -410,7 +410,7 @@ const OrganizerDashboard = () => {
                               <Settings className="w-4 h-4" />
                             </button>
                           </div>
-                        </td>
+                        </td> */}
                       </tr>
                     ))
                   ) : (

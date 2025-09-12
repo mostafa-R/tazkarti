@@ -1,49 +1,69 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 px-md-4 shadow-sm">
-  <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap gap-3">
-
+  <div
+    class="container-fluid d-flex justify-content-between align-items-center flex-wrap gap-3"
+  >
     <!-- 🔵 Logo & Brand -->
     <div class="d-flex align-items-center gap-2">
-      <img src="../../../assets/pexels-mminschlxxx-31827772.jpg"
-           alt="Logo"
-           width="40"
-           height="40"
-           class="rounded-circle border border-light"
-           style="object-fit: cover;">
-      <span class="navbar-brand mb-0 fs-5 fw-bold">{{ 'navbar.Tazkarti' | translate }}</span>
+      <img
+        src="../../../assets/pexels-mminschlxxx-31827772.jpg"
+        alt="Logo"
+        width="40"
+        height="40"
+        class="rounded-circle border border-light"
+        style="object-fit: cover"
+      />
+      <span class="navbar-brand mb-0 fs-5 fw-bold">{{
+        "navbar.Tazkarti" | translate
+      }}</span>
     </div>
 
     <!-- ⚙️ Actions -->
     <div class="d-flex align-items-center gap-3 flex-wrap">
-
       <!-- 🔔 Notifications -->
-      <button routerLink="/waiting" class="btn btn-sm btn-outline-light position-relative rounded-pill px-3">
+      <button
+        routerLink="/waiting"
+        class="btn btn-sm btn-outline-light position-relative rounded-pill px-3"
+      >
         <i class="fa-solid fa-bell"></i>
       </button>
 
-
-
       <!-- 🌐 Language Switch -->
       <div class="dropdown">
-        <button class="btn btn-sm btn-outline-light dropdown-toggle rounded-pill px-3" data-bs-toggle="dropdown">
-          🌐 {{ _TranslateService.currentLang?.toUpperCase() || 'EN' }}
+        <button
+          class="btn btn-sm btn-outline-light dropdown-toggle rounded-pill px-3"
+          data-bs-toggle="dropdown"
+        >
+          🌐 {{ _TranslateService.currentLang?.toUpperCase() || "EN" }}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li>
-            <a [class.bg-info]="_TranslateService.currentLang === 'ar'" class="dropdown-item" (click)="chooselang('ar')">العربية</a>
+            <a
+              [class.bg-info]="_TranslateService.currentLang === 'ar'"
+              class="dropdown-item"
+              (click)="chooselang('ar')"
+              >العربية</a
+            >
           </li>
           <li>
-            <a [class.bg-info]="_TranslateService.currentLang === 'en'" class="dropdown-item" (click)="chooselang('en')">English</a>
+            <a
+              [class.bg-info]="_TranslateService.currentLang === 'en'"
+              class="dropdown-item"
+              (click)="chooselang('en')"
+              >English</a
+            >
           </li>
         </ul>
       </div>
 
       <!-- 👤 Admin Avatar -->
-      <img src="../../../assets/295810785_603664684610641_2277856159059492752_n.jpg"
-           alt="Avatar"
-           width="40"
-           height="40"
-           class="rounded-circle border border-light"
-           style="object-fit: cover;">
+      <img
+        src="../../../assets/295810785_603664684610641_2277856159059492752_n.jpg"
+        alt="Avatar"
+        width="40"
+        height="40"
+        class="rounded-circle border border-light"
+        style="object-fit: cover"
+      />
     </div>
   </div>
 </nav>
