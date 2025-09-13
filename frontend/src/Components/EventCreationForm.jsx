@@ -178,7 +178,9 @@ const EventCreationForm = ({ onSuccess, onCancel }) => {
       const response = await eventsAPI.createEvent(submitData);
 
       if (response.data) {
-        toast.success(`Event ${isDraft ? "saved as draft" : "created"} successfully!`);
+        toast.success(
+          `Event ${isDraft ? "saved as draft" : "created"} successfully!`
+        );
         if (onSuccess) {
           onSuccess(response.data);
         }

@@ -15,6 +15,41 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { paymentAPI } from "../services/api";
 
+// Simple Tooltip Component for long text display
+const Tooltip = ({ children, content, className = "" }) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  if (!content || content === children) {
+    return <span className={className}>{children}</span>;
+  }
+
+  return (
+    <div className="relative inline-block">
+      <span
+        className={`${className} cursor-help`}
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+        onClick={() => setIsVisible(!isVisible)}
+      >
+        {children}
+      </span>
+      {isVisible && (
+        <div className="absolute z-50 px-3 py-2 text-xs text-white bg-gray-900 rounded-lg shadow-lg max-w-xs break-words -top-2 left-0 transform -translate-y-full">
+          {content}
+          <div className="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Utility function to truncate text
+const truncateText = (text, maxLength = 25) => {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + "...";
+};
+
 const PaymentPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -462,7 +497,7 @@ const PaymentPage = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-5 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-900 mb-1">
                       Expiry Date
@@ -608,7 +643,7 @@ const PaymentPage = () => {
 
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6 ">
               <h3 className="text-xl font-bold text-gray-900 mb-6">
                 Order Summary
               </h3>
@@ -619,36 +654,53 @@ const PaymentPage = () => {
                   <img
                     src={eventData.images[0]}
                     alt={eventData.title}
-                    className="w-20 h-20 rounded-lg object-cover"
+                    className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                   />
                 )}
-                <div className="flex-1">
-                  <h4 className="font-bold text-gray-900 mb-1">
-                    {eventData.title}
-                  </h4>
+                <div className="flex-1 min-w-0">
+                  <div className="mb-1">
+                    <Tooltip
+                      content={eventData.title}
+                      className="font-bold text-gray-900 block"
+                    >
+                      {truncateText(eventData.title, 30)}
+                    </Tooltip>
+                  </div>
                   <div className="space-y-1 text-sm text-gray-600">
                     <div className="flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span>{eventData.date}</span>
+                      <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
+                      <span className="truncate">{eventData.date}</span>
                     </div>
                     <div className="flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      <span>{eventData.time}</span>
+                      <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
+                      <span className="truncate">{eventData.time}</span>
                     </div>
-                    <div className="flex items-center">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      <span className="truncate">
-                        {typeof eventData.location === "object"
-                          ? eventData.location.venue
-                            ? `${eventData.location.venue}${
-                                eventData.location.address
-                                  ? `, ${eventData.location.address}`
-                                  : ""
-                              }`
-                            : eventData.location.address ||
-                              "Location not available"
-                          : eventData.location || "Location not available"}
-                      </span>
+                    <div className="flex items-start">
+                      <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        {(() => {
+                          const locationText =
+                            typeof eventData.location === "object"
+                              ? eventData.location.venue
+                                ? `${eventData.location.venue}${
+                                    eventData.location.address
+                                      ? `, ${eventData.location.address}`
+                                      : ""
+                                  }`
+                                : eventData.location.address ||
+                                  "Location not available"
+                              : eventData.location || "Location not available";
+
+                          return (
+                            <Tooltip
+                              content={locationText}
+                              className="text-xs leading-4"
+                            >
+                              {truncateText(locationText, 35)}
+                            </Tooltip>
+                          );
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -660,32 +712,48 @@ const PaymentPage = () => {
                   <p className="text-xs text-gray-500 mb-1">
                     Booking Reference
                   </p>
-                  <p className="font-mono font-bold text-gray-900">
-                    {orderSummary.bookingCode}
-                  </p>
+                  <div className="min-w-0">
+                    <Tooltip
+                      content={orderSummary.bookingCode}
+                      className="font-mono font-bold text-gray-900 text-sm break-all"
+                    >
+                      {truncateText(orderSummary.bookingCode, 20)}
+                    </Tooltip>
+                  </div>
                 </div>
               )}
 
               {/* Price Breakdown */}
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Ticket Type</span>
-                  <span className="font-medium">{orderSummary.ticketType}</span>
+                <div className="flex justify-between items-start gap-2">
+                  <span className="text-gray-600 text-sm">Ticket Type</span>
+                  <div className="text-right flex-1 min-w-0">
+                    <Tooltip
+                      content={orderSummary.ticketType}
+                      className="font-medium text-sm"
+                    >
+                      {truncateText(orderSummary.ticketType, 20)}
+                    </Tooltip>
+                  </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Quantity</span>
-                  <span className="font-medium">×{orderSummary.quantity}</span>
+                  <span className="text-gray-600 text-sm">Quantity</span>
+                  <span className="font-medium text-sm">
+                    ×{orderSummary.quantity}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Price per ticket</span>
-                  <span className="font-medium">
+                  <span className="text-gray-600 text-sm">
+                    Price per ticket
+                  </span>
+                  <span className="font-medium text-sm">
                     {orderSummary.pricePerTicket.toFixed(2)}{" "}
                     {orderSummary.currency}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Service fee</span>
-                  <span className="font-medium">
+                  <span className="text-gray-600 text-sm">Service fee</span>
+                  <span className="font-medium text-sm">
                     {orderSummary.serviceFee.toFixed(2)} {orderSummary.currency}
                   </span>
                 </div>
@@ -703,14 +771,41 @@ const PaymentPage = () => {
               {/* Customer Info */}
               {bookingData.customerInfo && (
                 <div className="mb-6 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-xs text-blue-600 mb-2 font-medium">
-                    Customer Details
-                  </p>
-                  <div className="space-y-1 text-sm text-gray-700">
-                    <p>{bookingData.customerInfo.fullName}</p>
-                    <p>{bookingData.customerInfo.email}</p>
+                  <div className="flex items-center mb-2">
+                    <User className="h-3 w-3 text-blue-600 mr-1" />
+                    <p className="text-xs text-blue-600 font-medium">
+                      Customer Details
+                    </p>
+                  </div>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <div className="min-w-0">
+                      <Tooltip
+                        content={bookingData.customerInfo.fullName}
+                        className="font-medium"
+                      >
+                        {truncateText(bookingData.customerInfo.fullName, 25)}
+                      </Tooltip>
+                    </div>
+
+                    <div className="min-w-0">
+                      {(() => {
+                        const email = bookingData.customerInfo.email;
+                        const truncatedEmail = truncateText(email, 23);
+                        return (
+                          <Tooltip
+                            content={email}
+                            className="text-xs text-gray-600 break-all"
+                          >
+                            {truncatedEmail}
+                          </Tooltip>
+                        );
+                      })()}
+                    </div>
+
                     {bookingData.customerInfo.phone && (
-                      <p>{bookingData.customerInfo.phone}</p>
+                      <div className="text-xs text-gray-600">
+                        {bookingData.customerInfo.phone}
+                      </div>
                     )}
                   </div>
                 </div>

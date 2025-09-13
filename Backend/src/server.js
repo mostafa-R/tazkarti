@@ -86,6 +86,7 @@ const allowedOrigins = process.env.FRONTEND_URL
       "https://tazkarti-ddg5ftu4q-mostafas-projects-e9614a99.vercel.app",
       "https://tazkarte.netlify.app",
       "https://tazkarti-f4xj.vercel.app",
+      "https://tazkarti-9kq8.vercel.app"
     ];
 
 app.use(
