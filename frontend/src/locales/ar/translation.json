@@ -284,7 +284,10 @@
       "entertainment": "الترفيه",
       "sports": "الرياضة",
       "education": "التعليم",
-      "health": "الصحة"
+      "health": "الصحة",
+      "conference": "المؤتمر",
+      "workshop": "الورشة",
+      "other": "أخرى"
     },
     "location": "الموقع",
     "locationPlaceholder": "أدخل المدينة أو المكان...",

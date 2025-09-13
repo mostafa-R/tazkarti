@@ -284,7 +284,10 @@
       "entertainment": "Entertainment",
       "sports": "Sports",
       "education": "Education",
-      "health": "Health"
+      "health": "Health",
+      "conference": "Conference",
+      "workshop": "Workshop",
+      "other": "Other"
     },
     "location": "Location",
     "locationPlaceholder": "Enter city or venue...",
