@@ -65,6 +65,7 @@ const EventDetailsPage = () => {
       setLoading(true);
       setError(null);
       const response = await eventsAPI.getEventById(id);
+      console.log("response", response);
       const normalizedEvent = normalizeEventData(response.data);
       setEvent(normalizedEvent);
     } catch (err) {
@@ -287,7 +288,7 @@ const EventDetailsPage = () => {
                   <Award className="mr-3 text-blue-500" size={20} />
                   <div>
                     <p className="font-medium">{t("eventDetails.organizer")}</p>
-                    <p>{event.organizer.name}</p>
+                    <p>{event.organizer.organizationName}</p>
                   </div>
                 </div>
               </div>

@@ -201,7 +201,7 @@ export const getEventById = async (req, res) => {
     const { id } = req.params;
 
     const event = await Event.findById(id).populate([
-      { path: "organizer", select: "name email" },
+      { path: "organizer", select: "organizationName email" },
       { path: "tickets" },
     ]);
 
